@@ -1,10 +1,10 @@
 # DigitalProduction.CommandLine
- Command line argument parsing library for .Net.
+Command line argument parsing library for .Net.
 
 ## Legacy
 This library is derived directly from the Plossum command line parsing library.
-- (Code project article and origianl source code.)[https://www.codeproject.com/Articles/19869/Powerful-and-simple-command-line-parsing-in-C]
-- (NuGet package)[https://www.nuget.org/packages/Plossum.CommandLine]
+- [Code project article and origianl source code.](https://www.codeproject.com/Articles/19869/Powerful-and-simple-command-line-parsing-in-C)
+- [NuGet package](https://www.nuget.org/packages/Plossum.CommandLine)
 
 ## Issues
 The NuGet package was available and functional, so the software was usable.  However, there were a few issues.
