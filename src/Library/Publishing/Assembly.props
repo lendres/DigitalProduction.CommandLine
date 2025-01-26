@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project>
+	<PropertyGroup>
+		<Title>DigitalProduction.CommandLine</Title>
+		<Product>DigitalProduction.CommandLine</Product>
+		<Copyright>Lance A. Endres</Copyright>
+		<Company>Digital Production</Company>
+		<Description>A command line argument parsing library for .Net.</Description>
+	</PropertyGroup>
+</Project>

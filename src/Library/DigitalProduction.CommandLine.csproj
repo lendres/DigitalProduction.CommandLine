@@ -1,40 +1,62 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>DigitalProduction.CommandLine</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>DigitalProduction.CommandLine</RootNamespace>
+		<Title>DigitalProduction.CommandLine</Title>
+		<Authors>Lance A. Endres, Peter Palotas</Authors>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/lendres/DigitalProduction.CommandLine</RepositoryUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageTags>commandline, command, line, arguments, C#, .net</PackageTags>
+		<PackageProjectUrl>https://github.com/lendres/DigitalProduction.CommandLine</PackageProjectUrl>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="C5" Version="3.0.0" />
-  </ItemGroup>
+	<!-- Import information from the folder containing the project if the files exists -->
+	<Import Project="$(MSBuildProjectDirectory)/Publishing/Assembly.props" Condition="Exists('$(MSBuildProjectDirectory)/Publishing/Assembly.props')" />
+	<Import Project="$(MSBuildProjectDirectory)/Publishing/Version.props" Condition="Exists('$(MSBuildProjectDirectory)/Publishing/Version.props')" />
+	<ItemGroup>
+	  <None Include="..\..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resources\CommandLineStrings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CommandLineStrings.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Resources\PlossumStrings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>PlossumStrings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="C5" Version="3.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\CommandLineStrings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CommandLineStrings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>DigitalProduction.CommandLine</CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\PlossumStrings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>PlossumStrings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>DigitalProduction.CommandLine</CustomToolNamespace>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Resources\CommandLineStrings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>CommandLineStrings.resx</DependentUpon>
+		</Compile>
+		<Compile Update="Resources\PlossumStrings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>PlossumStrings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Resources\CommandLineStrings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>CommandLineStrings.Designer.cs</LastGenOutput>
+			<CustomToolNamespace>DigitalProduction.CommandLine</CustomToolNamespace>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources\PlossumStrings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>PlossumStrings.Designer.cs</LastGenOutput>
+			<CustomToolNamespace>DigitalProduction.CommandLine</CustomToolNamespace>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>
