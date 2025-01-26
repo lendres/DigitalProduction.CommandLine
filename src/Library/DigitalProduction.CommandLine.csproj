@@ -13,6 +13,7 @@
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageTags>commandline, command, line, arguments, C#, .net</PackageTags>
 		<PackageProjectUrl>https://github.com/lendres/DigitalProduction.CommandLine</PackageProjectUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<!-- Import information from the folder containing the project if the files exists -->
