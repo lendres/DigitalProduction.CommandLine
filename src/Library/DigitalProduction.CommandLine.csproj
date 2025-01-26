@@ -11,4 +11,30 @@
     <PackageReference Include="C5" Version="3.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Resources\CommandLineStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CommandLineStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\PlossumStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PlossumStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\CommandLineStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommandLineStrings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>DigitalProduction.CommandLine</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\PlossumStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PlossumStrings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>DigitalProduction.CommandLine</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

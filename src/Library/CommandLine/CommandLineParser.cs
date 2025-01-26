@@ -498,11 +498,10 @@ public sealed class CommandLineParser : IDisposable
 	public void Parse(TextReader input, bool containsExecutable)
 	{
 		Debug.Assert(mLexerStack.IsEmpty);
-
+		mIsParsing = true;
+		
 		try
 		{
-			mIsParsing = true;
-
 			PushLexer(new Lexer(input, mEscapeCharacters, mQuotations, mAssignmentCharacters), null);
 
 			// Set the option styles for the lexer
@@ -600,34 +599,29 @@ public sealed class CommandLineParser : IDisposable
 					case OptionGroupRequirement.AtMostOne:
 						if (optionCount > 1)
 						{
-							ReportError(ParseErrorCodes.IllegalCardinality,
-								CommandLineStrings.AtMostOneOfTheOptions0MayBeSpecifiedAtOnce, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.IllegalCardinality, CommandLineStrings.AtMostOneOfTheOptions0MayBeSpecifiedAtOnce, group.GetOptionNamesAsString());
 						}
 						break;
 					case OptionGroupRequirement.AtLeastOne:
 						if (optionCount < 1)
 						{
-							ReportError(ParseErrorCodes.IllegalCardinality,
-								CommandLineStrings.AtLeastOneOfTheOption0MustBeSpecified, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.IllegalCardinality, CommandLineStrings.AtLeastOneOfTheOption0MustBeSpecified, group.GetOptionNamesAsString());
 						}
 						break;
 					case OptionGroupRequirement.ExactlyOne:
 						if (optionCount == 0)
 						{
-							ReportError(ParseErrorCodes.MissingRequiredOption,
-								CommandLineStrings.OneOfTheOptions0MustBeSpecified, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.MissingRequiredOption, CommandLineStrings.OneOfTheOptions0MustBeSpecified, group.GetOptionNamesAsString());
 						}
 						else if (optionCount > 1)
 						{
-							ReportError(ParseErrorCodes.MissingRequiredOption,
-								CommandLineStrings.OnlyOneOfTheOptions0MayBeSpecified, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.MissingRequiredOption, CommandLineStrings.OnlyOneOfTheOptions0MayBeSpecified, group.GetOptionNamesAsString());
 						}
 						break;
 					case OptionGroupRequirement.All:
 						if (optionCount != group.Options.Count)
 						{
-							ReportError(ParseErrorCodes.MissingRequiredOption,
-								CommandLineStrings.AllOfTheOptions0MustBeSpecified, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.MissingRequiredOption, CommandLineStrings.AllOfTheOptions0MustBeSpecified, group.GetOptionNamesAsString());
 						}
 						break;
 					default:

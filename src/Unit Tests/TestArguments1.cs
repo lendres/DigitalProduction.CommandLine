@@ -4,7 +4,7 @@ namespace UnitTests;
 
 public class TestArguments1
 {
-	QuotationInfo _quotationInfo = new('\"');
+	readonly QuotationInfo _quotationInfo = new('\"');
 			
 	public TestArguments1()
 	{
