@@ -29,10 +29,6 @@
  *  
  *  $Id: ColumnInfo.cs 7 2007-08-04 12:02:15Z palotas $
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace DigitalProduction.CommandLine
 {
 	/// <summary>
@@ -48,6 +44,15 @@ namespace DigitalProduction.CommandLine
 	/// <param name="method">The word wrapping method to use for this column</param>
 	public struct ColumnInfo(int width, string content, Alignment alignment, VerticalAlignment verticalAlignment, WordWrappingMethod method)
 	{
+        #region Private fields
+
+        private readonly WordWrappingMethod	mWordWrappingMethod		= method;
+        private readonly Alignment			mAlignment				= alignment;
+        private readonly int				mWidth					= width;
+        private readonly string				mContent				= content;
+        private VerticalAlignment			mVerticalAlignment		= verticalAlignment;
+
+        #endregion
 
 		#region Constructors
 
@@ -122,8 +127,10 @@ namespace DigitalProduction.CommandLine
         /// </returns>
         public override readonly bool Equals(object? obj)
         {
-            if (obj is not ColumnInfo)
-                return false;
+			if (obj is not ColumnInfo)
+			{
+				return false;
+			}
 
             ColumnInfo ci = (ColumnInfo)obj;
 
@@ -149,59 +156,32 @@ namespace DigitalProduction.CommandLine
         /// Gets the width of this column in fixed width characters.
         /// </summary>
         /// <value>the width of this column in fixed width characters.</value>
-        public readonly int Width
-        {
-            get { return mWidth; }
-        }
+        public readonly int Width { get => mWidth; }
 
         /// <summary>
         /// Gets the content of this column.
         /// </summary>
         /// <value>The content of this column.</value>
-        public readonly string Content
-        {
-            get { return mContent; }
-        }
+        public readonly string Content { get => mContent; }
 
         /// <summary>
         /// Gets the alignment of this column.
         /// </summary>
         /// <value>The alignment of this column.</value>
-        public readonly Alignment Alignment
-        {
-            get { return mAlignment; }
-        }
+        public readonly Alignment Alignment { get => mAlignment; }
 
         /// <summary>
         /// Gets the word wrapping method to use for this column.
         /// </summary>
         /// <value>The the word wrapping method to use for this column.</value>
-        public readonly WordWrappingMethod WordWrappingMethod
-        {
-            get { return mWordWrappingMethod; }
-        }
+        public readonly WordWrappingMethod WordWrappingMethod { get => mWordWrappingMethod; }
 
         /// <summary>
         /// Gets or sets the vertical alignment of the contents of this column.
         /// </summary>
         /// <value>The vertical alignment of this column.</value>
-        public VerticalAlignment VerticalAlignment
-        {
-			readonly get { return mVerticalAlignment; }
-            set { mVerticalAlignment = value; }
-        }
+        public VerticalAlignment VerticalAlignment { readonly get => mVerticalAlignment; set => mVerticalAlignment = value; }
 	
         #endregion
-
-        #region Private fields
-
-        private readonly WordWrappingMethod mWordWrappingMethod = method;
-        private readonly Alignment mAlignment = alignment;
-        private readonly int mWidth = width;
-        private readonly string mContent = content;
-        private VerticalAlignment mVerticalAlignment = verticalAlignment;
-
-        #endregion
     }
-
 }

@@ -45,6 +45,32 @@ namespace DigitalProduction.CommandLine;
 /// for setting and getting values of the option manager object used by the parser.</remarks>
 internal class Option : IOption
 {
+	#region Private fields
+
+	/// <summary>
+	/// Counts the number of times the value was set for this option
+	/// </summary>
+	private int								mSetCount;
+	private readonly Type					mOptionType;
+	private readonly MemberInfo				mMember;
+	private string							mDescription					= string.Empty;
+	private readonly string					mName							= string.Empty;
+	private readonly object					mObject;
+	private readonly OptionGroup?			mGroup;
+	private readonly int					mMaxOccurs;
+	private readonly int					mMinOccurs;
+	private readonly BoolFunction			mUsage;
+	private readonly ArrayList<Option>		mProhibitedBy					= [];
+	private readonly NumberFormatInfo		mNumberFormatInfo;
+	private readonly object?				mDefaultValue;
+	private bool							mRequireExplicitAssignment;
+	private readonly object?				mMinValue;
+	private readonly object?				mMaxValue;
+	private readonly ArrayList<string>		mAliases						= [];
+	private readonly TreeSet<string>		mEnumerationValues				= [];
+
+	#endregion
+
 	#region Constructor
 
 	/// <summary>
@@ -57,14 +83,14 @@ internal class Option : IOption
 	/// <param name="numberFormatInfo">The number format info to use for parsing numerical arguments.</param>
 	public Option(CommandLineOptionAttribute attribute, MemberInfo memberInfo, object cmdLineObject, ICollection<OptionGroup> optionGroups, NumberFormatInfo numberFormatInfo)
 	{
-		mObject = cmdLineObject;
-		mMember = memberInfo;
-		mUsage = attribute.BoolFunction;
-		mDescription = attribute.Description;
-		mNumberFormatInfo = numberFormatInfo ?? CultureInfo.CurrentCulture.NumberFormat;
-		mDefaultValue = attribute.DefaultAssignmentValue;
-		mMinValue = attribute.MinValue;
-		mMaxValue = attribute.MaxValue;
+		mObject				= cmdLineObject;
+		mMember				= memberInfo;
+		mUsage				= attribute.BoolFunction;
+		mDescription		= attribute.Description;
+		mNumberFormatInfo	= numberFormatInfo ?? CultureInfo.CurrentCulture.NumberFormat;
+		mDefaultValue		= attribute.DefaultAssignmentValue;
+		mMinValue			= attribute.MinValue;
+		mMaxValue			= attribute.MaxValue;
 
 		// Check the validity of the member for which this attribute was defined
 		switch (memberInfo.MemberType)
@@ -793,32 +819,6 @@ internal class Option : IOption
 			return value;
 		}
 	}
-
-	#endregion
-
-	#region Private fields
-
-	/// <summary>
-	/// Counts the number of times the value was set for this option
-	/// </summary>
-	private int mSetCount;
-	private readonly Type mOptionType;
-	private readonly MemberInfo mMember;
-	private string mDescription = string.Empty;
-	private readonly string mName = string.Empty;
-	private readonly object mObject;
-	private readonly OptionGroup? mGroup;
-	private readonly int mMaxOccurs;
-	private readonly int mMinOccurs;
-	private readonly BoolFunction mUsage;
-	private readonly ArrayList<Option> mProhibitedBy = [];
-	private readonly NumberFormatInfo mNumberFormatInfo;
-	private readonly object? mDefaultValue;
-	private bool mRequireExplicitAssignment;
-	private readonly object? mMinValue;
-	private readonly object? mMaxValue;
-	private readonly ArrayList<string> mAliases = [];
-	private readonly TreeSet<string> mEnumerationValues = [];
 
 	#endregion
 }
