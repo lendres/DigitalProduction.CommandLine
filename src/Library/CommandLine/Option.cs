@@ -124,9 +124,13 @@ internal class Option : IOption
 		{
 			// Use default setting for MaxOccurs
 			if (IsArray(mOptionType) || IsCollectionType(mOptionType))
+			{
 				mMaxOccurs = 0; // Unlimited 
+			}
 			else
+			{
 				mMaxOccurs = 1;
+			}
 		}
 		else
 		{
@@ -134,12 +138,16 @@ internal class Option : IOption
 		}
 
 		if (mMinOccurs > mMaxOccurs && mMaxOccurs > 0)
+		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 				String.Format(CultureInfo.CurrentUICulture, "MinOccurs ({0}) must not be larger than MaxOccurs ({1})", mMinOccurs, mMaxOccurs));
+		}
 
 		if (mMaxOccurs != 1 && !(IsArray(mOptionType) || IsCollectionType(mOptionType)) && mMember.MemberType != MemberTypes.Method)
+		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 				"Invalid cardinality for member; MaxOccurs must be equal to one (1) for any non-array or non-collection type");
+		}
 
 		CommandLineManagerAttribute objectAttr = Attribute.GetCustomAttribute(mObject.GetType(), typeof(CommandLineManagerAttribute)) as CommandLineManagerAttribute ??
 			throw new AttributeException(string.Format(CultureInfo.CurrentUICulture,
@@ -315,7 +323,9 @@ internal class Option : IOption
 		set
 		{
 			if (++mSetCount > MaxOccurs && MaxOccurs != 0)
+			{
 				throw new InvalidOperationException(CommandLineStrings.InternalErrorOptionValueWasSetMoreThanMaxOccursNumberOfTimes);
+			}
 
 			switch (mMember.MemberType)
 			{
@@ -442,8 +452,7 @@ internal class Option : IOption
 	{
 		get
 		{
-			return GetBaseType(mOptionType) != typeof(bool) ||
-				BoolFunction == BoolFunction.Value;
+			return GetBaseType(mOptionType) != typeof(bool) || BoolFunction == BoolFunction.Value;
 		}
 	}
 
@@ -588,6 +597,18 @@ internal class Option : IOption
 		get { return new GuardedCollection<string>(mEnumerationValues); }
 	}
 
+	/// <summary>
+	/// Gets the names of the aliases referring to this option.
+	/// </summary>
+	/// <value>The names of the aliases referring to this option.</value>
+	public SCG.IEnumerable<string> Aliases
+	{
+		get
+		{
+			return mAliases;
+		}
+	}
+
 	#endregion
 
 	#region Public methods
@@ -608,18 +629,6 @@ internal class Option : IOption
 	public void AddAlias(string alias)
 	{
 		mAliases.Add(alias);
-	}
-
-	/// <summary>
-	/// Gets the names of the aliases referring to this option.
-	/// </summary>
-	/// <value>The names of the aliases referring to this option.</value>
-	public SCG.IEnumerable<string> Aliases
-	{
-		get
-		{
-			return mAliases;
-		}
 	}
 
 	#endregion
@@ -712,8 +721,7 @@ internal class Option : IOption
 
 	private static bool IsGenericCollectionType(Type type)
 	{
-		return type.GetInterface("System.Collections.Generic.ICollection`1") != null ||
-			type.GetInterface("C5.IExtensible`1") != null;
+		return type.GetInterface("System.Collections.Generic.ICollection`1") != null || type.GetInterface("C5.IExtensible`1") != null;
 	}
 
 	private static bool IsCollectionType(Type type)
@@ -745,9 +753,13 @@ internal class Option : IOption
 	private static bool IsTypeSupported(Type type)
 	{
 		if (IsArray(type) && type.GetArrayRank() != 1)
+		{
 			return false;
+		}
 		else if (IsNonGenericCollectionType(type))
+		{
 			return true;
+		}
 
 		Type? baseType = GetBaseType(type);
 		Debug.Assert(baseType != null);
@@ -791,9 +803,13 @@ internal class Option : IOption
 			// if that is the type of the inner exception.
 			if (tie.InnerException?.GetType() == typeof(OverflowException) || tie.InnerException?.GetType() == typeof(FormatException)
 				|| tie.InnerException?.GetType() == typeof(InvalidOptionValueException))
+			{
 				throw tie.InnerException;
+			}
 			else
+			{
 				throw;
+			}
 		}
 
 		if (IsNumericalType)
@@ -803,7 +819,9 @@ internal class Option : IOption
 			// in the constructor for any numerical type supported by this class.
 			IComparable comparable = (IComparable)value;
 			if (comparable.CompareTo(MinValue) < 0 || comparable.CompareTo(MaxValue) > 0)
+			{
 				throw new OverflowException(CommandLineStrings.ValueWasEitherTooLargeOrTooSmallForThisOptionType);
+			}
 		}
 
 		return value;
