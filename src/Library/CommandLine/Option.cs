@@ -72,8 +72,9 @@ internal class Option : IOption
 			case MemberTypes.Field:
 				FieldInfo fieldInfo = (FieldInfo)memberInfo;
 				if (fieldInfo.IsInitOnly || fieldInfo.IsLiteral)
-					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
-						"Illegal field for this attribute; field must be writeable");
+				{
+					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo, "Illegal field for this attribute; field must be writeable");
+				}
 
 				mOptionType = fieldInfo.FieldType;
 				break;
@@ -82,16 +83,22 @@ internal class Option : IOption
 				ParameterInfo[] parameters = method.GetParameters();
 
 				if (parameters.Length != 1)
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal method for this attribute; the method must accept exactly one parameter");
+				}
 
 				if (parameters[0].IsOut)
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal method for this attribute; the parameter of the method must not be an out parameter");
+				}
 
 				if (IsArray(parameters[0].ParameterType) || IsCollectionType(parameters[0].ParameterType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal method for this attribute; the parameter of the method must be a non-array and non-collection type");
+				}
 
 				mOptionType = parameters[0].ParameterType;
 				break;
@@ -99,16 +106,22 @@ internal class Option : IOption
 				PropertyInfo propInfo = (PropertyInfo)memberInfo;
 
 				if (!propInfo.CanWrite && !IsCollectionType(propInfo.PropertyType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal property for this attribute; property for non-collection type must be writable");
+				}
 
 				if (!propInfo.CanRead && IsCollectionType(propInfo.PropertyType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal property for this attribute; property for collection type must be readable");
+				}
 
 				if (!(propInfo.CanRead && propInfo.CanWrite) && IsArray(propInfo.PropertyType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal property for this attribute; property representing array type must be both readable and writeable");
+				}
 
 				mOptionType = propInfo.PropertyType;
 				break;
@@ -194,8 +207,9 @@ internal class Option : IOption
 
 		// Make sure the type of the field, property or method is supported
 		if (!IsTypeSupported(mOptionType))
+		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), mMember, "Unsupported type for command line option.");
-
+		}
 
 		// Make sure MinValue and MaxValue is not specified for any non-numerical type.
 		if (mMinValue != null || mMaxValue != null)
@@ -350,13 +364,7 @@ internal class Option : IOption
 	/// Gets a value indicating whether this option requires a value to be assigned to it.
 	/// </summary>
 	/// <value><c>true</c> if this option requires a value to be assigned to it; otherwise, <c>false</c>.</value>
-	public bool RequiresValue
-	{
-		get
-		{
-			return AcceptsValue && !HasDefaultValue;
-		}
-	}
+	public bool RequiresValue { get => AcceptsValue && !HasDefaultValue; }
 
 	/// <summary>
 	/// Gets or sets a value indicating whether this option requires explicit assignment.
@@ -364,97 +372,61 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this option requires explicit assignment; otherwise, <c>false</c>.
 	/// </value>
-	public bool RequireExplicitAssignment
-	{
-		get { return mRequireExplicitAssignment; }
-		set { mRequireExplicitAssignment = value; }
-	}
+	public bool RequireExplicitAssignment { get => mRequireExplicitAssignment; set => mRequireExplicitAssignment = value; }
 
 	/// <summary>
 	/// Gets the collection containing the options prohibiting this option from being specified.
 	/// </summary>
 	/// <value>The collection containing the options prohibiting this option from being specified.</value>
-	public ICollection<Option> ProhibitedBy
-	{
-		get { return mProhibitedBy; }
-	}
+	public ICollection<Option> ProhibitedBy { get => mProhibitedBy; }
 
 	/// <summary>
 	/// Gets the group to which this option belongs, or null if this option does not belong to any group.
 	/// </summary>
 	/// <value>The group to which this option belongs, or null if this option does not belong to any group.</value>
-	public OptionGroup? Group
-	{
-		get { return mGroup; }
-	}
+	public OptionGroup? Group {	get => mGroup; }
 
 	/// <summary>
 	/// Gets the name of this option
 	/// </summary>
 	/// <value>The name of this option</value>
-	public string Name
-	{
-		get { return mName; }
-	}
+	public string Name { get => mName; }
 
 	/// <summary>
 	/// Gets the bool function used by this option
 	/// </summary>
 	/// <value>The bool function used by this option</value>
-	public BoolFunction BoolFunction
-	{
-		get { return mUsage; }
-	}
+	public BoolFunction BoolFunction { get => mUsage; }
 
 	/// <summary>
 	/// Gets the max occurs.
 	/// </summary>
 	/// <value>The max occurs.</value>
-	public int MaxOccurs
-	{
-		get { return mMaxOccurs; }
-	}
+	public int MaxOccurs { get => mMaxOccurs; }
 
 	/// <summary>
 	/// Gets the min occurs.
 	/// </summary>
 	/// <value>The min occurs.</value>
-	public int MinOccurs
-	{
-		get { return mMinOccurs; }
-	}
+	public int MinOccurs { get => mMinOccurs; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description
-	{
-		get { return mDescription; }
-		set { mDescription = value; }
-	}
+	public string Description { get => mDescription; set => mDescription = value; }
 
 	/// <summary>
 	/// Gets or sets the number of times the value of this option has been set.
 	/// </summary>
 	/// <value>The number of times the value of this option has been set.</value>
-	public int SetCount
-	{
-		get { return mSetCount; }
-		set { mSetCount = value; }
-	}
+	public int SetCount { get => mSetCount; set => mSetCount = value; }
 
 	/// <summary>
 	/// Gets a value indicating whether a value may be assigned to this option.
 	/// </summary>
 	/// <value><c>true</c> if a value may be assigned to this option; otherwise, <c>false</c>.</value>
-	public bool AcceptsValue
-	{
-		get
-		{
-			return GetBaseType(mOptionType) != typeof(bool) || BoolFunction == BoolFunction.Value;
-		}
-	}
+	public bool AcceptsValue { get => GetBaseType(mOptionType) != typeof(bool) || BoolFunction == BoolFunction.Value; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance has default value.
@@ -462,13 +434,7 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance has default value; otherwise, <c>false</c>.
 	/// </value>
-	public bool HasDefaultValue
-	{
-		get
-		{
-			return mDefaultValue != null;
-		}
-	}
+	public bool HasDefaultValue { get => mDefaultValue != null; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is boolean type.
@@ -476,22 +442,13 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is boolean type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsBooleanType
-	{
-		get
-		{
-			return GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false;
-		}
-	}
+	public bool IsBooleanType { get => GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is an alias.
 	/// </summary>
 	/// <value><c>true</c> if this instance is alias; otherwise, <c>false</c>.</value>
-	public bool IsAlias
-	{
-		get { return false; }
-	}
+	public bool IsAlias { get => false; }
 
 	/// <summary>
 	/// Gets the defining option.
@@ -499,28 +456,19 @@ internal class Option : IOption
 	/// <value>The defining option.</value>
 	/// <remarks>For an <see cref="Option"/> the value returned will be equal to the Option itself, for an <see cref="OptionAlias"/> it
 	/// will be the <see cref="Option"/> to which the alias refers.</remarks>
-	public Option DefiningOption
-	{
-		get { return this; }
-	}
+	public Option DefiningOption { get => this; }
 
 	/// <summary>
 	/// Gets the min value.
 	/// </summary>
 	/// <value>The min value, or null if no minimum value was specified.</value>
-	public object? MinValue
-	{
-		get { return mMinValue; }
-	}
+	public object? MinValue { get => mMinValue; }
 
 	/// <summary>
 	/// Gets the max value.
 	/// </summary>
 	/// <value>The max value or null if no maximum value was specified.</value>
-	public object? MaxValue
-	{
-		get { return mMaxValue; }
-	}
+	public object? MaxValue { get => mMaxValue; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is integral type.
@@ -555,8 +503,7 @@ internal class Option : IOption
 		get
 		{
 			Type? baseType = GetBaseType(mOptionType);
-			return baseType == typeof(float) ||
-				baseType == typeof(double);
+			return baseType == typeof(float) || baseType == typeof(double);
 		}
 	}
 
@@ -566,13 +513,7 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is decimal type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsDecimalType
-	{
-		get
-		{
-			return GetBaseType(mOptionType) == typeof(decimal);
-		}
-	}
+	public bool IsDecimalType { get => GetBaseType(mOptionType) == typeof(decimal); }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is numerical type.
@@ -580,34 +521,19 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is numerical type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsNumericalType
-	{
-		get
-		{
-			return IsIntegralType || IsDecimalType || IsFloatingPointType;
-		}
-	}
+	public bool IsNumericalType { get => IsIntegralType || IsDecimalType || IsFloatingPointType; }
 
 	/// <summary>
 	/// Gets the valid enumeration values.
 	/// </summary>
 	/// <value>The valid enumeration values of this option if the base type for this option is an enum, or a null reference otherwise.</value>
-	public ICollection<string> ValidEnumerationValues
-	{
-		get { return new GuardedCollection<string>(mEnumerationValues); }
-	}
+	public ICollection<string> ValidEnumerationValues { get => new GuardedCollection<string>(mEnumerationValues); }
 
 	/// <summary>
 	/// Gets the names of the aliases referring to this option.
 	/// </summary>
 	/// <value>The names of the aliases referring to this option.</value>
-	public SCG.IEnumerable<string> Aliases
-	{
-		get
-		{
-			return mAliases;
-		}
-	}
+	public SCG.IEnumerable<string> Aliases { get => mAliases; }
 
 	#endregion
 
