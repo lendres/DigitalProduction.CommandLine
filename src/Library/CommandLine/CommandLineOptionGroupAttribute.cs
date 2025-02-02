@@ -47,9 +47,17 @@ namespace DigitalProduction.CommandLine;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribute
 {
+	#region Private Fields
+
+	private readonly string			mId								= id;
+	private string					mName							= string.Empty;
+	private string					mDescription					= string.Empty;
+	private OptionGroupRequirement	mRequired;
+	private bool?					mRequireExplicitAssignment;
+
+	#endregion
 
 	#region Constructor
-
 	#endregion
 
 	#region Public properties
@@ -60,40 +68,25 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 	/// <value>The name.</value>
 	/// <remarks>This is the name that will be displayed as a headline for the options contained in the
 	/// group in any generated documentation. If not explicitly set it will be the same as <see cref="Id"/>.</remarks>
-	public string Name
-	{
-		get { return mName; }
-		set { mName = value; }
-	}
+	public string Name { get => mName; set => mName = value; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description
-	{
-		get { return mDescription; }
-		set { mDescription = value; }
-	}
+	public string Description { get => mDescription; set => mDescription = value; }
 
 	/// <summary>
 	/// Gets the id.
 	/// </summary>
 	/// <value>The id.</value>
-	public string Id
-	{
-		get { return mId; }
-	}
+	public string Id { get => mId; }
 
 	/// <summary>
 	/// Gets or sets the requirements placed on the options in this group.
 	/// </summary>
 	/// <value>requirements placed on the options in this group.</value>
-	public OptionGroupRequirement Require
-	{
-		get { return mRequired; }
-		set { mRequired = value; }
-	}
+	public OptionGroupRequirement Require { get => mRequired; set => mRequired = value; }
 
 	/// <summary>
 	/// Gets or sets a value indicating whether explicit assignment is required for the options
@@ -111,7 +104,7 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 			System.Diagnostics.Debug.Assert(mRequireExplicitAssignment != null);
 			return mRequireExplicitAssignment.Value;
 		}
-		set { mRequireExplicitAssignment = value; }
+		set => mRequireExplicitAssignment = value;
 	}
 
 	#endregion
@@ -124,20 +117,7 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 	/// <value>
 	/// 	<c>true</c> if this instance has specified a require explicit assignment value; otherwise, <c>false</c>.
 	/// </value>
-	internal bool HasRequireExplicitAssignment
-	{
-		get { return mRequireExplicitAssignment.HasValue; }
-	}
-
-	#endregion
-
-	#region Private fields
-
-	private readonly string mId = id;
-	private string mName = string.Empty;
-	private string mDescription = string.Empty;
-	private OptionGroupRequirement mRequired;
-	private bool? mRequireExplicitAssignment;
+	internal bool HasRequireExplicitAssignment { get => mRequireExplicitAssignment.HasValue; }
 
 	#endregion
 }
