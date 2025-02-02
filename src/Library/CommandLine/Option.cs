@@ -452,7 +452,15 @@ internal class Option : IOption
 	/// Gets a value indicating whether a value may be assigned to this option.
 	/// </summary>
 	/// <value><c>true</c> if a value may be assigned to this option; otherwise, <c>false</c>.</value>
-	public bool AcceptsValue { get => GetBaseType(mOptionType) != typeof(bool) || BoolFunction == BoolFunction.Value; }
+	public bool AcceptsValue
+	{
+		get
+		{
+			return	GetBaseType(mOptionType) != typeof(bool) ||
+					GetBaseType(mOptionType) != typeof(bool?) ||
+					BoolFunction == BoolFunction.Value;
+		}
+	}
 
 	/// <summary>
 	/// Gets a value indicating whether this instance has default value.
@@ -468,7 +476,14 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is boolean type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsBooleanType { get => GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false; }
+	public bool IsBooleanType
+	{
+		get
+		{
+			return	(GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false) ||
+					(GetBaseType(mOptionType)?.Equals(typeof(bool?)) ?? false);
+		}
+	}
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is an alias.
@@ -718,7 +733,7 @@ internal class Option : IOption
 
 		return
 			baseType.Equals(typeof(bool)) ||
-			baseType.Equals(typeof(bool?)) ||
+//			baseType.Equals(typeof(bool?)) ||
 			baseType.Equals(typeof(byte)) ||
 			baseType.Equals(typeof(sbyte)) ||
 			baseType.Equals(typeof(char)) ||
@@ -804,7 +819,7 @@ internal class Option : IOption
 				}
 				return Enum.Parse(type, stringValue, true);
 			}
-			else if (type.Equals(typeof(bool)))
+			else if (type.Equals(typeof(bool)) || type.Equals(typeof(bool?)))
 			{
 				return bool.Parse(stringValue);
 			}
