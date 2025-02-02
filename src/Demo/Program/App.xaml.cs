@@ -1,4 +1,4 @@
-﻿namespace UnlockingFlyout;
+﻿namespace DigitalProduction.Demo;
 
 public partial class App : Application
 {

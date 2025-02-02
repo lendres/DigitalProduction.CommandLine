@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="UnlockingFlyout.AppShell"
+    x:Class="DigitalProduction.Demo.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:UnlockingFlyout"
+    xmlns:local="clr-namespace:DigitalProduction.Demo"
     FlyoutBehavior="Locked"
-    Title="UnlockingFlyout">
+    Title="DigitalProduction.Demo">
 
     <FlyoutItem Title="Home">
         <ShellContent ContentTemplate="{DataTemplate local:MainPage}"/>

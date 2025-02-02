@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace UnlockingFlyout;
+namespace DigitalProduction.Demo;
 
 public static class MauiProgram
 {
