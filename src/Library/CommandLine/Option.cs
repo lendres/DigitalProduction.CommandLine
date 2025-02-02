@@ -231,7 +231,7 @@ internal class Option : IOption
 			mRequireExplicitAssignment = objectAttr.RequireExplicitAssignment;
 		}
 
-		// Make sure the type of the field, property or method is supported
+		// Make sure the type of the field, property, or method is supported.
 		if (!IsTypeSupported(mOptionType))
 		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), mMember, "Unsupported type for command line option.");
@@ -718,6 +718,7 @@ internal class Option : IOption
 
 		return
 			baseType.Equals(typeof(bool)) ||
+			baseType.Equals(typeof(bool?)) ||
 			baseType.Equals(typeof(byte)) ||
 			baseType.Equals(typeof(sbyte)) ||
 			baseType.Equals(typeof(char)) ||
