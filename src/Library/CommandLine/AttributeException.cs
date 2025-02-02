@@ -30,9 +30,8 @@
  *  $Id: AttributeException.cs 3 2007-07-29 13:32:10Z palotas $
  */
 using System;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Globalization;
+using System.Reflection;
 
 namespace DigitalProduction.CommandLine;
 
@@ -50,8 +49,8 @@ public class AttributeException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="AttributeException"/> class.
     /// </summary>
-    public AttributeException()
-        : base()
+    public AttributeException() :
+		base()
     {
     }
 
@@ -61,9 +60,8 @@ public class AttributeException : Exception
     /// <param name="attributeType">Type of the attribute on which the error is present.</param>
     /// <param name="objectType">Type of the object implementing the attribute on which the error occured.</param>
     /// <param name="message">The error message.</param>
-    public AttributeException(Type attributeType, Type objectType, string message)
-        : this(String.Format(CultureInfo.CurrentUICulture, "In attribute {0} defined on {1}; {2}",
-        attributeType.Name, objectType.FullName, message))
+    public AttributeException(Type attributeType, Type objectType, string message) :
+		this(String.Format(CultureInfo.CurrentUICulture, "In attribute {0} defined on {1}; {2}", attributeType.Name, objectType.FullName, message))
     {
     }
 
@@ -73,9 +71,8 @@ public class AttributeException : Exception
     /// <param name="attributeType">Type of the attribute on which the error is present.</param>
     /// <param name="member">The member assigned the attribute with the error.</param>
     /// <param name="message">The error message.</param>
-    public AttributeException(Type attributeType, MemberInfo member, string message)
-        : this(String.Format(CultureInfo.CurrentUICulture, "In attribute {0} defined on member \"{1}\" of {2}; {3}",
-        attributeType.Name, member.Name, member.DeclaringType?.FullName, message))
+    public AttributeException(Type attributeType, MemberInfo member, string message) :
+		this(String.Format(CultureInfo.CurrentUICulture, "In attribute {0} defined on member \"{1}\" of {2}; {3}", attributeType.Name, member.Name, member.DeclaringType?.FullName, message))
     {
     }
 
@@ -83,8 +80,8 @@ public class AttributeException : Exception
     /// Initializes a new instance of the <see cref="AttributeException"/> class.
     /// </summary>
     /// <param name="message">The message.</param>
-    public AttributeException(string message)
-        : base(message)
+    public AttributeException(string message) :
+		base(message)
     {
     }
 
@@ -93,8 +90,8 @@ public class AttributeException : Exception
     /// </summary>
     /// <param name="message">The error message.</param>
     /// <param name="innerException">The inner exception.</param>
-    public AttributeException(string message, Exception innerException)
-        : base(message, innerException)
+    public AttributeException(string message, Exception innerException) :
+		base(message, innerException)
     {
     }
 }

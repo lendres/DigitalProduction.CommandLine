@@ -47,16 +47,19 @@ public enum BoolFunction
 	/// either <see cref="Boolean.TrueString"/> or <see cref="Boolean.FalseString"/>.
 	/// </summary>
 	Value,
+
 	/// <summary>
 	/// The option does not accept a value, and if present on the command line the member to which the attribute is
 	/// applied will be set to <b>true</b>.
 	/// </summary>
 	TrueIfPresent,
+
 	/// <summary>
 	/// The option does not accept a value, and if present on the command line the member to which the attribute is
 	/// applied will be set to <b>false</b>.
 	/// </summary>
 	FalseIfPresent,
+
 	/// <summary>
 	/// The option does not accept a value. Instead if present on the command line the member to which the attribute
 	/// is applied will be set to <b>true</b> if the prefix of the option was '+', otherwise; <b>false</b>. It is an

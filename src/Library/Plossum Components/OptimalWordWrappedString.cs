@@ -47,39 +47,47 @@ namespace DigitalProduction.CommandLine;
 /// not a very good idea.</para></remarks>
 internal class OptimalWordWrappedString
 {
-	#region Private types
+	#region Private Types
 
 	private class LineBreakResult
 	{
+		public int Cost;
+		public int K;
+
 		public LineBreakResult()
 		{
-			Cost = mInfinity;
-			K = -1;
+			Cost	= mInfinity;
+			K		= -1;
 		}
 
 		public LineBreakResult(int cost, int k)
 		{
-			this.Cost = cost;
-			this.K = k;
+			this.Cost	= cost;
+			this.K		= k;
 		}
+	}
 
-		public int Cost;
-		public int K;
+	private struct WordInfo
+	{
+		public int spacesBefore;
+		public int pos;
+		public int length;
+		public int totalLength;
 	}
 
 	#endregion
 
-	#region Private fields
+	#region Private Fields
 
-	private WordInfo[]? mWordList;
-	private readonly StringBuilder mResult = new();
-	private readonly LineBreakResult[]? mfCache;
-	private readonly string? mStr;
-	private readonly int mLineWidth;
-	private const int mInfinity = int.MaxValue / 2;
+	private WordInfo[]?						mWordList;
+	private readonly StringBuilder			mResult			= new();
+	private readonly LineBreakResult[]?		mfCache;
+	private readonly string?				mStr;
+	private readonly int					mLineWidth;
+	private const int						mInfinity		= int.MaxValue / 2;
 
 	// We need a rectangular array here, so this warning is unwarranted.
-	private readonly int[,]? mCostCache;
+	private readonly int[,]?				mCostCache;
 
 	#endregion
 
@@ -97,8 +105,12 @@ internal class OptimalWordWrappedString
 			Debug.Assert(mWordList != null);
 			mCostCache = new int[mWordList.Length, mWordList.Length];
 			for (int x = 0; x < mWordList.Length; x++)
+			{
 				for (int y = 0; y < mWordList.Length; y++)
+				{
 					mCostCache[x, y] = -1;
+				}
+			}
 
 			mfCache = new LineBreakResult[mWordList.Length];
 
@@ -110,7 +122,9 @@ internal class OptimalWordWrappedString
 			{
 				last = FindLastOptimalBreak(last.K);
 				if (last.K >= 0)
+				{
 					stack.Push(last.K);
+				}
 			}
 
 			int start = 0;
@@ -119,23 +133,27 @@ internal class OptimalWordWrappedString
 				int next = stack.Pop();
 				mResult.Append(GetWords(start, next));
 				if (!stack.IsEmpty)
+				{
 					mResult.Append(Environment.NewLine);
+				}
 				start = next + 1;
 			}
 
 			if (c != lines.Length - 1)
+			{
 				mResult.Append(Environment.NewLine);
+			}
 		}
 
-		mWordList = null;
-		mfCache = null;
-		mStr = null;
-		mCostCache = null;
+		mWordList	= null;
+		mfCache		= null;
+		mStr		= null;
+		mCostCache	= null;
 	}
 
 	#endregion
 
-	#region Public methods
+	#region Public Methods
 
 	public override string ToString()
 	{
@@ -144,7 +162,7 @@ internal class OptimalWordWrappedString
 
 	#endregion
 
-	#region Private methods
+	#region Private Methods
 
 	private string GetWords(int i, int j)
 	{
@@ -154,14 +172,6 @@ internal class OptimalWordWrappedString
 		int start = mWordList[i].pos;
 		int end = (j + 1 >= mWordList.Length) ? mStr.Length : mWordList[j + 1].pos - (mWordList[j + 1].spacesBefore - mWordList[j].spacesBefore);
 		return mStr[start..end];
-	}
-
-	private struct WordInfo
-	{
-		public int spacesBefore;
-		public int pos;
-		public int length;
-		public int totalLength;
 	}
 
 	private void BuildWordList(string s, int lineWidth)
@@ -175,8 +185,8 @@ internal class OptimalWordWrappedString
 		{
 			pos = 0
 		};
-		int spaces = 0;
-		int totalLength = 0;
+		int spaces		= 0;
+		int totalLength	= 0;
 		for (int i = 0; i < s.Length; i++)
 		{
 			char ch = s[i];
@@ -184,7 +194,9 @@ internal class OptimalWordWrappedString
 			{
 				spaces++;
 				if (we.pos != i)
+				{
 					mWordListAL.Add(we);
+				}
 				we = new WordInfo
 				{
 					spacesBefore = spaces,

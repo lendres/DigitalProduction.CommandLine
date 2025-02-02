@@ -42,7 +42,7 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 public static class StringFormatter
 {
-	#region Public methods
+	#region Public Methods
 
 	/// <summary>
 	/// Aligns the specified string within a field of the desired width, cropping it if it doesn't fit, and expanding it otherwise.
@@ -147,20 +147,26 @@ public static class StringFormatter
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
 
 		if (cropping != Cropping.Both && width < ellipsis.Length)
+		{
 			throw new ArgumentException("width must not be less than the length of ellipsis");
+		}
 		else if (cropping == Cropping.Both && width < ellipsis.Length * 2)
+		{
 			throw new ArgumentException("width must not be less than twice the length of the ellipsis when cropping is set to Both");
+		}
 
-		IIndexed<string> lines = SplitAtLineBreaks(str);
-		StringBuilder result = new();
+		IIndexed<string> lines	= SplitAtLineBreaks(str);
+		StringBuilder result	= new();
 
 		for (int j = 0; j < lines.Count; j++)
 		{
 			if (j != 0)
+			{
 				result.Append(Environment.NewLine);
+			}
 
-			string s = lines[j];
-			int length = s.Length;
+			string s	= lines[j];
+			int length	= s.Length;
 			if (length <= width)
 			{
 				switch (alignment)
@@ -192,9 +198,9 @@ public static class StringFormatter
 							result.Append(padCharacter, width - length);
 						}
 
-						StringBuilder localResult = new();
-						int remainingSpace = width - length;
-						bool readingWord = true;
+						StringBuilder localResult	= new();
+						int remainingSpace			= width - length;
+						bool readingWord			= true;
 
 						for (int i = 0; i < length; i++)
 						{
@@ -266,11 +272,12 @@ public static class StringFormatter
 	public static string WordWrap(string str, int width, WordWrappingMethod method)
 	{
 		ArgumentNullException.ThrowIfNull(str);
-
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
 
 		if (method == WordWrappingMethod.Optimal)
+		{
 			return new OptimalWordWrappedString(str, width).ToString();
+		}
 
 		// Simple word wrapping method that simply fills lines as 
 		// much as possible and then breaks. Creates a not so nice
@@ -278,8 +285,8 @@ public static class StringFormatter
 		StringBuilder dest = new(str.Length);
 		StringBuilder word = new();
 
-		int spaceLeft = width;
-		StringReader reader = new(str);
+		int spaceLeft		= width;
+		StringReader reader	= new(str);
 		int ch;
 		do
 		{
@@ -287,7 +294,9 @@ public static class StringFormatter
 			{
 				word.Append((char)ch);
 				if (ch == '\n')
+				{
 					spaceLeft = width;
+				}
 			}
 
 			if (word.Length > spaceLeft)
@@ -355,7 +364,6 @@ public static class StringFormatter
 		return StringFormatter.Align(WordWrap(str, width, method), width, alignment, Cropping.Left, "", padCharacter);
 	}
 
-
 	/// <summary>
 	/// Splits the specified strings at line breaks, resulting in an indexed collection where each item represents one line of the 
 	/// original string.
@@ -392,12 +400,16 @@ public static class StringFormatter
 		for (int i = 0; i < str.Length; i++)
 		{
 			if (i < str.Length - 1 && str[i] == '\r' && str[i + 1] == '\n')
+			{
 				i++;
+			}
 
 			if (str[i] == '\n' || str[i] == '\r')
 			{
 				if (!removeEmptyLines || temp.Length > 0)
+				{
 					result.Add(temp.ToString());
+				}
 				temp.Length = 0;
 			}
 			else
@@ -407,7 +419,9 @@ public static class StringFormatter
 		}
 
 		if (temp.Length > 0)
+		{
 			result.Add(temp.ToString());
+		}
 		return result;
 	}
 
@@ -423,12 +437,14 @@ public static class StringFormatter
 	{
 		ArgumentNullException.ThrowIfNull(str);
 
-		int count = 0;
-		bool readingWord = false;
+		int count			= 0;
+		bool readingWord	= false;
 		for (int i = 0; i < str.Length; i++)
 		{
 			if (!char.IsWhiteSpace(str[i]))
+			{
 				readingWord = true;
+			}
 			else if (readingWord)
 			{
 				count++;
@@ -436,7 +452,9 @@ public static class StringFormatter
 			}
 		}
 		if (readingWord)
+		{
 			count++;
+		}
 
 		return count;
 	}
@@ -456,22 +474,28 @@ public static class StringFormatter
 	public static string FormatInColumns(int indent, int columnSpacing, params ColumnInfo[] columns)
 	{
 		if (columnSpacing < 0)
+		{
 			throw new ArgumentException("columnSpacing must not be less than zero", nameof(columnSpacing));
+		}
 
 		if (indent < 0)
+		{
 			throw new ArgumentException("indent must not be less than zero", nameof(indent));
+		}
 
 		if (columns.Length == 0)
+		{
 			return "";
+		}
 
-		IIndexed<string>[] strings = new IIndexed<string>[columns.Length];
-		int totalLineCount = 0;
+		IIndexed<string>[] strings	= new IIndexed<string>[columns.Length];
+		int totalLineCount			= 0;
 
 		// Calculate the total number of lines that needs to be printed
 		for (int i = 0; i < columns.Length; i++)
 		{
-			strings[i] = SplitAtLineBreaks(WordWrap(columns[i].Content, columns[i].Width, columns[i].WordWrappingMethod, columns[i].Alignment, ' '), false);
-			totalLineCount = Math.Max(strings[i].Count, totalLineCount);
+			strings[i]		= SplitAtLineBreaks(WordWrap(columns[i].Content, columns[i].Width, columns[i].WordWrappingMethod, columns[i].Alignment, ' '), false);
+			totalLineCount	= Math.Max(strings[i].Count, totalLineCount);
 		}
 
 		// Calculate the first line on which each column should start to print, based
@@ -503,10 +527,14 @@ public static class StringFormatter
 					result.Append(' ', columns[col].Width);
 				}
 				if (col < columns.Length - 1)
+				{
 					result.Append(' ', columnSpacing);
+				}
 			}
 			if (line != totalLineCount - 1)
+			{
 				result.Append(Environment.NewLine);
+			}
 		}
 		return result.ToString();
 	}

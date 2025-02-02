@@ -45,10 +45,7 @@ internal class AssignmentToken(char assignmentChar) : Token(TokenTypes.Assignmen
 	/// Gets the assignment character.
 	/// </summary>
 	/// <value>The assignment character.</value>
-	public char AssignmentCharacter
-	{
-		get { return mAssignmentChar; }
-	}
+	public char AssignmentCharacter { get => mAssignmentChar; }
 
 	private readonly char mAssignmentChar = assignmentChar;
 }

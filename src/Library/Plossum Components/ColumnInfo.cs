@@ -44,7 +44,7 @@ namespace DigitalProduction.CommandLine
 	/// <param name="method">The word wrapping method to use for this column</param>
 	public struct ColumnInfo(int width, string content, Alignment alignment, VerticalAlignment verticalAlignment, WordWrappingMethod method)
 	{
-        #region Private fields
+        #region Private Fields
 
         private readonly WordWrappingMethod	mWordWrappingMethod		= method;
         private readonly Alignment			mAlignment				= alignment;
@@ -94,7 +94,7 @@ namespace DigitalProduction.CommandLine
 
         #endregion
 
-        #region Public methods
+        #region Public Methods
 
         /// <summary>
         /// Implements the operator ==.
@@ -150,7 +150,7 @@ namespace DigitalProduction.CommandLine
 
         #endregion
 
-        #region Public properties 
+        #region Public Properties 
 
         /// <summary>
         /// Gets the width of this column in fixed width characters.

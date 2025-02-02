@@ -29,16 +29,12 @@
  *  
  *  $Id: WordWrappingMethod.cs 3 2007-07-29 13:32:10Z palotas $
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace DigitalProduction.CommandLine
 {
-    /// <summary>
-    /// Represents the word wrapping method to use for various operations performed by <see cref="StringFormatter"/>.
-    /// </summary>
-    public enum WordWrappingMethod
+	/// <summary>
+	/// Represents the word wrapping method to use for various operations performed by <see cref="StringFormatter"/>.
+	/// </summary>
+	public enum WordWrappingMethod
     {
         /// <summary>
         /// Uses a greedy algorithm for performing the word wrapping, 
@@ -48,6 +44,7 @@ namespace DigitalProduction.CommandLine
         /// <remarks>This is the fastest method, but will often create a less esthetically pleasing result than the
         /// <see cref="Optimal"/> method.</remarks>
         Greedy,
+
         /// <summary>
         /// Uses an algorithm attempting to create an optimal solution of breaking the lines, where the optimal solution is the one
         /// where the remaining space on the end of each line is as small as possible.
