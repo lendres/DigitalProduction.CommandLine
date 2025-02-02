@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="DigitalProduction.Demo.MainPage">
+<ContentPage
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:local="clr-namespace:DigitalProduction.Demo"
+	x:DataType="local:MainPageViewModel"
+	x:Class="DigitalProduction.Demo.MainPage">
 
     <ScrollView>
         <VerticalStackLayout
@@ -9,16 +12,47 @@
             Spacing="25">
             <Image
                 Source="dotnet_bot.png"
-                HeightRequest="185"
+                HeightRequest="100"
                 Aspect="AspectFit"
                 SemanticProperties.Description="dot net bot in a hovercraft number nine" />
 
-            <Label
-                Text="Main Page"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
+			<Label
+				Text="An Error Occurred"
+				Style="{StaticResource ErrorStyle}"
+				IsVisible="{Binding ErrorOccured}"/>
+			<Label
+				Text="{Binding ErrorMessage}"
+				Style="{StaticResource ErrorStyle}"
+				IsVisible="{Binding ErrorOccured}"/>
 
-            <Button
+			<Grid
+				RowDefinitions="Auto,Auto"
+				RowSpacing="8"
+				ColumnDefinitions="400,200"
+				ColumnSpacing="8"
+				WidthRequest="500">
+
+				<Label
+					Grid.Row="0" Grid.Column="0"
+					Text="File Command Line:"
+					Style="{StaticResource Headline}" />
+
+				<Label
+					Grid.Row="0" Grid.Column="1"
+					Text="{Binding FileName}"
+					Style="{StaticResource Headline}" />
+
+				<Label
+					Grid.Row="1" Grid.Column="0"
+					Text="Run Command Line:"
+					Style="{StaticResource Headline}" />
+
+				<Label
+					Grid.Row="1" Grid.Column="1"
+					Text="{Binding Run}"
+					Style="{StaticResource Headline}" />
+			</Grid>
+			<Button
                 Text="Navigate to Second Page" 
                 Clicked="OnNavigateForward"
                 HorizontalOptions="Fill" />
