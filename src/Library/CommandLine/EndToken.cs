@@ -39,8 +39,8 @@ internal class EndToken : Token
 	/// <summary>
 	/// Initializes a new instance of the <see cref="EndToken"/> class.
 	/// </summary>
-	public EndToken()
-		: base(TokenTypes.EndToken, CommandLineStrings.EndOfInput)
+	public EndToken() :
+		base(TokenTypes.EndToken, CommandLineStrings.EndOfInput)
 	{
 	}
 }
