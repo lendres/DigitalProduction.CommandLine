@@ -733,7 +733,7 @@ internal class Option : IOption
 
 		return
 			baseType.Equals(typeof(bool)) ||
-//			baseType.Equals(typeof(bool?)) ||
+			baseType.Equals(typeof(bool?)) ||
 			baseType.Equals(typeof(byte)) ||
 			baseType.Equals(typeof(sbyte)) ||
 			baseType.Equals(typeof(char)) ||
@@ -795,9 +795,40 @@ internal class Option : IOption
 		return value;
 	}
 
+	/// <summary>
+	/// Checks if an object is of the specified type.  Performs additional checks to allow for Nullable objects to be
+	/// equal to their non-nullable underlying type.
+	/// 
+	/// That is:
+	/// typeof(bool) == typeof(bool?) is considered true.
+	/// </summary>
+	/// <param name="value">Object to check.</param>
+	/// <param name="type">Type to check against.</param>
+	/// <returns>True of the object is considered of type input type, false otherwise.</returns>
+	private bool IsObjectOfType(object value, Type type)
+	{
+		Type valueType = value.GetType();
+
+		// Was this required historically?  Why not just use "valueType == GetBaseType(mOptionType)"?
+		if (valueType == typeof(string))
+		{
+			return true;
+		}
+
+		if (type.IsGenericType)
+		{
+			if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				return valueType == Nullable.GetUnderlyingType(type);
+			}
+		}
+
+		return valueType == GetBaseType(mOptionType);
+	}
+
 	private object ConvertValueTypeForSetOperation(object value)
 	{
-		Debug.Assert(value.GetType() == typeof(string) || value.GetType() == GetBaseType(mOptionType));
+		Debug.Assert(IsObjectOfType(value, mOptionType));
 
 		ArgumentNullException.ThrowIfNull(value);
 
