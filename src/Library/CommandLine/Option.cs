@@ -811,8 +811,11 @@ internal class Option : IOption
 
 		if (type.IsGenericType)
 		{
+			// Check if we have a generic nullable.
 			if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
+				// Test to consider nullables equal to the underlying type.
+				// typeof(bool) == typeof(bool?) will be true for our purposes.
 				return valueType == Nullable.GetUnderlyingType(type);
 			}
 		}

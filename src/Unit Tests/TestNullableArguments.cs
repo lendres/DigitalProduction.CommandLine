@@ -6,12 +6,9 @@ public class TestNullableArguments
 {
 	readonly QuotationInfo _quotationInfo = new('\"');
 
-	private NullableBoolManager _emptyArguments;
-			
 	public TestNullableArguments()
 	{
 		_quotationInfo.AddEscapeCode('\"', '\"');
-		//_emptyArguments = GetArgumentsInstance("");
 	}
 
 	private T GetArgumentsInstance<T>(string commandLineString) where T : class, new()
@@ -34,6 +31,13 @@ public class TestNullableArguments
 	[Fact]
 	public void TestString()
 	{
+		StringManager arguments = GetArgumentsInstance<StringManager>("-filename \"Test File.txt\"");
+		Assert.Equal("Test File.txt", arguments.FileName);
+	}
+
+	[Fact]
+	public void TestNullableString()
+	{
 		NullableStringManager arguments = GetArgumentsInstance<NullableStringManager>("-filename \"Test File.txt\"");
 		Assert.Equal("Test File.txt", arguments.FileName);
 
@@ -54,7 +58,7 @@ public class TestNullableArguments
 		NullableBoolManager arguments = GetArgumentsInstance<NullableBoolManager>("-run");
 		Assert.True(arguments.Run);
 
-		//arguments = GetArgumentsInstance<NullableBoolManager>("");
-		//Assert.Null(_emptyArguments.Run);
+		arguments = GetArgumentsInstance<NullableBoolManager>("");
+		Assert.Null(arguments.Run);
 	}
 }
