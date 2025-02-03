@@ -735,19 +735,29 @@ internal class Option : IOption
 			baseType.Equals(typeof(bool)) ||
 			baseType.Equals(typeof(bool?)) ||
 			baseType.Equals(typeof(byte)) ||
+			baseType.Equals(typeof(byte?)) ||
 			baseType.Equals(typeof(sbyte)) ||
+			baseType.Equals(typeof(sbyte?)) ||
 			baseType.Equals(typeof(char)) ||
 			baseType.Equals(typeof(char?)) ||
 			baseType.Equals(typeof(decimal)) ||
+			baseType.Equals(typeof(decimal?)) ||
 			baseType.Equals(typeof(double)) ||
+			baseType.Equals(typeof(double?)) ||
 			baseType.Equals(typeof(float)) ||
+			baseType.Equals(typeof(float?)) ||
 			baseType.Equals(typeof(int)) ||
 			baseType.Equals(typeof(int?)) ||
 			baseType.Equals(typeof(uint)) ||
+			baseType.Equals(typeof(uint?)) ||
 			baseType.Equals(typeof(long)) ||
+			baseType.Equals(typeof(long?)) ||
 			baseType.Equals(typeof(ulong)) ||
+			baseType.Equals(typeof(ulong?)) ||
 			baseType.Equals(typeof(short)) ||
+			baseType.Equals(typeof(short?)) ||
 			baseType.Equals(typeof(ushort)) ||
+			baseType.Equals(typeof(ushort?)) ||
 			baseType.Equals(typeof(string)) ||
 			baseType.IsEnum;
 	}
