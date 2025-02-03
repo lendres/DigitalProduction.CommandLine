@@ -737,10 +737,12 @@ internal class Option : IOption
 			baseType.Equals(typeof(byte)) ||
 			baseType.Equals(typeof(sbyte)) ||
 			baseType.Equals(typeof(char)) ||
+			baseType.Equals(typeof(char?)) ||
 			baseType.Equals(typeof(decimal)) ||
 			baseType.Equals(typeof(double)) ||
 			baseType.Equals(typeof(float)) ||
 			baseType.Equals(typeof(int)) ||
+			baseType.Equals(typeof(int?)) ||
 			baseType.Equals(typeof(uint)) ||
 			baseType.Equals(typeof(long)) ||
 			baseType.Equals(typeof(ulong)) ||
@@ -796,8 +798,9 @@ internal class Option : IOption
 	}
 
 	/// <summary>
-	/// Checks if an object is of the specified type.  Performs additional checks to allow for Nullable objects to be
-	/// equal to their non-nullable underlying type.
+	/// Checks if an object is of the an acceptable type.  Performs additional checks to allow for Nullable objects to be
+	/// equal to their non-nullable underlying type.  Allows strings to pass.
+	/// 
 	/// 
 	/// That is:
 	/// typeof(bool) == typeof(bool?) is considered true.
@@ -808,6 +811,12 @@ internal class Option : IOption
 	private bool IsObjectOfType(object value, Type type)
 	{
 		Type valueType = value.GetType();
+
+		// Strings always pass.
+		if (valueType == typeof(string))
+		{
+			return true;
+		}
 
 		if (type.IsGenericType)
 		{
@@ -851,9 +860,24 @@ internal class Option : IOption
 			{
 				return bool.Parse(stringValue);
 			}
-			else // We have a numerical type
+			else if (type.Equals(typeof(char)) || type.Equals(typeof(char?)))
 			{
-				object? returnValue = type.InvokeMember("Parse", BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod, null, null, [value, mNumberFormatInfo], CultureInfo.CurrentUICulture);
+				if (stringValue.Length > 1)
+				{
+					throw new InvalidOptionValueException("Character options must be a single character.");
+				}
+				return char.Parse(stringValue);
+			}
+			else // We have a numerical type.
+			{
+				// For nullable types, we don't want to parse by the nullable type, we want to parse by the underlying type.
+				Type? parseType = type;
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					parseType = Nullable.GetUnderlyingType(type);
+					Debug.Assert(parseType != null);
+				}
+				object? returnValue = parseType.InvokeMember("Parse", BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod, null, null, [value, mNumberFormatInfo], CultureInfo.CurrentUICulture);
 				Debug.Assert(returnValue != null);
 				return returnValue;
 			}
