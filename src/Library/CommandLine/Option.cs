@@ -809,12 +809,6 @@ internal class Option : IOption
 	{
 		Type valueType = value.GetType();
 
-		// Was this required historically?  Why not just use "valueType == GetBaseType(mOptionType)"?
-		if (valueType == typeof(string))
-		{
-			return true;
-		}
-
 		if (type.IsGenericType)
 		{
 			if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
