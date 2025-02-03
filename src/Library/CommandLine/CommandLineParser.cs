@@ -804,7 +804,7 @@ public sealed class CommandLineParser : IDisposable
 						}
 						else if (optionCount > 1)
 						{
-							ReportError(ParseErrorCodes.MissingRequiredOption, CommandLineStrings.OnlyOneOfTheOptions0MayBeSpecified, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.IllegalCardinality, CommandLineStrings.OnlyOneOfTheOptions0MayBeSpecified, group.GetOptionNamesAsString());
 						}
 						break;
 					case OptionGroupRequirement.All:

@@ -456,9 +456,9 @@ internal class Option : IOption
 	{
 		get
 		{
-			return	GetBaseType(mOptionType) != typeof(bool) ||
-					GetBaseType(mOptionType) != typeof(bool?) ||
-					BoolFunction == BoolFunction.Value;
+			return	(GetBaseType(mOptionType) != typeof(bool) && 
+					 GetBaseType(mOptionType) != typeof(bool?)) ||
+					 BoolFunction == BoolFunction.Value;
 		}
 	}
 
