@@ -46,6 +46,108 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 public sealed class CommandLineParser : IDisposable
 {
+	#region Private Fields
+
+	/// <summary>
+	/// The stack of lexers. This is used when file arguments are processed on the command line, in which case a new 
+	/// lexer is created and pushed onto the stack so parsing will continue from that lexer instead. The current
+	/// lexer is the one on the top of the stack.
+	/// </summary>
+	private readonly ArrayList<LexerStackRecord> mLexerStack = [];
+
+	/// <summary>
+	/// The option manager, i.e. the object used for storing the values of the options read. Supplied by the 
+	/// user.
+	/// </summary>
+	private readonly object mOptionManager;
+
+	/// <summary>
+	/// Dictionary mapping option names to the corresponding <see cref="Option"/> or <see cref="OptionAlias"/> object.
+	/// </summary>
+	private readonly TreeDictionary<string, IOption> mOptions;
+
+	/// <summary>
+	/// Set containing all defined option groups.
+	/// </summary>
+	private readonly TreeSet<OptionGroup> mOptionGroups;
+
+	/// <summary>
+	/// The comparer to be used for comparing option names. This is either case sensitive, or case insensitive 
+	/// depending on what was specified in the <see cref="CommandLineManagerAttribute"/> of the 
+	/// command line manager.
+	/// </summary>
+	private readonly OptionNameComparer mOptionNameComparer;
+
+	private string				mApplicationName;
+	private string				mApplicationVersion;
+	private readonly string		mApplicationCopyright;
+	private string				mApplicationDescription;
+
+	/// <summary>
+	/// The option styles enabled for this parser.
+	/// </summary>
+	private readonly OptionStyles mEnabledOptionStyles;
+
+	/// <summary>
+	/// <see cref="NumberFormatInfo"/> dictating how numeric values should be parsed.
+	/// </summary>
+	readonly NumberFormatInfo mNumberFormatInfo;
+
+	/// <summary>
+	/// The name of the executable file from the command line, or null if none was available.
+	/// </summary>
+	private string mExecutable = string.Empty;
+
+	/// <summary>
+	/// The list of the remaining arguments, i.e. those that were not options or values assigned to options.
+	/// </summary>
+	private readonly ArrayList<string> mRemainingArguments = [];
+
+	/// <summary>
+	/// The list of errors.
+	/// </summary>
+	private readonly HashSet<ErrorInfo> mErrors = [];
+
+	/// <summary>
+	/// The escape characters available to this parser.
+	/// </summary>
+	private readonly ArrayList<char> mEscapeCharacters = [];
+
+	/// <summary>
+	/// Dictionary mapping quotation marks to <see cref="QuotationInfo"/> objects describing what
+	/// characters may be escaped within those quotes.
+	/// </summary>
+	private readonly HashDictionary<char, QuotationInfo> mQuotations = [];
+
+	/// <summary>
+	/// Dictionary mapping assignemnt characters to the option styles for which they are enabled.
+	/// </summary>
+	private readonly HashDictionary<char, OptionStyles> mAssignmentCharacters = [];
+
+	/// <summary>
+	/// Separators that may be used for separating values in strings that may contain several values, such as 
+	/// the Aliases or Prohibits attributes of <see cref="CommandLineOptionAttribute"/>.
+	/// </summary>
+	private static readonly char [] mSeparators = [' ', ',', ';'];
+
+	/// <summary>
+	/// The default escape characters.
+	/// </summary>
+	private static readonly char[] mDefaultEscapeCharacters = ['\\'];
+
+	/// <summary>
+	/// Value indicating whether we are currently parsing.
+	/// </summary>
+	private bool mIsParsing;
+
+	/// <summary>
+	/// Contains the object describing the command line options and groups for the option manager associated
+	/// with this parser. It will be null before such an object is generated (upon request)
+	/// </summary>
+	private UsageInfo? mUsageDescription;
+
+	#endregion
+
 	#region Constructors
 
 	/// <summary>
@@ -57,7 +159,8 @@ public sealed class CommandLineParser : IDisposable
 	/// <para>This constructor initializes the parser with the <see cref="NumberFormatInfo"/> specified 
 	/// in <see cref="System.Globalization.CultureInfo.NumberFormat"/> of <see cref="CultureInfo.CurrentUICulture"/>. This may not be desired, since it affects
 	/// the parsing of numbers by this parser.</para></remarks>
-	public CommandLineParser(object optionManager) : this(optionManager, CultureInfo.CurrentUICulture.NumberFormat)
+	public CommandLineParser(object optionManager) :
+		this(optionManager, CultureInfo.CurrentUICulture.NumberFormat)
 	{
 	}
 
@@ -136,8 +239,7 @@ public sealed class CommandLineParser : IDisposable
 			}
 
 
-			if (!mOptionGroups.Add(new OptionGroup(groupAttr.Id, groupAttr.Name, groupAttr.Description,
-				groupAttr.Require, groupAttr.HasRequireExplicitAssignment ? groupAttr.RequireExplicitAssignment : managerAttr.RequireExplicitAssignment, mOptionNameComparer)))
+			if (!mOptionGroups.Add(new OptionGroup(groupAttr.Id, groupAttr.Name, groupAttr.Description, groupAttr.Require, groupAttr.HasRequireExplicitAssignment ? groupAttr.RequireExplicitAssignment : managerAttr.RequireExplicitAssignment, mOptionNameComparer)))
 			{
 				throw new AttributeException(typeof(CommandLineOptionGroupAttribute), mOptionManager.GetType(),
 					String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.RedefinitionOfGroupWithId01,
@@ -232,7 +334,9 @@ public sealed class CommandLineParser : IDisposable
 					string [] targetArray = optionAttr.Prohibits.Split(mSeparators, StringSplitOptions.RemoveEmptyEntries);
 
 					if (!prohibitions.Contains(option.Name))
+					{
 						prohibitions.Add(option.Name, new TreeSet<string>(mOptionNameComparer, mOptionNameComparer));
+					}
 
 					TreeSet<string> targets = prohibitions[option.Name];
 					targets.AddAll(targetArray);
@@ -240,7 +344,9 @@ public sealed class CommandLineParser : IDisposable
 					foreach (string target in targetArray)
 					{
 						if (!prohibitions.Contains(target))
+						{
 							prohibitions.Add(target, []);
+						}
 						prohibitions[target].Add(option.Name);
 					}
 				}
@@ -254,13 +360,19 @@ public sealed class CommandLineParser : IDisposable
 			{
 				string key = entry.Key;
 				if (!mOptions.Find(ref key, out IOption ioption))
+				{
 					throw new InvalidOperationException(CommandLineStrings.InternalErrorOptionSpecifiedInProhibitionDoesNotExist);
+				}
 
 				Option option;
 				if (ioption.IsAlias)
+				{
 					option = ioption.DefiningOption;
+				}
 				else
+				{
 					option = (Option)ioption;
+				}
 
 				foreach (string name in entry.Value)
 				{
@@ -278,11 +390,15 @@ public sealed class CommandLineParser : IDisposable
 					}
 
 					if (target.IsAlias)
+					{
 						target = target.DefiningOption;
+					}
 
 
 					if (!target.ProhibitedBy.Contains(option))
+					{
 						target.ProhibitedBy.Add(option);
+					}
 				}
 			}
 		}
@@ -290,57 +406,38 @@ public sealed class CommandLineParser : IDisposable
 
 	#endregion
 
-	#region Public properties
+	#region Public Properties
 
 	/// <summary>
 	/// Gets or sets the name of the application.
 	/// </summary>
 	/// <value>The name of the application.</value>
-	public string ApplicationName
-	{
-		get { return mApplicationName; }
-		set { mApplicationName = value; }
-	}
+	public string ApplicationName { get => mApplicationName; set => mApplicationName = value; }
 
 	/// <summary>
 	/// Gets or sets the application version.
 	/// </summary>
 	/// <value>The application version.</value>
-	public string ApplicationVersion
-	{
-		get { return mApplicationVersion; }
-		set { mApplicationVersion = value; }
-	}
+	public string ApplicationVersion { get => mApplicationVersion; set => mApplicationVersion = value; }
 
 	/// <summary>
 	/// Gets or sets the application copyright.
 	/// </summary>
 	/// <value>The application copyright.</value>
-	public string ApplicationCopyright
-	{
-		get { return mApplicationCopyright; }
-		set { mApplicationVersion = value; }
-	}
+	public string ApplicationCopyright { get => mApplicationCopyright; set  => mApplicationVersion = value; }
 
 	/// <summary>
 	/// Gets or sets the application description.
 	/// </summary>
 	/// <value>The application description.</value>
-	public string ApplicationDescription
-	{
-		get { return mApplicationDescription; }
-		set { mApplicationDescription = value; }
-	}
+	public string ApplicationDescription { get => mApplicationDescription; set => mApplicationDescription = value; }
 
 	/// <summary>
 	/// Gets the path to the executable of this application if it was included on the command line (it normally is), or null otherwise.
 	/// </summary>
 	/// <value>the path to the executable of this application if it was included on the command line.</value>
 	/// <remarks>This should only be evaluated after <see cref="Parse()"/> has been called.</remarks>
-	public string ExecutablePath
-	{
-		get { return mExecutable; }
-	}
+	public string ExecutablePath { get => mExecutable; }
 
 	/// <summary>
 	/// Gets a value indicating whether any errors were encountered during parsing.
@@ -349,30 +446,21 @@ public sealed class CommandLineParser : IDisposable
 	/// 	<c>true</c> if this instance has errors; otherwise, <c>false</c>.
 	/// </value>
 	/// <remarks>This should only be evaluated after <see cref="Parse()"/> has been called.</remarks>
-	public bool HasErrors
-	{
-		get { return !mErrors.IsEmpty; }
-	}
+	public bool HasErrors { get  => !mErrors.IsEmpty; }
 
 	/// <summary>
 	/// Gets a collection containing any parse errors that occured.
 	/// </summary>
 	/// <value>The parse errors that occured.</value>
 	/// <remarks>This should only be evaluated after <see cref="Parse()"/> has been called.</remarks>
-	public ICollection<ErrorInfo> Errors
-	{
-		get { return mErrors; }
-	}
+	public ICollection<ErrorInfo> Errors { get  => mErrors; }
 
 	/// <summary>
 	/// Gets the remaining arguments specified on the command line, i.e. those that were not interpreted as options
 	/// or values assigned to options.
 	/// </summary>
 	/// <value>The remaining arguments.</value>
-	public ArrayList<string> RemainingArguments
-	{
-		get { return mRemainingArguments; }
-	}
+	public ArrayList<string> RemainingArguments { get  => mRemainingArguments; }
 
 	/// <summary>
 	/// Gets an object containing the descriptive properties of the option manager from which this instance was
@@ -393,7 +481,103 @@ public sealed class CommandLineParser : IDisposable
 
 	#endregion
 
-	#region Public methods
+	#region Private Properties
+
+	/// <summary>
+	/// Gets the next token that will be read by the current lexer, or null if no more tokens are available
+	/// from the current lexer.
+	/// </summary>
+	/// <value>the next token that will be read by the current lexer, or null if no more tokens are available
+	/// from the current lexer.</value>
+	/// <remarks>This will not remove the token from the buffer, but rather works as a peek.</remarks>
+	private Token? LA1
+	{
+		get
+		{
+			try
+			{
+				Debug.Assert(CurrentLexer != null);
+				LA1Token ??= CurrentLexer.GetNextToken();
+			}
+			catch (MissingClosingQuoteException)
+			{
+				ReportError(ParseErrorCodes.MissingClosingQuote, CommandLineStrings.MissingClosingQuoteForQuotedValue);
+				// No more tokes will be available after this message, (since the lexer parsed
+				// to the end of input). So we leave mLA1Token at null.
+			}
+			catch (MissingOptionNameException)
+			{
+				ReportError(ParseErrorCodes.EmptyOptionName, CommandLineStrings.EmptyOptionNameIsNotAllowed);
+				// Since an empty option name is not allowed, we discard it
+				// This if statement is only to make the recursive call happen. We need to 
+				// use the value of LA1 somehow to call it.
+				if (LA1 == null)
+				{
+					return null;
+				}
+			}
+			return LA1Token;
+		}
+	}
+
+	/// <summary>
+	/// Gets the current lexer.
+	/// </summary>
+	/// <value>The current lexer or null if there are no lexers.</value>
+	private Lexer? CurrentLexer
+	{
+		get
+		{
+			if (mLexerStack.IsEmpty)
+			{
+				return null;
+			}
+			return mLexerStack[^1].Lexer;
+		}
+	}
+
+	/// <summary>
+	/// Gets the current file being read by the lexer.
+	/// </summary>
+	/// <value>The current file being read by the current lexer, or a null reference if no file is being read.</value>
+	private string? CurrentFile
+	{
+		get
+		{
+			if (CurrentLexer == null)
+			{
+				return null;
+			}
+			return mLexerStack[^1].FileName;
+		}
+	}
+
+	/// <summary>
+	/// Gets or sets the lookahead token.
+	/// </summary>
+	/// <value>The lookahead token.</value>
+	/// <remarks>This method should not be used by any method other than <see cref="LA1"/>. Use <see cref="LA1"/> instead.</remarks>
+	private Token? LA1Token
+	{
+		get
+		{
+			if (mLexerStack.IsEmpty)
+			{
+				return null;
+			}
+			return mLexerStack[^1].LA1Token;
+		}
+
+		set
+		{
+			Debug.Assert(!mLexerStack.IsEmpty);
+			mLexerStack[^1].LA1Token = value;
+		}
+	}
+
+	#endregion
+
+	#region Public Methods
 
 	/// <summary>
 	/// Performs the actual parsing of the command line, setting (or calling) the relevant members of the
@@ -421,9 +605,9 @@ public sealed class CommandLineParser : IDisposable
 	/// of the option manager object (i.e. which properties has been set or not) is undefined.</remarks>
 	public void Parse(string commandLine, bool containsExecutable)
 	{
-		StringReader sr = new(commandLine);
-		Parse(sr, containsExecutable);
-		sr.Dispose();
+		StringReader stringReader = new(commandLine);
+		Parse(stringReader, containsExecutable);
+		stringReader.Dispose();
 	}
 
 	/// <summary>
@@ -511,14 +695,18 @@ public sealed class CommandLineParser : IDisposable
 			{
 				ValueToken valueToken = CurrentLexer.GetNextValueToken();
 				if (valueToken != null)
+				{
 					mExecutable = valueToken.Value;
+				}
 			}
 
 			// Perform the actual parsing of the input
 			while (CurrentLexer != null)
 			{
 				if (LA1 == null && !PopFinishedLexers())
+				{
 					break;
+				}
 
 				Token token = LA1!;
 				switch (token.TokenType)
@@ -586,7 +774,9 @@ public sealed class CommandLineParser : IDisposable
 					foreach (SCG.KeyValuePair<string, Option> entry in group.Options)
 					{
 						if (entry.Value.SetCount > 0)
+						{
 							optionCount++;
+						}
 					}
 				}
 
@@ -614,7 +804,7 @@ public sealed class CommandLineParser : IDisposable
 						}
 						else if (optionCount > 1)
 						{
-							ReportError(ParseErrorCodes.MissingRequiredOption, CommandLineStrings.OnlyOneOfTheOptions0MayBeSpecified, group.GetOptionNamesAsString());
+							ReportError(ParseErrorCodes.IllegalCardinality, CommandLineStrings.OnlyOneOfTheOptions0MayBeSpecified, group.GetOptionNamesAsString());
 						}
 						break;
 					case OptionGroupRequirement.All:
@@ -646,13 +836,17 @@ public sealed class CommandLineParser : IDisposable
 	public void SetEscapeCharacters(SCG.IEnumerable<char> characters)
 	{
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException("Escape characters may not be set while parsing");
+		}
 
 		foreach (char ch in characters)
 		{
 			if (char.IsWhiteSpace(ch) || char.IsLetterOrDigit(ch))
+			{
 				throw new ArgumentException(string.Format(CultureInfo.CurrentUICulture,
 					"Character '{0}' may not be used as an escape character; only characters not considered white space, letters or digits may be used.", ch));
+			}
 		}
 
 		mEscapeCharacters.Clear();
@@ -675,7 +869,9 @@ public sealed class CommandLineParser : IDisposable
 		ArgumentNullException.ThrowIfNull(quotationInfo);
 
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException("Quotation information must not be changed while parse in progress");
+		}
 
 		mQuotations.UpdateOrAdd(quotationInfo.QuotationMark, quotationInfo);
 	}
@@ -688,7 +884,9 @@ public sealed class CommandLineParser : IDisposable
 	public void RemoveQuotation(char quotationMark)
 	{
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException("Quotation information must not be changed while parse in progress");
+		}
 
 		mQuotations.Remove(quotationMark);
 	}
@@ -700,7 +898,9 @@ public sealed class CommandLineParser : IDisposable
 	public void ClearQuotations()
 	{
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException("Quotation information must not be changed while parse in progress");
+		}
 
 		mQuotations.Clear();
 	}
@@ -720,7 +920,9 @@ public sealed class CommandLineParser : IDisposable
 	public void AddAssignmentCharacter(char assignmentCharacter, OptionStyles targetStyles)
 	{
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException(CommandLineStrings.AssignmentCharactersMustNotBeChangedWhileParseInProgress);
+		}
 
 		mAssignmentCharacters.UpdateOrAdd(assignmentCharacter, targetStyles);
 	}
@@ -733,7 +935,9 @@ public sealed class CommandLineParser : IDisposable
 	public void RemoveAssignmentCharacter(char assignmentCharacter)
 	{
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException(CommandLineStrings.AssignmentCharactersMustNotBeChangedWhileParseInProgress);
+		}
 
 		mAssignmentCharacters.Remove(assignmentCharacter);
 	}
@@ -744,7 +948,9 @@ public sealed class CommandLineParser : IDisposable
 	public void ClearAssignmentCharacters()
 	{
 		if (mIsParsing)
+		{
 			throw new InvalidOperationException(CommandLineStrings.AssignmentCharactersMustNotBeChangedWhileParseInProgress);
+		}
 
 		mAssignmentCharacters.Clear();
 	}
@@ -758,7 +964,9 @@ public sealed class CommandLineParser : IDisposable
 	public QuotationInfo? GetQuotationInfo(char quotationMark)
 	{
 		if (!mQuotations.Find(ref quotationMark, out QuotationInfo quotationInfo))
+		{
 			return null;
+		}
 		return quotationInfo;
 	}
 
@@ -772,7 +980,7 @@ public sealed class CommandLineParser : IDisposable
 
 	#endregion
 
-	#region Private methods
+	#region Private Methods
 
 	/// <summary>
 	/// Matches an option file on the command line, creates a new lexer for that file and pushes
@@ -795,8 +1003,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 		catch (FileNotFoundException)
 		{
-			ReportError(ParseErrorCodes.FileNotFound, CommandLineStrings.FileNotFound0,
-				fileToken.FileName);
+			ReportError(ParseErrorCodes.FileNotFound, CommandLineStrings.FileNotFound0, fileToken.FileName);
 		}
 		catch (ArgumentException)
 		{
@@ -804,8 +1011,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 		catch (DirectoryNotFoundException)
 		{
-			ReportError(ParseErrorCodes.FileNotFound, CommandLineStrings.TheSpecifiedPath0IsInvalid,
-				fileToken.FileName);
+			ReportError(ParseErrorCodes.FileNotFound, CommandLineStrings.TheSpecifiedPath0IsInvalid, fileToken.FileName);
 		}
 		catch (UnauthorizedAccessException)
 		{
@@ -835,7 +1041,9 @@ public sealed class CommandLineParser : IDisposable
 
 			// Skip an assignment token and value if it follows
 			if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+			{
 				SkipTokens(2);
+			}
 
 			return;
 		}
@@ -845,23 +1053,23 @@ public sealed class CommandLineParser : IDisposable
 		{
 			if (prohibiter.SetCount > 0)
 			{
-				ReportOptionError(ParseErrorCodes.OptionProhibited, optionNameToken.Text,
-					CommandLineStrings.Option0MayNotBeSpecifiedTogetherWithOption1, option.Name,
-					prohibiter.Name);
+				ReportOptionError(ParseErrorCodes.OptionProhibited, optionNameToken.Text, CommandLineStrings.Option0MayNotBeSpecifiedTogetherWithOption1, option.Name, prohibiter.Name);
 
 				// Skip any assignment following this option
 				if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+				{
 					SkipTokens(2);
+				}
 				else if (option.AcceptsValue && LA1 != null && LA1.TokenType == Token.TokenTypes.ValueToken)
+				{
 					SkipTokens(1);
+				}
 				return;
 			}
 		}
 
-
 		// Determine whether we need an assignment token 
-		if (option.RequireExplicitAssignment && !option.HasDefaultValue &&
-			(LA1 == null || LA1.TokenType != Token.TokenTypes.AssignmentToken))
+		if (option.RequireExplicitAssignment && !option.HasDefaultValue && (LA1 == null || LA1.TokenType != Token.TokenTypes.AssignmentToken))
 		{
 			ReportOptionError(ParseErrorCodes.MissingValue, optionNameToken.Text, CommandLineStrings.MissingRequiredValueForOption0, option.Name);
 			// Increase SetCount to avoid additional error about this option not being specified
@@ -887,7 +1095,9 @@ public sealed class CommandLineParser : IDisposable
 		// Now we know that any value that follows should be assigned to this token, so we skip any 
 		// following assignment token
 		if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+		{
 			SkipTokens(1);
+		}
 
 		// Determine whether we require a value
 		if (option.RequiresValue && (LA1 == null || LA1.TokenType != Token.TokenTypes.ValueToken))
@@ -901,7 +1111,9 @@ public sealed class CommandLineParser : IDisposable
 		if (option.IsBooleanType && option.BoolFunction != BoolFunction.Value)
 		{
 			if (!CheckMaxOccurs(optionNameToken, option))
+			{
 				return;
+			}
 			switch (option.BoolFunction)
 			{
 				case BoolFunction.TrueIfPresent:
@@ -929,7 +1141,9 @@ public sealed class CommandLineParser : IDisposable
 		{
 			ValueToken valueToken = (ValueToken)GetNextToken()!;
 			if (!CheckMaxOccurs(optionNameToken, option))
+			{
 				return;
+			}
 
 			try
 			{
@@ -947,19 +1161,18 @@ public sealed class CommandLineParser : IDisposable
 						throw tie.InnerException;
 					}
 					else
+					{
 						throw;
+					}
 				}
 			}
 			catch (FormatException)
 			{
-				ReportOptionError(ParseErrorCodes.InvalidFormat, option.Name,
-					CommandLineStrings.InvalidValue0ForOption1, valueToken.Value, option.Name);
+				ReportOptionError(ParseErrorCodes.InvalidFormat, option.Name, CommandLineStrings.InvalidValue0ForOption1, valueToken.Value, option.Name);
 			}
 			catch (OverflowException)
 			{
-				ReportOptionError(ParseErrorCodes.Overflow, option.Name,
-					CommandLineStrings.ValueFor03OutOfRangeExpectedNumericBetween1And2,
-					option.Name, option.MinValue, option.MaxValue, valueToken.Value);
+				ReportOptionError(ParseErrorCodes.Overflow, option.Name, CommandLineStrings.ValueFor03OutOfRangeExpectedNumericBetween1And2, option.Name, option.MinValue, option.MaxValue, valueToken.Value);
 			}
 			catch (InvalidEnumerationValueException)
 			{
@@ -973,8 +1186,8 @@ public sealed class CommandLineParser : IDisposable
 				bool hasNext = iter.MoveNext();
 				while (hasNext)
 				{
-					string currentValue = iter.Current;
-					hasNext = iter.MoveNext();
+					string currentValue	= iter.Current;
+					hasNext				= iter.MoveNext();
 
 					if (hasNext)
 					{
@@ -987,23 +1200,22 @@ public sealed class CommandLineParser : IDisposable
 						validValues.Append(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.LastItemOfExclusiveList, currentValue));
 					}
 				}
-				ReportOptionError(ParseErrorCodes.InvalidFormat, option.Name,
-					CommandLineStrings.InvalidValue0ForOption1TheValueMustBeOneOf2,
-					valueToken.Value, option.Name, validValues.ToString());
+				ReportOptionError(ParseErrorCodes.InvalidFormat, option.Name, CommandLineStrings.InvalidValue0ForOption1TheValueMustBeOneOf2, valueToken.Value, option.Name, validValues.ToString());
 			}
 			catch (InvalidOptionValueException iove)
 			{
 				StringBuilder errorMessage = new();
 				if (iove.InlcudeDefaultMessage)
 				{
-					errorMessage.Append(String.Format(CultureInfo.CurrentUICulture, "The value \"{0}\" is not valid for option \"{1}\"",
-						valueToken.Value, option.Name));
+					errorMessage.Append(String.Format(CultureInfo.CurrentUICulture, "The value \"{0}\" is not valid for option \"{1}\"", valueToken.Value, option.Name));
 				}
 
 				if (!String.IsNullOrEmpty(iove.Message))
 				{
 					if (iove.InlcudeDefaultMessage)
+					{
 						errorMessage.Append("; ");
+					}
 
 					errorMessage.Append(iove.Message);
 				}
@@ -1024,15 +1236,11 @@ public sealed class CommandLineParser : IDisposable
 		{
 			if (option.MaxOccurs == 1)
 			{
-				ReportOptionError(ParseErrorCodes.IllegalCardinality, optionNameToken.Text,
-					CommandLineStrings.Option0MustNotBeSpecifiedMultipleTimes, option.Name);
-
+				ReportOptionError(ParseErrorCodes.IllegalCardinality, optionNameToken.Text, CommandLineStrings.Option0MustNotBeSpecifiedMultipleTimes, option.Name);
 			}
 			else
 			{
-				ReportOptionError(ParseErrorCodes.IllegalCardinality, optionNameToken.Text,
-					CommandLineStrings.Option0MustNotBeSpecifiedMoreThan1Times, option.Name,
-					option.MaxOccurs);
+				ReportOptionError(ParseErrorCodes.IllegalCardinality, optionNameToken.Text, CommandLineStrings.Option0MustNotBeSpecifiedMoreThan1Times, option.Name, option.MaxOccurs);
 			}
 			return false;
 		}
@@ -1049,7 +1257,13 @@ public sealed class CommandLineParser : IDisposable
 	private void ReportOptionError(ParseErrorCodes errorCode, string? optionName, string message, params object?[] paramList)
 	{
 		string formattedMessage = String.Format(CultureInfo.CurrentUICulture, message, paramList);
-		ErrorInfo error = new(errorCode, formattedMessage, optionName, CurrentFile, CurrentLexer == null ? null : (CurrentFile == null ? null : (int?)CurrentLexer.CurrentLine));
+		ErrorInfo error = new(
+			errorCode,
+			formattedMessage,
+			optionName,
+			CurrentFile,
+			CurrentLexer == null ? null : (CurrentFile == null ? null : (int?)CurrentLexer.CurrentLine)
+		);
 		mErrors.Add(error);
 	}
 
@@ -1071,44 +1285,8 @@ public sealed class CommandLineParser : IDisposable
 	/// <returns>true if all the specified tokens were skipped, or false if the end of stream was reached before.</returns>
 	private bool SkipTokens(int count)
 	{
-		while (count-- > 0 && GetNextToken() != null)
-			;
+		while (count-- > 0 && GetNextToken() != null);
 		return count == 0;
-	}
-
-	/// <summary>
-	/// Gets the next token that will be read by the current lexer, or null if no more tokens are available
-	/// from the current lexer.
-	/// </summary>
-	/// <value>the next token that will be read by the current lexer, or null if no more tokens are available
-	/// from the current lexer.</value>
-	/// <remarks>This will not remove the token from the buffer, but rather works as a peek.</remarks>
-	private Token? LA1
-	{
-		get
-		{
-			try
-			{
-				Debug.Assert(CurrentLexer != null);
-				LA1Token ??= CurrentLexer.GetNextToken();
-			}
-			catch (MissingClosingQuoteException)
-			{
-				ReportError(ParseErrorCodes.MissingClosingQuote, CommandLineStrings.MissingClosingQuoteForQuotedValue);
-				// No more tokes will be available after this message, (since the lexer parsed
-				// to the end of input). So we leave mLA1Token at null.
-			}
-			catch (MissingOptionNameException)
-			{
-				ReportError(ParseErrorCodes.EmptyOptionName, CommandLineStrings.EmptyOptionNameIsNotAllowed);
-				// Since an empty option name is not allowed, we discard it
-				// This if statement is only to make the recursive call happen. We need to 
-				// use the value of LA1 somehow to call it.
-				if (LA1 == null)
-					return null;
-			}
-			return LA1Token;
-		}
 	}
 
 	/// <summary>
@@ -1120,56 +1298,6 @@ public sealed class CommandLineParser : IDisposable
 		Token? returnToken = LA1;
 		LA1Token = null;
 		return returnToken;
-	}
-
-	/// <summary>
-	/// Gets the current lexer.
-	/// </summary>
-	/// <value>The current lexer or null if there are no lexers.</value>
-	private Lexer? CurrentLexer
-	{
-		get
-		{
-			if (mLexerStack.IsEmpty)
-				return null;
-			return mLexerStack[^1].Lexer;
-		}
-	}
-
-	/// <summary>
-	/// Gets the current file being read by the lexer.
-	/// </summary>
-	/// <value>The current file being read by the current lexer, or a null reference if no file is being read.</value>
-	private string? CurrentFile
-	{
-		get
-		{
-			if (CurrentLexer == null)
-				return null;
-			return mLexerStack[^1].FileName;
-		}
-	}
-
-	/// <summary>
-	/// Gets or sets the lookahead token.
-	/// </summary>
-	/// <value>The lookahead token.</value>
-	/// <remarks>This method should not be used by any method other than <see cref="LA1"/>. Use <see cref="LA1"/> instead.</remarks>
-	private Token? LA1Token
-	{
-		get
-		{
-			if (mLexerStack.IsEmpty)
-				return null;
-
-			return mLexerStack[^1].LA1Token;
-		}
-
-		set
-		{
-			Debug.Assert(!mLexerStack.IsEmpty);
-			mLexerStack[^1].LA1Token = value;
-		}
 	}
 
 	/// <summary>
@@ -1207,188 +1335,12 @@ public sealed class CommandLineParser : IDisposable
 			mEscapeCharacters.Dispose();
 			mRemainingArguments.Dispose();
 			if (mLexerStack is ArrayList<LexerStackRecord> list)
+			{
 				list.Dispose();
+			}
 			mOptionGroups.Dispose();
 		}
 	}
-
-	#endregion
-
-	#region Private classes
-
-	/// <summary>
-	/// Comparer implementing compareres for collections keyed by <see cref="OptionGroup"/> or 
-	/// strings. The comparisons will be case-sensitive or case-insensitive depending on the 
-	/// flag passed to the constructor.
-	/// </summary>
-	private class OptionNameComparer(bool isCaseSensitive) :
-		SCG.IComparer<OptionGroup>, SCG.IEqualityComparer<OptionGroup>,
-		SCG.IComparer<string>, SCG.IEqualityComparer<string>
-	{
-		public bool IsCaseSensitive
-		{
-			get { return mIsCaseSensitive; }
-		}
-
-		#region IComparer<OptionGroup> Members
-
-		public int Compare(OptionGroup? x, OptionGroup? y)
-		{
-			ArgumentNullException.ThrowIfNull(x);
-
-			ArgumentNullException.ThrowIfNull(y);
-
-			return String.Compare(x.Id, y.Id, !mIsCaseSensitive, CultureInfo.CurrentUICulture);
-		}
-
-		#endregion
-
-		#region IEqualityComparer<OptionGroup> Members
-
-		public bool Equals(OptionGroup? x, OptionGroup? y)
-		{
-			return Compare(x, y) == 0;
-		}
-
-		public int GetHashCode(OptionGroup obj)
-		{
-			ArgumentNullException.ThrowIfNull(obj);
-
-			return mIsCaseSensitive ? obj.Id.GetHashCode() : obj.Id.ToUpper(CultureInfo.CurrentUICulture).GetHashCode();
-		}
-
-		#endregion
-
-		#region IComparer<string> Members
-
-		public int Compare(string? x, string? y)
-		{
-			return String.Compare(x, y, !mIsCaseSensitive, CultureInfo.CurrentUICulture);
-		}
-
-		#endregion
-
-		#region IEqualityComparer<string> Members
-
-		public bool Equals(string? x, string? y)
-		{
-			return Compare(x, y) == 0;
-		}
-
-		public int GetHashCode(string obj)
-		{
-			ArgumentNullException.ThrowIfNull(obj);
-
-			return mIsCaseSensitive ? obj.GetHashCode() : obj.ToUpper(CultureInfo.CurrentUICulture).GetHashCode();
-		}
-
-		#endregion
-
-		private readonly bool mIsCaseSensitive = isCaseSensitive;
-	}
-
-
-	#endregion
-
-	#region Private fields
-
-	/// <summary>
-	/// The stack of lexers. This is used when file arguments are processed on the command line, in which case a new 
-	/// lexer is created and pushed onto the stack so parsing will continue from that lexer instead. The current
-	/// lexer is the one on the top of the stack.
-	/// </summary>
-	private readonly ArrayList<LexerStackRecord> mLexerStack = [];
-
-	/// <summary>
-	/// The option manager, i.e. the object used for storing the values of the options read. Supplied by the 
-	/// user.
-	/// </summary>
-	private readonly object mOptionManager;
-
-	/// <summary>
-	/// Dictionary mapping option names to the corresponding <see cref="Option"/> or <see cref="OptionAlias"/> object.
-	/// </summary>
-	private readonly TreeDictionary<string, IOption> mOptions;
-
-	/// <summary>
-	/// Set containing all defined option groups.
-	/// </summary>
-	private readonly TreeSet<OptionGroup> mOptionGroups;
-
-	/// <summary>
-	/// The comparer to be used for comparing option names. This is either case sensitive, or case insensitive 
-	/// depending on what was specified in the <see cref="CommandLineManagerAttribute"/> of the 
-	/// command line manager.
-	/// </summary>
-	private readonly OptionNameComparer mOptionNameComparer;
-
-	private string mApplicationName;
-	private string mApplicationVersion;
-	private readonly string mApplicationCopyright;
-	private string mApplicationDescription;
-
-	/// <summary>
-	/// The option styles enabled for this parser.
-	/// </summary>
-	private readonly OptionStyles mEnabledOptionStyles;
-
-	/// <summary>
-	/// <see cref="NumberFormatInfo"/> dictating how numeric values should be parsed.
-	/// </summary>
-	readonly NumberFormatInfo mNumberFormatInfo;
-
-	/// <summary>
-	/// The name of the executable file from the command line, or null if none was available.
-	/// </summary>
-	private string mExecutable = string.Empty;
-
-	/// <summary>
-	/// The list of the remaining arguments, i.e. those that were not options or values assigned to options.
-	/// </summary>
-	private readonly ArrayList<string> mRemainingArguments = [];
-
-	/// <summary>
-	/// The list of errors.
-	/// </summary>
-	private readonly HashSet<ErrorInfo> mErrors = [];
-
-	/// <summary>
-	/// The escape characters available to this parser.
-	/// </summary>
-	private readonly ArrayList<char> mEscapeCharacters = [];
-
-	/// <summary>
-	/// Dictionary mapping quotation marks to <see cref="QuotationInfo"/> objects describing what
-	/// characters may be escaped within those quotes.
-	/// </summary>
-	private readonly HashDictionary<char, QuotationInfo> mQuotations = [];
-
-	/// <summary>
-	/// Dictionary mapping assignemnt characters to the option styles for which they are enabled.
-	/// </summary>
-	private readonly HashDictionary<char, OptionStyles> mAssignmentCharacters = [];
-
-	/// <summary>
-	/// Separators that may be used for separating values in strings that may contain several values, such as 
-	/// the Aliases or Prohibits attributes of <see cref="CommandLineOptionAttribute"/>.
-	/// </summary>
-	private static readonly char [] mSeparators = [' ', ',', ';'];
-
-	/// <summary>
-	/// The default escape characters.
-	/// </summary>
-	private static readonly char[] mDefaultEscapeCharacters = ['\\'];
-
-	/// <summary>
-	/// Value indicating whether we are currently parsing.
-	/// </summary>
-	private bool mIsParsing;
-
-	/// <summary>
-	/// Contains the object describing the command line options and groups for the option manager associated
-	/// with this parser. It will be null before such an object is generated (upon request)
-	/// </summary>
-	private UsageInfo? mUsageDescription;
 
 	#endregion
 }

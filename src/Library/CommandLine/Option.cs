@@ -231,7 +231,7 @@ internal class Option : IOption
 			mRequireExplicitAssignment = objectAttr.RequireExplicitAssignment;
 		}
 
-		// Make sure the type of the field, property or method is supported
+		// Make sure the type of the field, property, or method is supported.
 		if (!IsTypeSupported(mOptionType))
 		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), mMember, "Unsupported type for command line option.");
@@ -452,7 +452,15 @@ internal class Option : IOption
 	/// Gets a value indicating whether a value may be assigned to this option.
 	/// </summary>
 	/// <value><c>true</c> if a value may be assigned to this option; otherwise, <c>false</c>.</value>
-	public bool AcceptsValue { get => GetBaseType(mOptionType) != typeof(bool) || BoolFunction == BoolFunction.Value; }
+	public bool AcceptsValue
+	{
+		get
+		{
+			return	(GetBaseType(mOptionType) != typeof(bool) && 
+					 GetBaseType(mOptionType) != typeof(bool?)) ||
+					 BoolFunction == BoolFunction.Value;
+		}
+	}
 
 	/// <summary>
 	/// Gets a value indicating whether this instance has default value.
@@ -468,7 +476,14 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is boolean type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsBooleanType { get => GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false; }
+	public bool IsBooleanType
+	{
+		get
+		{
+			return	(GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false) ||
+					(GetBaseType(mOptionType)?.Equals(typeof(bool?)) ?? false);
+		}
+	}
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is an alias.
@@ -718,18 +733,31 @@ internal class Option : IOption
 
 		return
 			baseType.Equals(typeof(bool)) ||
+			baseType.Equals(typeof(bool?)) ||
 			baseType.Equals(typeof(byte)) ||
+			baseType.Equals(typeof(byte?)) ||
 			baseType.Equals(typeof(sbyte)) ||
+			baseType.Equals(typeof(sbyte?)) ||
 			baseType.Equals(typeof(char)) ||
+			baseType.Equals(typeof(char?)) ||
 			baseType.Equals(typeof(decimal)) ||
+			baseType.Equals(typeof(decimal?)) ||
 			baseType.Equals(typeof(double)) ||
+			baseType.Equals(typeof(double?)) ||
 			baseType.Equals(typeof(float)) ||
+			baseType.Equals(typeof(float?)) ||
 			baseType.Equals(typeof(int)) ||
+			baseType.Equals(typeof(int?)) ||
 			baseType.Equals(typeof(uint)) ||
+			baseType.Equals(typeof(uint?)) ||
 			baseType.Equals(typeof(long)) ||
+			baseType.Equals(typeof(long?)) ||
 			baseType.Equals(typeof(ulong)) ||
+			baseType.Equals(typeof(ulong?)) ||
 			baseType.Equals(typeof(short)) ||
+			baseType.Equals(typeof(short?)) ||
 			baseType.Equals(typeof(ushort)) ||
+			baseType.Equals(typeof(ushort?)) ||
 			baseType.Equals(typeof(string)) ||
 			baseType.IsEnum;
 	}
@@ -779,9 +807,44 @@ internal class Option : IOption
 		return value;
 	}
 
+	/// <summary>
+	/// Checks if an object is of the an acceptable type.  Performs additional checks to allow for Nullable objects to be
+	/// equal to their non-nullable underlying type.  Allows strings to pass.
+	/// 
+	/// 
+	/// That is:
+	/// typeof(bool) == typeof(bool?) is considered true.
+	/// </summary>
+	/// <param name="value">Object to check.</param>
+	/// <param name="type">Type to check against.</param>
+	/// <returns>True of the object is considered of type input type, false otherwise.</returns>
+	private bool IsObjectOfType(object value, Type type)
+	{
+		Type valueType = value.GetType();
+
+		// Strings always pass.
+		if (valueType == typeof(string))
+		{
+			return true;
+		}
+
+		if (type.IsGenericType)
+		{
+			// Check if we have a generic nullable.
+			if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				// Test to consider nullables equal to the underlying type.
+				// typeof(bool) == typeof(bool?) will be true for our purposes.
+				return valueType == Nullable.GetUnderlyingType(type);
+			}
+		}
+
+		return valueType == GetBaseType(mOptionType);
+	}
+
 	private object ConvertValueTypeForSetOperation(object value)
 	{
-		Debug.Assert(value.GetType() == typeof(string) || value.GetType() == GetBaseType(mOptionType));
+		Debug.Assert(IsObjectOfType(value, mOptionType));
 
 		ArgumentNullException.ThrowIfNull(value);
 
@@ -803,13 +866,28 @@ internal class Option : IOption
 				}
 				return Enum.Parse(type, stringValue, true);
 			}
-			else if (type.Equals(typeof(bool)))
+			else if (type.Equals(typeof(bool)) || type.Equals(typeof(bool?)))
 			{
 				return bool.Parse(stringValue);
 			}
-			else // We have a numerical type
+			else if (type.Equals(typeof(char)) || type.Equals(typeof(char?)))
 			{
-				object? returnValue = type.InvokeMember("Parse", BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod, null, null, [value, mNumberFormatInfo], CultureInfo.CurrentUICulture);
+				if (stringValue.Length > 1)
+				{
+					throw new InvalidOptionValueException("Character options must be a single character.");
+				}
+				return char.Parse(stringValue);
+			}
+			else // We have a numerical type.
+			{
+				// For nullable types, we don't want to parse by the nullable type, we want to parse by the underlying type.
+				Type? parseType = type;
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					parseType = Nullable.GetUnderlyingType(type);
+					Debug.Assert(parseType != null);
+				}
+				object? returnValue = parseType.InvokeMember("Parse", BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod, null, null, [value, mNumberFormatInfo], CultureInfo.CurrentUICulture);
 				Debug.Assert(returnValue != null);
 				return returnValue;
 			}
