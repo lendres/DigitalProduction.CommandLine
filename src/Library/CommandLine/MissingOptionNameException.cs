@@ -44,8 +44,8 @@ public class MissingOptionNameException : ParseException
 	/// <summary>
 	/// Initializes a new instance of the <see cref="MissingOptionNameException"/> class.
 	/// </summary>
-	public MissingOptionNameException()
-		: base(CommandLineStrings.DefaultMissingOptionNameExceptionMessage)
+	public MissingOptionNameException() :
+		base(CommandLineStrings.DefaultMissingOptionNameExceptionMessage)
 	{
 	}
 
@@ -53,8 +53,8 @@ public class MissingOptionNameException : ParseException
 	/// Initializes a new instance of the <see cref="MissingOptionNameException"/> class.
 	/// </summary>
 	/// <param name="message">The message.</param>
-	public MissingOptionNameException(string message)
-		: base(message)
+	public MissingOptionNameException(string message) :
+		base(message)
 	{
 	}
 
@@ -63,8 +63,8 @@ public class MissingOptionNameException : ParseException
 	/// </summary>
 	/// <param name="message">The message.</param>
 	/// <param name="innerException">The inner exception.</param>
-	public MissingOptionNameException(string message, Exception innerException)
-		: base(message, innerException)
+	public MissingOptionNameException(string message, Exception innerException) :
+		base(message, innerException)
 	{
 	}
 }

@@ -45,7 +45,7 @@ namespace DigitalProduction.CommandLine;
 /// for setting and getting values of the option manager object used by the parser.</remarks>
 internal class Option : IOption
 {
-	#region Private fields
+	#region Private Fields
 
 	/// <summary>
 	/// Counts the number of times the value was set for this option
@@ -578,7 +578,7 @@ internal class Option : IOption
 
 	#endregion
 
-	#region Public methods
+	#region Public Methods
 
 	/// <summary>
 	/// Sets this option to its default value.
@@ -600,7 +600,7 @@ internal class Option : IOption
 
 	#endregion
 
-	#region Private methods
+	#region Private Methods
 
 	private static void AppendToCollection(object collection, object value)
 	{

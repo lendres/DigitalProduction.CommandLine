@@ -117,7 +117,7 @@ public class ErrorInfo
 
 	#endregion
 
-	#region Public methods
+	#region Public Methods
 
 	/// <summary>
 	/// Determines whether the specified <see cref="T:System.Object"></see> is equal to the current <see cref="T:System.Object"></see>.

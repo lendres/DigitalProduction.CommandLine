@@ -37,117 +37,49 @@ internal interface IOption
 {
 	#region Public Properties
 
-	object Value
-	{
-		set;
-	}
+	object Value { set; }
 
-	bool RequiresValue
-	{
-		get;
-	}
+	bool RequiresValue { get; }
 
-	bool RequireExplicitAssignment
-	{
-		get;
-		set;
-	}
+	bool RequireExplicitAssignment { get; set; }
 
-	ICollection<Option> ProhibitedBy
-	{
-		get;
-	}
+	ICollection<Option> ProhibitedBy { get; }
 
-	OptionGroup? Group
-	{
-		get;
-	}
+	OptionGroup? Group { get; }
 
-	string Name
-	{
-		get;
-	}
+	string Name { get; }
 
-	BoolFunction BoolFunction
-	{
-		get;
-	}
+	BoolFunction BoolFunction { get; }
 
-	int MaxOccurs
-	{
-		get;
-	}
+	int MaxOccurs { get; }
 
-	int MinOccurs
-	{
-		get;
-	}
+	int MinOccurs { get; }
 
-	string Description
-	{
-		get;
-	}
+	string Description { get; }
+	
+	int SetCount { get; set; }
 
-	int SetCount
-	{
-		get;
-		set;
-	}
+	bool AcceptsValue { get; }
 
-	bool AcceptsValue
-	{
-		get;
-	}
+	bool HasDefaultValue { get; }
 
-	bool HasDefaultValue
-	{
-		get;
-	}
+	bool IsBooleanType { get; }
 
-	bool IsBooleanType
-	{
-		get;
-	}
+	bool IsAlias { get; }
 
-	bool IsAlias
-	{
-		get;
-	}
+	Option DefiningOption { get; }
 
-	Option DefiningOption
-	{
-		get;
-	}
+	bool IsIntegralType { get; }
 
-	bool IsIntegralType
-	{
-		get;
-	}
+	bool IsFloatingPointType { get; }
 
-	bool IsFloatingPointType
-	{
-		get;
-	}
+	bool IsDecimalType { get; }
 
-	bool IsDecimalType
-	{
-		get;
-	}
+	bool IsNumericalType { get; }
 
-	bool IsNumericalType
-	{
-		get;
-	}
+	object? MinValue { get; }
 
-	object? MinValue
-	{
-		get;
-	}
-
-	object? MaxValue
-	{
-		get;
-	}
+	object? MaxValue { get; }
 
 	#endregion
 

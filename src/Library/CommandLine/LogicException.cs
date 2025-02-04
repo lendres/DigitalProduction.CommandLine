@@ -43,8 +43,8 @@ public class LogicException : Exception
 	/// <summary>
 	/// Initializes a new instance of the <see cref="LogicException"/> class.
 	/// </summary>
-	public LogicException()
-		: base()
+	public LogicException() :
+		base()
 	{
 	}
 
@@ -52,8 +52,8 @@ public class LogicException : Exception
 	/// Initializes a new instance of the <see cref="LogicException"/> class.
 	/// </summary>
 	/// <param name="message">The message.</param>
-	public LogicException(string message)
-		: base(message)
+	public LogicException(string message) :
+		base(message)
 	{
 	}
 
@@ -62,8 +62,8 @@ public class LogicException : Exception
 	/// </summary>
 	/// <param name="message">The message.</param>
 	/// <param name="innerException">The inner exception.</param>
-	public LogicException(string message, Exception innerException)
-		: base(message, innerException)
+	public LogicException(string message, Exception innerException) :
+		base(message, innerException)
 	{
 	}
 }

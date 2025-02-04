@@ -33,15 +33,9 @@ namespace DigitalProduction.CommandLine;
 
 internal class OptionAlias(string aliasName, Option definingOption) : IOption
 {
-	public object Value
-	{
-		set { mDefiningOption.Value = value; }
-	}
+	public object Value { set => mDefiningOption.Value = value; }
 
-	public bool RequiresValue
-	{
-		get { return mDefiningOption.RequiresValue; }
-	}
+	public bool RequiresValue { get => mDefiningOption.RequiresValue; }
 
 	public bool RequireExplicitAssignment
 	{

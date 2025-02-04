@@ -43,8 +43,8 @@ public class MissingClosingQuoteException : ParseException
 	/// <summary>
 	/// Initializes a new instance of the <see cref="MissingClosingQuoteException"/> class.
 	/// </summary>
-	public MissingClosingQuoteException()
-		: base(CommandLineStrings.MissingClosingQuote)
+	public MissingClosingQuoteException() :
+		base(CommandLineStrings.MissingClosingQuote)
 	{
 	}
 
@@ -52,8 +52,8 @@ public class MissingClosingQuoteException : ParseException
 	/// Initializes a new instance of the <see cref="MissingClosingQuoteException"/> class.
 	/// </summary>
 	/// <param name="message">The message.</param>
-	public MissingClosingQuoteException(string message)
-		: base(message)
+	public MissingClosingQuoteException(string message) :
+		base(message)
 	{
 	}
 
@@ -62,8 +62,8 @@ public class MissingClosingQuoteException : ParseException
 	/// </summary>
 	/// <param name="message">The message.</param>
 	/// <param name="innerException">The inner exception.</param>
-	public MissingClosingQuoteException(string message, Exception innerException)
-		: base(message, innerException)
+	public MissingClosingQuoteException(string message, Exception innerException) :
+		base(message, innerException)
 	{
 	}
 }
