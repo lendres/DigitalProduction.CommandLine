@@ -74,10 +74,4 @@
 	  <ProjectReference Include="..\Library\DigitalProduction.CommandLine.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <MauiXaml Update="Pages\SecondPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
-
 </Project>
