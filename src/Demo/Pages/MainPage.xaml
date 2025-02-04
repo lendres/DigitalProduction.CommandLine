@@ -12,7 +12,7 @@
             Spacing="25">
             <Image
                 Source="dotnet_bot.png"
-                HeightRequest="100"
+                HeightRequest="150"
                 Aspect="AspectFit"
                 SemanticProperties.Description="dot net bot in a hovercraft number nine" />
 
@@ -28,34 +28,34 @@
 			<Grid
 				RowDefinitions="Auto,Auto"
 				RowSpacing="8"
-				ColumnDefinitions="400,200"
+				ColumnDefinitions="240,300"
 				ColumnSpacing="8"
 				WidthRequest="500">
 
 				<Label
 					Grid.Row="0" Grid.Column="0"
 					Text="File Command Line:"
-					Style="{StaticResource Headline}" />
+					Style="{StaticResource SubHeadline}" />
 
 				<Label
 					Grid.Row="0" Grid.Column="1"
 					Text="{Binding FileName}"
-					Style="{StaticResource Headline}" />
+					Style="{StaticResource SubHeadline}" />
 
 				<Label
 					Grid.Row="1" Grid.Column="0"
 					Text="Run Command Line:"
-					Style="{StaticResource Headline}" />
+					Style="{StaticResource SubHeadline}" />
 
 				<Label
 					Grid.Row="1" Grid.Column="1"
 					Text="{Binding Run}"
-					Style="{StaticResource Headline}" />
+					Style="{StaticResource SubHeadline}" />
 			</Grid>
-			<Button
+			<!--<Button
                 Text="Navigate to Second Page" 
                 Clicked="OnNavigateForward"
-                HorizontalOptions="Fill" />
+                HorizontalOptions="Fill" />-->
         </VerticalStackLayout>
     </ScrollView>
 
