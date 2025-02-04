@@ -26,14 +26,7 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: ValueToken.cs 3 2007-07-29 13:32:10Z palotas $
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
-
 namespace DigitalProduction.CommandLine;
 
 /// <summary>
@@ -46,15 +39,9 @@ namespace DigitalProduction.CommandLine;
 /// <param name="value">The value.</param>
 internal class ValueToken(string value) : Token(TokenTypes.ValueToken, value)
 {
-
 	/// <summary>
 	/// Gets the value.
 	/// </summary>
 	/// <value>The value.</value>
-	public string Value
-	{
-		get { return mValue; }
-	}
-
-	readonly string mValue = value;
+	public string Value { get; } = value;
 }

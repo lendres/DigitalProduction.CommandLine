@@ -26,11 +26,8 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: ParseException.cs 3 2007-07-29 13:32:10Z palotas $
  */
 using System;
-using System.Runtime.Serialization;
 
 namespace DigitalProduction.CommandLine;
 
@@ -44,8 +41,8 @@ public abstract class ParseException : Exception
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ParseException"/> class.
 	/// </summary>
-	protected ParseException()
-		: base(CommandLineStrings.DefaultCommandLineExceptionErrorMessage)
+	protected ParseException() :
+		base(CommandLineStrings.DefaultCommandLineExceptionErrorMessage)
 	{
 	}
 
@@ -53,8 +50,8 @@ public abstract class ParseException : Exception
 	/// Initializes a new instance of the <see cref="ParseException"/> class.
 	/// </summary>
 	/// <param name="message">The message.</param>
-	protected ParseException(string message)
-		: base(message)
+	protected ParseException(string message) :
+		base(message)
 	{
 	}
 
@@ -63,8 +60,8 @@ public abstract class ParseException : Exception
 	/// </summary>
 	/// <param name="message">The message.</param>
 	/// <param name="innerException">The inner exception.</param>
-	protected ParseException(string message, Exception innerException)
-		: base(message, innerException)
+	protected ParseException(string message, Exception innerException) :
+		base(message, innerException)
 	{
 	}
 }

@@ -26,12 +26,7 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: Token.cs 3 2007-07-29 13:32:10Z palotas $
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 
 namespace DigitalProduction.CommandLine;
@@ -41,7 +36,7 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 internal class Token
 {
-	#region Public types
+	#region Public Types
 
 	/// <summary>
 	/// Represents the various token types
@@ -52,23 +47,28 @@ internal class Token
 		/// A token of type <see cref="ValueToken"/>
 		/// </summary>
 		ValueToken,
+
 		/// <summary>
 		/// A token of type <see cref="AssignmentToken"/>
 		/// </summary>
 		AssignmentToken,
+
 		/// <summary>
 		/// A token of type <see cref="OptionNameToken"/>
 		/// </summary>
 		OptionNameToken,
+
 		/// <summary>
 		/// A token of type <see cref="EndToken"/>
 		/// </summary>
 		EndToken,
+
 		/// <summary>
 		/// A token of type <see cref="OptionFileToken"/>
 		/// </summary>
 		OptionFileToken
 	}
+
 	#endregion
 
 	#region Constructor
@@ -81,30 +81,25 @@ internal class Token
 	public Token(TokenTypes tokenType, string text)
 	{
 		Debug.Assert(text != null);
-		mTokenType = tokenType;
-		mText = text;
+		TokenType	= tokenType;
+		Text		= text;
 	}
 
 	#endregion
+
+	#region Properties
 
 	/// <summary>
 	/// Gets the type of the token.
 	/// </summary>
 	/// <value>The type of the token.</value>
-	public TokenTypes TokenType
-	{
-		get { return mTokenType; }
-	}
+	public TokenTypes TokenType { get; private set; }
 
 	/// <summary>
 	/// Gets the text.
 	/// </summary>
 	/// <value>The text.</value>
-	public string Text
-	{
-		get { return mText; }
-	}
+	public string Text { get; private set; }
 
-	private readonly TokenTypes mTokenType;
-	private readonly string mText;
+	#endregion
 }

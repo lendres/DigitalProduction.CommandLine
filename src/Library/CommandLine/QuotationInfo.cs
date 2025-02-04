@@ -29,8 +29,6 @@
  *  
  *  $Id: QuotationInfo.cs 3 2007-07-29 13:32:10Z palotas $
  */
-using System;
-using SCG = System.Collections.Generic;
 using C5;
 
 namespace DigitalProduction.CommandLine;
@@ -44,25 +42,28 @@ namespace DigitalProduction.CommandLine;
 /// <param name="quotationMark">The quotation mark used for this quotation.</param>
 public class QuotationInfo(char quotationMark)
 {
+	#region Fields
+
+	private readonly HashDictionary<char, char>		mEscapeCodes		= [];
+	private readonly char							mQuotationMark		= quotationMark;
+
+	#endregion
 
 	#region Constructors
 
 	#endregion
 
-	#region Public properties
+	#region Properties
 
 	/// <summary>
 	/// Gets the quotation mark.
 	/// </summary>
 	/// <value>The quotation mark.</value>
-	public char QuotationMark
-	{
-		get { return mQuotationMark; }
-	}
+	public char QuotationMark { get => mQuotationMark; }
 
 	#endregion
 
-	#region Public methods
+	#region Methods
 
 	/// <summary>
 	/// Adds the escape code to this quotation.
@@ -105,9 +106,13 @@ public class QuotationInfo(char quotationMark)
 	public char EscapeCharacter(char code)
 	{
 		if (!mEscapeCodes.Find(ref code, out char replacement))
+		{
 			return code;
+		}
 		else
+		{
 			return replacement;
+		}
 	}
 
 	/// <summary>
@@ -120,7 +125,9 @@ public class QuotationInfo(char quotationMark)
 	public override bool Equals(object? obj)
 	{
 		if (obj is not QuotationInfo qi)
+		{
 			return false;
+		}
 
 		return mQuotationMark.Equals(qi.mQuotationMark) && mEscapeCodes.Equals(qi.mEscapeCodes);
 	}
@@ -135,13 +142,6 @@ public class QuotationInfo(char quotationMark)
 	{
 		return mQuotationMark.GetHashCode() ^ mEscapeCodes.GetHashCode();
 	}
-
-	#endregion
-
-	#region Private fields
-
-	private readonly HashDictionary<char, char> mEscapeCodes = [];
-	private readonly char mQuotationMark = quotationMark;
 
 	#endregion
 }

@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionGroup.cs 3 2007-07-29 13:32:10Z palotas $
  */
 using C5;
 using System;
@@ -39,64 +37,55 @@ namespace DigitalProduction.CommandLine;
 
 internal class OptionGroup
 {
+	#region Construction
+
 	public OptionGroup(string id, string name, string description, OptionGroupRequirement require, bool requireExplicitAssignment, SCG.IComparer<string> keyComparer)
 	{
 		Debug.Assert(!String.IsNullOrEmpty(id));
 		Debug.Assert(keyComparer != null);
 
-		mId = id;
-		mName = name;
-		mDescription = description;
-		mRequire = require;
-		mOptions = new TreeDictionary<string, Option>(keyComparer);
-		mRequireExplicitAssignment = requireExplicitAssignment;
+		Id = id;
+		Name = name;
+		Description = description;
+		Require = require;
+		Options = new TreeDictionary<string, Option>(keyComparer);
+		RequireExplicitAssignment = requireExplicitAssignment;
 	}
 
-	#region Public properties
+	#endregion
 
-	public string Id
-	{
-		get { return mId; }
-	}
+	#region Properties
 
-	public OptionGroupRequirement Require
-	{
-		get { return mRequire; }
-	}
+	public string Id { get; private set; }
 
-	public string Description
-	{
-		get { return mDescription; }
-		set { mDescription = value; }
-	}
+	public OptionGroupRequirement Require { get; private set; }
 
-	public string Name
-	{
-		get { return mName; }
-		set { mName = value; }
-	}
+	public string Description { get; set; }
 
-	public IDictionary<string, Option> Options
-	{
-		get { return mOptions; }
-	}
+	public string Name { get; set; }
 
-	public bool RequireExplicitAssignment
-	{
-		get { return mRequireExplicitAssignment; }
-	}
+	public IDictionary<string, Option> Options { get; private set; }
+
+	public bool RequireExplicitAssignment { get; private set; }
+
+	#endregion
+
+	#region Methods
 
 	public string GetOptionNamesAsString()
 	{
 		StringBuilder names = new();
 		bool isFirst = true;
-		foreach (SCG.KeyValuePair<string, Option> entry in mOptions)
+		foreach (SCG.KeyValuePair<string, Option> entry in Options)
 		{
 			if (!isFirst)
+			{
 				names.Append(", ");
+			}
 			else
+			{
 				isFirst = false;
-
+			}
 
 			names.Append('\"');
 			names.Append(entry.Key);
@@ -104,16 +93,6 @@ internal class OptionGroup
 		}
 		return names.ToString();
 	}
-	#endregion
-
-	#region Private fields
-
-	private readonly string mId;
-	private string mName;
-	private readonly OptionGroupRequirement mRequire;
-	private string mDescription;
-	private readonly IDictionary<string, Option> mOptions;
-	private readonly bool mRequireExplicitAssignment;
 
 	#endregion
 }

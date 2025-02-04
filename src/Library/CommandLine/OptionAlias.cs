@@ -26,139 +26,78 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionAlias.cs 3 2007-07-29 13:32:10Z palotas $
  */
 namespace DigitalProduction.CommandLine;
 
 internal class OptionAlias(string aliasName, Option definingOption) : IOption
 {
+	#region Fields
+
+	private readonly Option		mDefiningOption		= definingOption;
+
+	#endregion
+
+	#region Properties
+
 	public object Value { set => mDefiningOption.Value = value; }
 
 	public bool RequiresValue { get => mDefiningOption.RequiresValue; }
 
 	public bool RequireExplicitAssignment
 	{
-		get
-		{
-			return mDefiningOption.RequireExplicitAssignment;
-		}
-		set
-		{
-			mDefiningOption.RequireExplicitAssignment = value;
-		}
+		get => mDefiningOption.RequireExplicitAssignment;
+		set => mDefiningOption.RequireExplicitAssignment = value;
 	}
 
-	public C5.ICollection<Option> ProhibitedBy
-	{
-		get { return mDefiningOption.ProhibitedBy; }
-	}
+	public C5.ICollection<Option> ProhibitedBy { get => mDefiningOption.ProhibitedBy; }
 
-	public OptionGroup? Group
-	{
-		get { return mDefiningOption.Group; }
-	}
+	public OptionGroup? Group { get => mDefiningOption.Group; }
 
-	public string Name
-	{
-		get { return mAliasName; }
-	}
+	public string Name { get; } = aliasName;
 
-	public BoolFunction BoolFunction
-	{
-		get { return mDefiningOption.BoolFunction; }
-	}
+	public BoolFunction BoolFunction { get => mDefiningOption.BoolFunction; }
 
-	public int MaxOccurs
-	{
-		get { return mDefiningOption.MaxOccurs; }
-	}
+	public int MaxOccurs { get => mDefiningOption.MaxOccurs; }
 
-	public int MinOccurs
-	{
-		get { return mDefiningOption.MinOccurs; }
-	}
+	public int MinOccurs { get => mDefiningOption.MinOccurs; }
 
-	public string Description
-	{
-		get { return mDefiningOption.Description; }
-	}
+	public string Description { get => mDefiningOption.Description; }
 
-	public int SetCount
-	{
-		get
-		{
-			return mDefiningOption.SetCount;
-		}
-		set
-		{
-			mDefiningOption.SetCount = value;
-		}
-	}
+	public int SetCount { get => mDefiningOption.SetCount; set => mDefiningOption.SetCount = value; }
 
-	public bool AcceptsValue
-	{
-		get { return mDefiningOption.AcceptsValue; }
-	}
+	public bool AcceptsValue { get => mDefiningOption.AcceptsValue; }
 
-	public bool HasDefaultValue
-	{
-		get { return mDefiningOption.HasDefaultValue; }
-	}
+	public bool HasDefaultValue { get => mDefiningOption.HasDefaultValue; }
 
-	public bool IsBooleanType
-	{
-		get { return mDefiningOption.IsBooleanType; }
-	}
+	public bool IsBooleanType { get => mDefiningOption.IsBooleanType; }
 
-	public bool IsAlias
-	{
-		get { return true; }
-	}
+	public bool IsAlias { get => true; }
 
-	public Option DefiningOption
-	{
-		get { return mDefiningOption; }
-	}
+	public Option DefiningOption { get => mDefiningOption; }
+
+	public object? MinValue { get => mDefiningOption.MinValue; }
+
+	public object? MaxValue { get => mDefiningOption.MaxValue; }
+
+	#endregion
+
+	#region IOption Properties
+
+	public bool IsIntegralType { get => mDefiningOption.IsIntegralType; }
+
+	public bool IsFloatingPointType { get => mDefiningOption.IsFloatingPointType; }
+
+	public bool IsDecimalType { get => mDefiningOption.IsDecimalType; }
+
+	public bool IsNumericalType { get => mDefiningOption.IsNumericalType; }
+
+	#endregion
+
+	#region Methods
 
 	public void SetDefaultValue()
 	{
 		mDefiningOption.SetDefaultValue();
-	}
-
-	public object? MinValue
-	{
-		get { return mDefiningOption.MinValue; }
-	}
-
-	public object? MaxValue
-	{
-		get { return mDefiningOption.MaxValue; }
-	}
-
-	private readonly Option mDefiningOption = definingOption;
-	private readonly string mAliasName = aliasName;
-
-	#region IOption Members
-
-	public bool IsIntegralType
-	{
-		get { return mDefiningOption.IsIntegralType; }
-	}
-
-	public bool IsFloatingPointType
-	{
-		get { return mDefiningOption.IsFloatingPointType; }
-	}
-
-	public bool IsDecimalType
-	{
-		get { return mDefiningOption.IsDecimalType; }
-	}
-
-	public bool IsNumericalType
-	{
-		get { return mDefiningOption.IsNumericalType; }
 	}
 
 	#endregion

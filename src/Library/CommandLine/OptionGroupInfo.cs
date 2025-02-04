@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionGroupInfo.cs 7 2007-08-04 12:02:15Z palotas $
  */
 using C5;
 using System;
@@ -42,7 +40,16 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 public sealed class OptionGroupInfo
 {
-	#region Constructors 
+	#region Fields
+
+	private readonly TreeDictionary<string, OptionInfo>		mOptions = [];
+	private readonly OptionGroup							mOptionGroup;
+	private readonly UsageInfo								mUsageInfo;
+
+	#endregion
+
+	#region Constructors
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="OptionGroupInfo"/> class.
 	/// </summary>
@@ -51,8 +58,8 @@ public sealed class OptionGroupInfo
 	/// <param name="optionStyles">The option styles.</param>
 	internal OptionGroupInfo(UsageInfo usageInfo, OptionGroup optionGroup, OptionStyles optionStyles)
 	{
-		mOptionGroup = optionGroup;
-		mUsageInfo = usageInfo;
+		mOptionGroup	= optionGroup;
+		mUsageInfo		= usageInfo;
 
 		foreach (SCG.KeyValuePair<string, Option> entry in optionGroup.Options)
 		{
@@ -62,49 +69,35 @@ public sealed class OptionGroupInfo
 
 	#endregion
 
-	#region Public properties
+	#region Properties
 
 	/// <summary>
 	/// Gets an enumeration of the options included in this group.
 	/// </summary>
 	/// <value>an enumeration of the options included in this group.</value>
-	public SCG.IEnumerable<OptionInfo> Options
-	{
-		get { return mOptions.Values; }
-	}
+	public SCG.IEnumerable<OptionInfo> Options { get => mOptions.Values; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description
-	{
-		get { return mOptionGroup.Description; }
-		set { mOptionGroup.Description = value; }
-	}
+	public string Description { get => mOptionGroup.Description; set => mOptionGroup.Description = value; }
 
 	/// <summary>
 	/// Gets or sets the name.
 	/// </summary>
 	/// <value>The name.</value>
-	public string Name
-	{
-		get { return mOptionGroup.Name ?? mOptionGroup.Id; }
-		set { mOptionGroup.Name = value; }
-	}
+	public string Name { get => mOptionGroup.Name ?? mOptionGroup.Id; set => mOptionGroup.Name = value; }
 
 	/// <summary>
 	/// Gets the id.
 	/// </summary>
 	/// <value>The id.</value>
-	public string Id
-	{
-		get { return mOptionGroup.Id; }
-	}
+	public string Id { get => mOptionGroup.Id; }
 
 	#endregion
 
-	#region Public methods
+	#region Methods
 
 	/// <summary>
 	/// Retrieves a formatted string describing this option group and its options, suitable for displaying
@@ -118,13 +111,19 @@ public sealed class OptionGroupInfo
 	public string ToString(int indent, int nameColumnWidth, int descriptionColumnWidth)
 	{
 		if (nameColumnWidth < 1)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeGreaterThanZero, "nameColumnWidth"), nameof(nameColumnWidth));
+		}
 
 		if (nameColumnWidth < 1)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeGreaterThanZero, "descriptionColumnWidth"), nameof(descriptionColumnWidth));
+		}
 
 		if (indent < 0)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "indent"), nameof(indent));
+		}
 
 		StringBuilder result = new();
 		result.Append(StringFormatter.FormatInColumns(indent, 0, new ColumnInfo(nameColumnWidth + descriptionColumnWidth + mUsageInfo.ColumnSpacing, Name + ":")));
@@ -154,17 +153,11 @@ public sealed class OptionGroupInfo
 	public OptionInfo? GetOption(string optionName)
 	{
 		if (!mOptions.Find(ref optionName, out OptionInfo description))
+		{
 			return null;
+		}
 		return description;
 	}
-
-	#endregion
-
-	#region Private fields
-
-	private readonly TreeDictionary<string, OptionInfo> mOptions = [];
-	private readonly OptionGroup mOptionGroup;
-	private readonly UsageInfo mUsageInfo;
 
 	#endregion
 }

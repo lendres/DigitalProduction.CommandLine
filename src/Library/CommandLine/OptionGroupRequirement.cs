@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionGroupRequirement.cs 3 2007-07-29 13:32:10Z palotas $
  */
 namespace DigitalProduction.CommandLine;
 
@@ -40,18 +38,22 @@ public enum OptionGroupRequirement
 	/// Indicates that no requirement is placed on the options of this group.
 	/// </summary>
 	None,
+
 	/// <summary>
 	/// Indicates that at most one of the options in this group may be specified on the command line.
 	/// </summary>
 	AtMostOne,
+
 	/// <summary>
 	/// Indicates that at least one of the options in this group may be specified on the command line.
 	/// </summary>
 	AtLeastOne,
+
 	/// <summary>
 	/// Indicates that exactly one of the options in this group must be specified on the command line.
 	/// </summary>
 	ExactlyOne,
+
 	/// <summary>
 	/// Indicates that all options of this group must be specified.
 	/// </summary>

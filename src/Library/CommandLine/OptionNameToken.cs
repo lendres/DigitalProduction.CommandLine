@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionNameToken.cs 3 2007-07-29 13:32:10Z palotas $
  */
 using System;
 using System.Diagnostics;
@@ -39,38 +37,28 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 internal class OptionNameToken : Token
 {
-
 	/// <summary>
 	/// Initializes a new instance of the <see cref="OptionNameToken"/> class.
 	/// </summary>
 	/// <param name="name">The name of this option.</param>
 	/// <param name="optionStyle">The option style.</param>
-	public OptionNameToken(string name, OptionStyles optionStyle)
-		: base(TokenTypes.OptionNameToken, OptionStyleManager.GetPrefix(optionStyle, name) + name)
+	public OptionNameToken(string name, OptionStyles optionStyle) :
+		base(TokenTypes.OptionNameToken, OptionStyleManager.GetPrefix(optionStyle, name) + name)
 	{
 		Debug.Assert(!String.IsNullOrEmpty(name));
-		mOptionStyle = optionStyle;
-		mName = name;
+		OptionStyle	= optionStyle;
+		Name		= name;
 	}
 
 	/// <summary>
 	/// Gets the option style.
 	/// </summary>
 	/// <value>The option style.</value>
-	public OptionStyles OptionStyle
-	{
-		get { return mOptionStyle; }
-	}
+	public OptionStyles OptionStyle { get; private set; }
 
 	/// <summary>
 	/// Gets the name.
 	/// </summary>
 	/// <value>The name.</value>
-	public string Name
-	{
-		get { return mName; }
-	}
-
-	readonly OptionStyles mOptionStyle;
-	readonly string mName;
+	public string Name { get; private set; }
 }

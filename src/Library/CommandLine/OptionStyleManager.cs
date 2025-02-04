@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionStyleManager.cs 3 2007-07-29 13:32:10Z palotas $
  */
 using System;
 using System.Diagnostics;
@@ -79,8 +77,7 @@ public static class OptionStyleManager
 	/// options also include the short unix style.</remarks>
 	public static bool IsValid(OptionStyles optionStyle)
 	{
-		return !((optionStyle & OptionStyles.ShortUnix) == OptionStyles.None &&
-			(optionStyle & (OptionStyles.Plus | OptionStyles.Group)) != OptionStyles.None);
+		return !((optionStyle & OptionStyles.ShortUnix) == OptionStyles.None && (optionStyle & (OptionStyles.Plus | OptionStyles.Group)) != OptionStyles.None);
 	}
 
 	/// <summary>
@@ -136,21 +133,40 @@ public static class OptionStyleManager
 	{
 		ArgumentNullException.ThrowIfNull(optionName);
 
-		// The ordering here is important
+		// The ordering here is important.
 		if (IsAllEnabled(optionStyle, OptionStyles.LongUnix) && optionName.Length > 1)
+		{
 			return "--";
+		}
 		if (IsAllEnabled(optionStyle, OptionStyles.Plus))
+		{
 			return "+";
+		}
 		else if (IsAllEnabled(optionStyle, OptionStyles.ShortUnix))
+		{
 			return "-";
+		}
 		else if (IsAllEnabled(optionStyle, OptionStyles.File))
+		{
 			return "@";
+		}
 		else if (IsAnyEnabled(optionStyle, OptionStyles.LongUnix))
+		{
 			return "--";
+		}
 		else if (IsAllEnabled(optionStyle, OptionStyles.Windows))
+		{
 			return "/";
+		}
 		else
-			throw new NotImplementedException(String.Format(CultureInfo.CurrentUICulture, "Internal error: An OptionNameToken was created with an unsupported set of option style flags ({0})", optionStyle.ToString()));
+		{
+			string message = String.Format(
+				CultureInfo.CurrentUICulture,
+				"Internal error: An OptionNameToken was created with an unsupported set of option style flags ({0})",
+				optionStyle.ToString()
+			);
+			throw new NotImplementedException(message);
+		}
 	}
 
 	/// <summary>
@@ -167,13 +183,19 @@ public static class OptionStyleManager
 		ArgumentNullException.ThrowIfNull(optionName);
 
 		if (IsAllEnabled(optionStyle, OptionStyles.Plus))
+		{
 			return "[+|-]" + optionName;
+		}
 		else if (optionName.Length == 1)
 		{
 			if (IsAllEnabled(optionStyle, OptionStyles.ShortUnix))
+			{
 				return "-" + optionName;
+			}
 			else if (IsAllEnabled(optionStyle, OptionStyles.LongUnix))
+			{
 				return "--" + optionName;
+			}
 			else
 			{
 				Debug.Assert(IsAllEnabled(optionStyle, OptionStyles.Windows));
@@ -181,9 +203,13 @@ public static class OptionStyleManager
 			}
 		}
 		else if (!IsAllEnabled(optionStyle, OptionStyles.Group) && IsAllEnabled(optionStyle, OptionStyles.ShortUnix))
+		{
 			return "-" + optionName;
+		}
 		else if (IsAllEnabled(optionStyle, OptionStyles.LongUnix))
+		{
 			return "--" + optionName;
+		}
 		else
 		{
 			Debug.Assert(IsAllEnabled(optionStyle, OptionStyles.Windows));

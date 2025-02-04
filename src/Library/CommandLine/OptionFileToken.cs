@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionFileToken.cs 3 2007-07-29 13:32:10Z palotas $
  */
 using System;
 
@@ -38,18 +36,12 @@ internal class OptionFileToken : Token
 	/// <summary>
 	/// Initializes a new instance of the <see cref="OptionFileToken"/> class.
 	/// </summary>
-	public OptionFileToken(string fileName)
-		: base(TokenTypes.OptionFileToken, "@" + fileName)
+	public OptionFileToken(string fileName) :
+		base(TokenTypes.OptionFileToken, "@" + fileName)
 	{
 		ArgumentNullException.ThrowIfNull(fileName);
-
-		mFileName = fileName;
+		FileName = fileName;
 	}
 
-	public string FileName
-	{
-		get { return mFileName; }
-	}
-
-	private readonly string mFileName;
+	public string FileName { get; private set; }
 }

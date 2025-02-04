@@ -26,8 +26,6 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: OptionInfo.cs 7 2007-08-04 12:02:15Z palotas $
  */
 using C5;
 using System;
@@ -42,7 +40,16 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 public sealed class OptionInfo : IDisposable
 {
-	#region Constructors 
+	#region Fields
+
+	private readonly ArrayList<string>	mAliases = [];
+	private readonly OptionStyles		mOptionStyles;
+	private readonly Option				mOption;
+	private readonly UsageInfo			mUsageInfo;
+
+	#endregion
+
+	#region Constructors and Disposing
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="OptionInfo"/> class.
@@ -62,50 +69,42 @@ public sealed class OptionInfo : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+	/// </summary>
+	public void Dispose()
+	{
+		mAliases.Dispose();
+	}
+
 	#endregion
 
-	#region Public properties
+	#region Properties
 
 	/// <summary>
 	/// Gets an enumeration containing strings representing the prefixed names of the aliases of this option.
 	/// </summary>
 	/// <value>an enumeration containing strings representing the prefixed names of the aliases of this option.</value>
-	public SCG.IEnumerable<string> Aliases
-	{
-		get
-		{
-			return mAliases;
-		}
-	}
+	public SCG.IEnumerable<string> Aliases { get => mAliases; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description
-	{
-		get { return mOption.Description; }
-		set { mOption.Description = value; }
-	}
+	public string Description { get => mOption.Description; set => mOption.Description = value; }
 
 	/// <summary>
 	/// Gets the name.
 	/// </summary>
 	/// <value>The name.</value>
-	public string Name
-	{
-		get { return OptionStyleManager.PrefixOptionForDescription(mOptionStyles, mOption.Name); }
-	}
+	public string Name { get => OptionStyleManager.PrefixOptionForDescription(mOptionStyles, mOption.Name); }
 
 	/// <summary>
 	/// Gets the id. 
 	/// </summary>
 	/// <value>The id.</value>
 	/// <remarks>The id of an option is the same as its <see cref="Name"/>.</remarks>
-	public string Id
-	{
-		get { return mOption.Name; }
-	}
+	public string Id { get => mOption.Name; }
 
 	#endregion
 
@@ -133,13 +132,19 @@ public sealed class OptionInfo : IDisposable
 	public string ToString(int indent, int nameColumnWidth, int descriptionColumnWidth)
 	{
 		if (nameColumnWidth < 1)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeGreaterThanZero, "nameColumnWidth"), nameof(nameColumnWidth));
+		}
 
 		if (descriptionColumnWidth < 1)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeGreaterThanZero, "descriptionColumnWidth"), nameof(descriptionColumnWidth));
+		}
 
 		if (indent < 0)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "indent"), nameof(indent));
+		}
 
 		StringBuilder names = new();
 
@@ -155,21 +160,5 @@ public sealed class OptionInfo : IDisposable
 		return StringFormatter.FormatInColumns(indent, mUsageInfo.ColumnSpacing, nameColumn, descColumn);
 	}
 
-	/// <summary>
-	/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-	/// </summary>
-	public void Dispose()
-	{
-		mAliases.Dispose();
-	}
-
-	#endregion
-
-	#region Private fields
-
-	private readonly ArrayList<string> mAliases = [];
-	private readonly OptionStyles mOptionStyles;
-	private readonly Option mOption;
-	private readonly UsageInfo mUsageInfo;
 	#endregion
 }

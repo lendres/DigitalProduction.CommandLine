@@ -26,16 +26,14 @@
  *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: UsageInfo.cs 7 2007-08-04 12:02:15Z palotas $
  */
-using System;
-using SCG = System.Collections.Generic;
-using System.Text;
 using C5;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Collections.Generic;
+using System.Text;
+using SCG = System.Collections.Generic;
 
 namespace DigitalProduction.CommandLine;
 
@@ -48,16 +46,17 @@ namespace DigitalProduction.CommandLine;
 /// class, but they are retrieved by the <see cref="CommandLineParser.UsageInfo"/> property.</remarks>
 public sealed class UsageInfo
 {
-	#region Constructors
+	#region Fields
 
-	//        internal UsageInfo(C5.IDictionary<string, IOption> options, OptionStyles optionStyles, CommandLineParser parser)
-	//		{
-	//var dict = new Dictionary<TKey, TValue>();
-	//foreach (KeyValuePair<TKey, TValue> kvp in enum)
-	//{
-	//	dict.Add(kvp.Key, kvp.Value);
-	//}
-	//		}
+	private readonly CommandLineParser							mParser;
+	private readonly TreeDictionary<string, OptionGroupInfo>	mGroups				= [];
+	private readonly TreeDictionary<string, OptionInfo>			mOptions			= [];
+	private int													mColumnSpacing		= 3;
+	private int													mIndentWidth		= 3;
+
+	#endregion
+
+	#region Constructors
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="UsageInfo"/> class.
@@ -90,47 +89,31 @@ public sealed class UsageInfo
 
 	#endregion
 
-	#region Public properties
+	#region Properties
 
 	/// <summary>
 	/// Gets or sets the name of the application.
 	/// </summary>
 	/// <value>The name of the application.</value>
-	public string ApplicationName
-	{
-		get { return mParser.ApplicationName; }
-		set { mParser.ApplicationName = value; }
-	}
+	public string ApplicationName { get => mParser.ApplicationName; set =>  mParser.ApplicationName = value; }
 
 	/// <summary>
 	/// Gets or sets the application version.
 	/// </summary>
 	/// <value>The application version.</value>
-	public string ApplicationVersion
-	{
-		get { return mParser.ApplicationVersion; }
-		set { mParser.ApplicationVersion = value; }
-	}
+	public string ApplicationVersion { get => mParser.ApplicationVersion; set =>  mParser.ApplicationVersion = value; }
 
 	/// <summary>
 	/// Gets or sets the application copyright.
 	/// </summary>
 	/// <value>The application copyright.</value>
-	public string ApplicationCopyright
-	{
-		get { return mParser.ApplicationCopyright; }
-		set { mParser.ApplicationCopyright = value; }
-	}
+	public string ApplicationCopyright { get => mParser.ApplicationCopyright; set =>  mParser.ApplicationCopyright = value; }
 
 	/// <summary>
 	/// Gets or sets the application description.
 	/// </summary>
 	/// <value>The application description.</value>
-	public string ApplicationDescription
-	{
-		get { return mParser.ApplicationDescription; }
-		set { mParser.ApplicationDescription = value; }
-	}
+	public string ApplicationDescription { get => mParser.ApplicationDescription; set => mParser.ApplicationDescription = value; }
 
 	/// <summary>
 	/// Gets an enumeration of <see cref="OptionInfo"/> objects describing the options of this 
@@ -138,10 +121,7 @@ public sealed class UsageInfo
 	/// </summary>
 	/// <value>an enumeration of <see cref="OptionInfo"/> objects describing the options of this 
 	/// command line manager that are <i>not</i> part of any option group.</value>
-	public SCG.IEnumerable<OptionInfo> Options
-	{
-		get { return mOptions.Values; }
-	}
+	public SCG.IEnumerable<OptionInfo> Options { get => mOptions.Values; }
 
 	/// <summary>
 	/// Gets an enumeration of the <see cref="OptionGroupInfo"/> objects describin the option groups
@@ -149,10 +129,7 @@ public sealed class UsageInfo
 	/// </summary>
 	/// <value>an enumeration of the <see cref="OptionGroupInfo"/> objects describin the option groups
 	/// of this command line manager.</value>
-	public SCG.IEnumerable<OptionGroupInfo> Groups
-	{
-		get { return mGroups.Values; }
-	}
+	public SCG.IEnumerable<OptionGroupInfo> Groups { get => mGroups.Values; }
 
 	/// <summary>
 	/// Gets or sets the column spacing to use for any string formatting involving multiple columns.
@@ -160,11 +137,13 @@ public sealed class UsageInfo
 	/// <value>The column spacing used for any string formatting involving multiple columns.</value>
 	public int ColumnSpacing
 	{
-		get { return mColumnSpacing; }
+		get => mColumnSpacing;
 		set
 		{
 			if (value < 0)
+			{
 				throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "value"), nameof(value));
+			}
 			mColumnSpacing = value;
 		}
 	}
@@ -175,11 +154,13 @@ public sealed class UsageInfo
 	/// <value>the width of the indent to use for any string formatting by this <see cref="UsageInfo"/>.</value>
 	public int IndentWidth
 	{
-		get { return mIndentWidth; }
+		get => mIndentWidth;
 		set
 		{
 			if (value < 0)
+			{
 				throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "value"), nameof(value));
+			}
 			mIndentWidth = value;
 		}
 	}
@@ -202,7 +183,9 @@ public sealed class UsageInfo
 			foreach (OptionGroupInfo gdesc in mGroups.Values)
 			{
 				if ((description = gdesc.GetOption(name)) != null)
+				{
 					return description;
+				}
 			}
 			return null;
 		}
@@ -218,7 +201,9 @@ public sealed class UsageInfo
 	public OptionGroupInfo? GetGroup(string id)
 	{
 		if (!mGroups.Find(ref id, out OptionGroupInfo desc))
+		{
 			return null;
+		}
 		return desc;
 	}
 
@@ -257,16 +242,18 @@ public sealed class UsageInfo
 	/// <exception cref="ArgumentException">The specified width was too small to generate the requested list.</exception>
 	public string GetOptionsAsString(int width)
 	{
-		// Remove spacing between columns
+		// Remove spacing between columns.
 		width -= ColumnSpacing;
 
 		if (width < 2)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.WidthMustNotBeLessThan0, ColumnSpacing + 2), nameof(width));
+		}
 
-		// Default minimum width
+		// Default minimum width.
 		int maxNameWidth = 5;
 
-		// Get the maximum option name length from options not in groups
+		// Get the maximum option name length from options not in groups.
 		foreach (OptionInfo option in mOptions.Values)
 		{
 			maxNameWidth = Math.Max(option.Name.Length, maxNameWidth);
@@ -276,7 +263,7 @@ public sealed class UsageInfo
 			}
 		}
 
-		// Get the maximum option name length from option inside groups
+		// Get the maximum option name length from option inside groups.
 		foreach (OptionGroupInfo group in mGroups.Values)
 		{
 			foreach (OptionInfo option in group.Options)
@@ -292,7 +279,7 @@ public sealed class UsageInfo
 		// Add room for '--' and comma after the option name.
 		maxNameWidth += 3;
 
-		// Make sure the name column isn't more than half the specified width
+		// Make sure the name column isn't more than half the specified width.
 		maxNameWidth = Math.Min(width / 2, maxNameWidth);
 
 		return GetOptionsAsString(maxNameWidth, width - maxNameWidth);
@@ -337,7 +324,9 @@ public sealed class UsageInfo
 	public string GetErrorsAsString(int width)
 	{
 		if (width < IndentWidth + 7)
+		{
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.Arg0MustNotBeLessThan1, "width", IndentWidth + 7), nameof(width));
+		}
 
 		StringBuilder result = new();
 		result.Append(StringFormatter.WordWrap("Errors:", width));
@@ -407,17 +396,5 @@ public sealed class UsageInfo
 		return result.ToString();
 	}
 
-
 	#endregion
-
-	#region Private fields
-
-	private readonly CommandLineParser mParser;
-	private readonly TreeDictionary<string, OptionGroupInfo> mGroups = [];
-	private readonly TreeDictionary<string, OptionInfo> mOptions = [];
-	private int mColumnSpacing = 3;
-	private int mIndentWidth = 3;
-
-	#endregion
-
 }
