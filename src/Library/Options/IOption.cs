@@ -52,7 +52,7 @@ internal interface IOption
 
 	#endregion
 
-	#region Public methods
+	#region Methods
 
 	void SetDefaultValue();
 
