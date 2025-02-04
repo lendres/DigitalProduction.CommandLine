@@ -1,36 +1,3 @@
-/* Copyright (c) Peter Palotas 2007
- *  
- *  All rights reserved.
- *  
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are
- *  met:
- *  
- *      * Redistributions of source code must retain the above copyright 
- *        notice, this list of conditions and the following disclaimer.    
- *      * Redistributions in binary form must reproduce the above copyright 
- *        notice, this list of conditions and the following disclaimer in 
- *        the documentation and/or other materials provided with the distribution.
- *      * Neither the name of the copyright holder nor the names of its 
- *        contributors may be used to endorse or promote products derived 
- *        from this software without specific prior written permission.
- *  
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: QuotationInfo.cs 3 2007-07-29 13:32:10Z palotas $
- */
-using System;
-using SCG = System.Collections.Generic;
 using C5;
 
 namespace DigitalProduction.CommandLine;
@@ -44,25 +11,28 @@ namespace DigitalProduction.CommandLine;
 /// <param name="quotationMark">The quotation mark used for this quotation.</param>
 public class QuotationInfo(char quotationMark)
 {
+	#region Fields
+
+	private readonly HashDictionary<char, char>		mEscapeCodes		= [];
+	private readonly char							mQuotationMark		= quotationMark;
+
+	#endregion
 
 	#region Constructors
 
 	#endregion
 
-	#region Public properties
+	#region Properties
 
 	/// <summary>
 	/// Gets the quotation mark.
 	/// </summary>
 	/// <value>The quotation mark.</value>
-	public char QuotationMark
-	{
-		get { return mQuotationMark; }
-	}
+	public char QuotationMark { get => mQuotationMark; }
 
 	#endregion
 
-	#region Public methods
+	#region Methods
 
 	/// <summary>
 	/// Adds the escape code to this quotation.
@@ -105,9 +75,13 @@ public class QuotationInfo(char quotationMark)
 	public char EscapeCharacter(char code)
 	{
 		if (!mEscapeCodes.Find(ref code, out char replacement))
+		{
 			return code;
+		}
 		else
+		{
 			return replacement;
+		}
 	}
 
 	/// <summary>
@@ -120,7 +94,9 @@ public class QuotationInfo(char quotationMark)
 	public override bool Equals(object? obj)
 	{
 		if (obj is not QuotationInfo qi)
+		{
 			return false;
+		}
 
 		return mQuotationMark.Equals(qi.mQuotationMark) && mEscapeCodes.Equals(qi.mEscapeCodes);
 	}
@@ -135,13 +111,6 @@ public class QuotationInfo(char quotationMark)
 	{
 		return mQuotationMark.GetHashCode() ^ mEscapeCodes.GetHashCode();
 	}
-
-	#endregion
-
-	#region Private fields
-
-	private readonly HashDictionary<char, char> mEscapeCodes = [];
-	private readonly char mQuotationMark = quotationMark;
 
 	#endregion
 }

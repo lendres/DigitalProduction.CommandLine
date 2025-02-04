@@ -69,7 +69,20 @@ public class TestArguments2
 		parser.Parse(input, false);
 			
 		Assert.NotNull(parser);
-		Assert.Equal("Missing required option \"f\".", parser.Errors.ElementAt(0).Message);
-		Assert.Equal("Only one of the options \"c\", \"h\", \"x\" may be specified", parser.Errors.ElementAt(1).Message);
+		foreach (var error in parser.Errors)
+		{
+			switch (error.ErrorCode)
+			{
+				case ParseErrorCodes.MissingRequiredOption:
+					Assert.Equal("Missing required option \"f\".", error.Message);
+					break;
+				case ParseErrorCodes.IllegalCardinality:
+					Assert.Equal("Only one of the options \"c\", \"h\", \"x\" may be specified", error.Message);
+					break;
+				default:
+					Assert.Fail("Invalid error code found.");
+					break;
+			}
+		}	
 	}
 }

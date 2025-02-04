@@ -10,36 +10,21 @@
 /// <param name="fileName">Name of the file or null if no file name is available.</param>
 internal class LexerStackRecord(Lexer lexer, string? fileName)
 {
-
 	/// <summary>
 	/// Gets the lexer.
 	/// </summary>
 	/// <value>The lexer.</value>
-	public Lexer Lexer
-	{
-		get { return mLexer; }
-	}
+	public Lexer Lexer { get; } = lexer;
 
 	/// <summary>
 	/// Gets or sets the lookahead token.
 	/// </summary>
 	/// <value>The lookahead token.</value>
-	public Token? LA1Token
-	{
-		get { return mLA1Token; }
-		set { mLA1Token = value; }
-	}
+	public Token? LA1Token { get; set; }
 
 	/// <summary>
 	/// Gets the name of the file.
 	/// </summary>
 	/// <value>The name of the file.</value>
-	public string? FileName
-	{
-		get { return mFileName; }
-	}
-
-	private readonly string? mFileName = fileName;
-	private readonly Lexer mLexer = lexer;
-	private Token? mLA1Token;
+	public string? FileName { get; } = fileName;
 }
