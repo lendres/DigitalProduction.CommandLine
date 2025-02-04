@@ -1,34 +1,3 @@
-/* Copyright (c) Peter Palotas 2007
- *  
- *  All rights reserved.
- *  
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are
- *  met:
- *  
- *      * Redistributions of source code must retain the above copyright 
- *        notice, this list of conditions and the following disclaimer.    
- *      * Redistributions in binary form must reproduce the above copyright 
- *        notice, this list of conditions and the following disclaimer in 
- *        the documentation and/or other materials provided with the distribution.
- *      * Neither the name of the copyright holder nor the names of its 
- *        contributors may be used to endorse or promote products derived 
- *        from this software without specific prior written permission.
- *  
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: Option.cs 12 2007-08-05 10:26:08Z palotas $
- */
 using C5;
 using System;
 using System.Diagnostics;
@@ -45,6 +14,32 @@ namespace DigitalProduction.CommandLine;
 /// for setting and getting values of the option manager object used by the parser.</remarks>
 internal class Option : IOption
 {
+	#region Private Fields
+
+	/// <summary>
+	/// Counts the number of times the value was set for this option
+	/// </summary>
+	private int								mSetCount;
+	private readonly Type					mOptionType;
+	private readonly MemberInfo				mMember;
+	private string							mDescription					= string.Empty;
+	private readonly string					mName							= string.Empty;
+	private readonly object					mObject;
+	private readonly OptionGroup?			mGroup;
+	private readonly int					mMaxOccurs;
+	private readonly int					mMinOccurs;
+	private readonly BoolFunction			mUsage;
+	private readonly ArrayList<Option>		mProhibitedBy					= [];
+	private readonly NumberFormatInfo		mNumberFormatInfo;
+	private readonly object?				mDefaultValue;
+	private bool							mRequireExplicitAssignment;
+	private readonly object?				mMinValue;
+	private readonly object?				mMaxValue;
+	private readonly ArrayList<string>		mAliases						= [];
+	private readonly TreeSet<string>		mEnumerationValues				= [];
+
+	#endregion
+
 	#region Constructor
 
 	/// <summary>
@@ -57,14 +52,14 @@ internal class Option : IOption
 	/// <param name="numberFormatInfo">The number format info to use for parsing numerical arguments.</param>
 	public Option(CommandLineOptionAttribute attribute, MemberInfo memberInfo, object cmdLineObject, ICollection<OptionGroup> optionGroups, NumberFormatInfo numberFormatInfo)
 	{
-		mObject = cmdLineObject;
-		mMember = memberInfo;
-		mUsage = attribute.BoolFunction;
-		mDescription = attribute.Description;
-		mNumberFormatInfo = numberFormatInfo ?? CultureInfo.CurrentCulture.NumberFormat;
-		mDefaultValue = attribute.DefaultAssignmentValue;
-		mMinValue = attribute.MinValue;
-		mMaxValue = attribute.MaxValue;
+		mObject				= cmdLineObject;
+		mMember				= memberInfo;
+		mUsage				= attribute.BoolFunction;
+		mDescription		= attribute.Description;
+		mNumberFormatInfo	= numberFormatInfo ?? CultureInfo.CurrentCulture.NumberFormat;
+		mDefaultValue		= attribute.DefaultAssignmentValue;
+		mMinValue			= attribute.MinValue;
+		mMaxValue			= attribute.MaxValue;
 
 		// Check the validity of the member for which this attribute was defined
 		switch (memberInfo.MemberType)
@@ -72,8 +67,9 @@ internal class Option : IOption
 			case MemberTypes.Field:
 				FieldInfo fieldInfo = (FieldInfo)memberInfo;
 				if (fieldInfo.IsInitOnly || fieldInfo.IsLiteral)
-					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
-						"Illegal field for this attribute; field must be writeable");
+				{
+					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo, "Illegal field for this attribute; field must be writeable");
+				}
 
 				mOptionType = fieldInfo.FieldType;
 				break;
@@ -82,16 +78,22 @@ internal class Option : IOption
 				ParameterInfo[] parameters = method.GetParameters();
 
 				if (parameters.Length != 1)
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal method for this attribute; the method must accept exactly one parameter");
+				}
 
 				if (parameters[0].IsOut)
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal method for this attribute; the parameter of the method must not be an out parameter");
+				}
 
 				if (IsArray(parameters[0].ParameterType) || IsCollectionType(parameters[0].ParameterType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal method for this attribute; the parameter of the method must be a non-array and non-collection type");
+				}
 
 				mOptionType = parameters[0].ParameterType;
 				break;
@@ -99,16 +101,22 @@ internal class Option : IOption
 				PropertyInfo propInfo = (PropertyInfo)memberInfo;
 
 				if (!propInfo.CanWrite && !IsCollectionType(propInfo.PropertyType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal property for this attribute; property for non-collection type must be writable");
+				}
 
 				if (!propInfo.CanRead && IsCollectionType(propInfo.PropertyType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal property for this attribute; property for collection type must be readable");
+				}
 
 				if (!(propInfo.CanRead && propInfo.CanWrite) && IsArray(propInfo.PropertyType))
+				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 						"Illegal property for this attribute; property representing array type must be both readable and writeable");
+				}
 
 				mOptionType = propInfo.PropertyType;
 				break;
@@ -124,9 +132,13 @@ internal class Option : IOption
 		{
 			// Use default setting for MaxOccurs
 			if (IsArray(mOptionType) || IsCollectionType(mOptionType))
+			{
 				mMaxOccurs = 0; // Unlimited 
+			}
 			else
+			{
 				mMaxOccurs = 1;
+			}
 		}
 		else
 		{
@@ -134,12 +146,16 @@ internal class Option : IOption
 		}
 
 		if (mMinOccurs > mMaxOccurs && mMaxOccurs > 0)
+		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 				String.Format(CultureInfo.CurrentUICulture, "MinOccurs ({0}) must not be larger than MaxOccurs ({1})", mMinOccurs, mMaxOccurs));
+		}
 
 		if (mMaxOccurs != 1 && !(IsArray(mOptionType) || IsCollectionType(mOptionType)) && mMember.MemberType != MemberTypes.Method)
+		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), memberInfo,
 				"Invalid cardinality for member; MaxOccurs must be equal to one (1) for any non-array or non-collection type");
+		}
 
 		CommandLineManagerAttribute objectAttr = Attribute.GetCustomAttribute(mObject.GetType(), typeof(CommandLineManagerAttribute)) as CommandLineManagerAttribute ??
 			throw new AttributeException(string.Format(CultureInfo.CurrentUICulture,
@@ -184,10 +200,11 @@ internal class Option : IOption
 			mRequireExplicitAssignment = objectAttr.RequireExplicitAssignment;
 		}
 
-		// Make sure the type of the field, property or method is supported
+		// Make sure the type of the field, property, or method is supported.
 		if (!IsTypeSupported(mOptionType))
+		{
 			throw new AttributeException(typeof(CommandLineOptionAttribute), mMember, "Unsupported type for command line option.");
-
+		}
 
 		// Make sure MinValue and MaxValue is not specified for any non-numerical type.
 		if (mMinValue != null || mMaxValue != null)
@@ -315,7 +332,9 @@ internal class Option : IOption
 		set
 		{
 			if (++mSetCount > MaxOccurs && MaxOccurs != 0)
+			{
 				throw new InvalidOperationException(CommandLineStrings.InternalErrorOptionValueWasSetMoreThanMaxOccursNumberOfTimes);
+			}
 
 			switch (mMember.MemberType)
 			{
@@ -340,13 +359,7 @@ internal class Option : IOption
 	/// Gets a value indicating whether this option requires a value to be assigned to it.
 	/// </summary>
 	/// <value><c>true</c> if this option requires a value to be assigned to it; otherwise, <c>false</c>.</value>
-	public bool RequiresValue
-	{
-		get
-		{
-			return AcceptsValue && !HasDefaultValue;
-		}
-	}
+	public bool RequiresValue { get => AcceptsValue && !HasDefaultValue; }
 
 	/// <summary>
 	/// Gets or sets a value indicating whether this option requires explicit assignment.
@@ -354,85 +367,55 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this option requires explicit assignment; otherwise, <c>false</c>.
 	/// </value>
-	public bool RequireExplicitAssignment
-	{
-		get { return mRequireExplicitAssignment; }
-		set { mRequireExplicitAssignment = value; }
-	}
+	public bool RequireExplicitAssignment { get => mRequireExplicitAssignment; set => mRequireExplicitAssignment = value; }
 
 	/// <summary>
 	/// Gets the collection containing the options prohibiting this option from being specified.
 	/// </summary>
 	/// <value>The collection containing the options prohibiting this option from being specified.</value>
-	public ICollection<Option> ProhibitedBy
-	{
-		get { return mProhibitedBy; }
-	}
+	public ICollection<Option> ProhibitedBy { get => mProhibitedBy; }
 
 	/// <summary>
 	/// Gets the group to which this option belongs, or null if this option does not belong to any group.
 	/// </summary>
 	/// <value>The group to which this option belongs, or null if this option does not belong to any group.</value>
-	public OptionGroup? Group
-	{
-		get { return mGroup; }
-	}
+	public OptionGroup? Group {	get => mGroup; }
 
 	/// <summary>
 	/// Gets the name of this option
 	/// </summary>
 	/// <value>The name of this option</value>
-	public string Name
-	{
-		get { return mName; }
-	}
+	public string Name { get => mName; }
 
 	/// <summary>
 	/// Gets the bool function used by this option
 	/// </summary>
 	/// <value>The bool function used by this option</value>
-	public BoolFunction BoolFunction
-	{
-		get { return mUsage; }
-	}
+	public BoolFunction BoolFunction { get => mUsage; }
 
 	/// <summary>
 	/// Gets the max occurs.
 	/// </summary>
 	/// <value>The max occurs.</value>
-	public int MaxOccurs
-	{
-		get { return mMaxOccurs; }
-	}
+	public int MaxOccurs { get => mMaxOccurs; }
 
 	/// <summary>
 	/// Gets the min occurs.
 	/// </summary>
 	/// <value>The min occurs.</value>
-	public int MinOccurs
-	{
-		get { return mMinOccurs; }
-	}
+	public int MinOccurs { get => mMinOccurs; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description
-	{
-		get { return mDescription; }
-		set { mDescription = value; }
-	}
+	public string Description { get => mDescription; set => mDescription = value; }
 
 	/// <summary>
 	/// Gets or sets the number of times the value of this option has been set.
 	/// </summary>
 	/// <value>The number of times the value of this option has been set.</value>
-	public int SetCount
-	{
-		get { return mSetCount; }
-		set { mSetCount = value; }
-	}
+	public int SetCount { get => mSetCount; set => mSetCount = value; }
 
 	/// <summary>
 	/// Gets a value indicating whether a value may be assigned to this option.
@@ -442,8 +425,9 @@ internal class Option : IOption
 	{
 		get
 		{
-			return GetBaseType(mOptionType) != typeof(bool) ||
-				BoolFunction == BoolFunction.Value;
+			return	(GetBaseType(mOptionType) != typeof(bool) && 
+					 GetBaseType(mOptionType) != typeof(bool?)) ||
+					 BoolFunction == BoolFunction.Value;
 		}
 	}
 
@@ -453,13 +437,7 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance has default value; otherwise, <c>false</c>.
 	/// </value>
-	public bool HasDefaultValue
-	{
-		get
-		{
-			return mDefaultValue != null;
-		}
-	}
+	public bool HasDefaultValue { get => mDefaultValue != null; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is boolean type.
@@ -471,7 +449,8 @@ internal class Option : IOption
 	{
 		get
 		{
-			return GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false;
+			return	(GetBaseType(mOptionType)?.Equals(typeof(bool)) ?? false) ||
+					(GetBaseType(mOptionType)?.Equals(typeof(bool?)) ?? false);
 		}
 	}
 
@@ -479,10 +458,7 @@ internal class Option : IOption
 	/// Gets a value indicating whether this instance is an alias.
 	/// </summary>
 	/// <value><c>true</c> if this instance is alias; otherwise, <c>false</c>.</value>
-	public bool IsAlias
-	{
-		get { return false; }
-	}
+	public bool IsAlias { get => false; }
 
 	/// <summary>
 	/// Gets the defining option.
@@ -490,28 +466,19 @@ internal class Option : IOption
 	/// <value>The defining option.</value>
 	/// <remarks>For an <see cref="Option"/> the value returned will be equal to the Option itself, for an <see cref="OptionAlias"/> it
 	/// will be the <see cref="Option"/> to which the alias refers.</remarks>
-	public Option DefiningOption
-	{
-		get { return this; }
-	}
+	public Option DefiningOption { get => this; }
 
 	/// <summary>
 	/// Gets the min value.
 	/// </summary>
 	/// <value>The min value, or null if no minimum value was specified.</value>
-	public object? MinValue
-	{
-		get { return mMinValue; }
-	}
+	public object? MinValue { get => mMinValue; }
 
 	/// <summary>
 	/// Gets the max value.
 	/// </summary>
 	/// <value>The max value or null if no maximum value was specified.</value>
-	public object? MaxValue
-	{
-		get { return mMaxValue; }
-	}
+	public object? MaxValue { get => mMaxValue; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is integral type.
@@ -546,8 +513,7 @@ internal class Option : IOption
 		get
 		{
 			Type? baseType = GetBaseType(mOptionType);
-			return baseType == typeof(float) ||
-				baseType == typeof(double);
+			return baseType == typeof(float) || baseType == typeof(double);
 		}
 	}
 
@@ -557,13 +523,7 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is decimal type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsDecimalType
-	{
-		get
-		{
-			return GetBaseType(mOptionType) == typeof(decimal);
-		}
-	}
+	public bool IsDecimalType { get => GetBaseType(mOptionType) == typeof(decimal); }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance is numerical type.
@@ -571,26 +531,23 @@ internal class Option : IOption
 	/// <value>
 	/// 	<c>true</c> if this instance is numerical type; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsNumericalType
-	{
-		get
-		{
-			return IsIntegralType || IsDecimalType || IsFloatingPointType;
-		}
-	}
+	public bool IsNumericalType { get => IsIntegralType || IsDecimalType || IsFloatingPointType; }
 
 	/// <summary>
 	/// Gets the valid enumeration values.
 	/// </summary>
 	/// <value>The valid enumeration values of this option if the base type for this option is an enum, or a null reference otherwise.</value>
-	public ICollection<string> ValidEnumerationValues
-	{
-		get { return new GuardedCollection<string>(mEnumerationValues); }
-	}
+	public ICollection<string> ValidEnumerationValues { get => new GuardedCollection<string>(mEnumerationValues); }
+
+	/// <summary>
+	/// Gets the names of the aliases referring to this option.
+	/// </summary>
+	/// <value>The names of the aliases referring to this option.</value>
+	public SCG.IEnumerable<string> Aliases { get => mAliases; }
 
 	#endregion
 
-	#region Public methods
+	#region Public Methods
 
 	/// <summary>
 	/// Sets this option to its default value.
@@ -610,21 +567,9 @@ internal class Option : IOption
 		mAliases.Add(alias);
 	}
 
-	/// <summary>
-	/// Gets the names of the aliases referring to this option.
-	/// </summary>
-	/// <value>The names of the aliases referring to this option.</value>
-	public SCG.IEnumerable<string> Aliases
-	{
-		get
-		{
-			return mAliases;
-		}
-	}
-
 	#endregion
 
-	#region Private methods
+	#region Private Methods
 
 	private static void AppendToCollection(object collection, object value)
 	{
@@ -712,8 +657,7 @@ internal class Option : IOption
 
 	private static bool IsGenericCollectionType(Type type)
 	{
-		return type.GetInterface("System.Collections.Generic.ICollection`1") != null ||
-			type.GetInterface("C5.IExtensible`1") != null;
+		return type.GetInterface("System.Collections.Generic.ICollection`1") != null || type.GetInterface("C5.IExtensible`1") != null;
 	}
 
 	private static bool IsCollectionType(Type type)
@@ -745,27 +689,44 @@ internal class Option : IOption
 	private static bool IsTypeSupported(Type type)
 	{
 		if (IsArray(type) && type.GetArrayRank() != 1)
+		{
 			return false;
+		}
 		else if (IsNonGenericCollectionType(type))
+		{
 			return true;
+		}
 
 		Type? baseType = GetBaseType(type);
 		Debug.Assert(baseType != null);
 
 		return
 			baseType.Equals(typeof(bool)) ||
+			baseType.Equals(typeof(bool?)) ||
 			baseType.Equals(typeof(byte)) ||
+			baseType.Equals(typeof(byte?)) ||
 			baseType.Equals(typeof(sbyte)) ||
+			baseType.Equals(typeof(sbyte?)) ||
 			baseType.Equals(typeof(char)) ||
+			baseType.Equals(typeof(char?)) ||
 			baseType.Equals(typeof(decimal)) ||
+			baseType.Equals(typeof(decimal?)) ||
 			baseType.Equals(typeof(double)) ||
+			baseType.Equals(typeof(double?)) ||
 			baseType.Equals(typeof(float)) ||
+			baseType.Equals(typeof(float?)) ||
 			baseType.Equals(typeof(int)) ||
+			baseType.Equals(typeof(int?)) ||
 			baseType.Equals(typeof(uint)) ||
+			baseType.Equals(typeof(uint?)) ||
 			baseType.Equals(typeof(long)) ||
+			baseType.Equals(typeof(long?)) ||
 			baseType.Equals(typeof(ulong)) ||
+			baseType.Equals(typeof(ulong?)) ||
 			baseType.Equals(typeof(short)) ||
+			baseType.Equals(typeof(short?)) ||
 			baseType.Equals(typeof(ushort)) ||
+			baseType.Equals(typeof(ushort?)) ||
 			baseType.Equals(typeof(string)) ||
 			baseType.IsEnum;
 	}
@@ -791,9 +752,13 @@ internal class Option : IOption
 			// if that is the type of the inner exception.
 			if (tie.InnerException?.GetType() == typeof(OverflowException) || tie.InnerException?.GetType() == typeof(FormatException)
 				|| tie.InnerException?.GetType() == typeof(InvalidOptionValueException))
+			{
 				throw tie.InnerException;
+			}
 			else
+			{
 				throw;
+			}
 		}
 
 		if (IsNumericalType)
@@ -803,15 +768,52 @@ internal class Option : IOption
 			// in the constructor for any numerical type supported by this class.
 			IComparable comparable = (IComparable)value;
 			if (comparable.CompareTo(MinValue) < 0 || comparable.CompareTo(MaxValue) > 0)
+			{
 				throw new OverflowException(CommandLineStrings.ValueWasEitherTooLargeOrTooSmallForThisOptionType);
+			}
 		}
 
 		return value;
 	}
 
+	/// <summary>
+	/// Checks if an object is of the an acceptable type.  Performs additional checks to allow for Nullable objects to be
+	/// equal to their non-nullable underlying type.  Allows strings to pass.
+	/// 
+	/// 
+	/// That is:
+	/// typeof(bool) == typeof(bool?) is considered true.
+	/// </summary>
+	/// <param name="value">Object to check.</param>
+	/// <param name="type">Type to check against.</param>
+	/// <returns>True of the object is considered of type input type, false otherwise.</returns>
+	private bool IsObjectOfType(object value, Type type)
+	{
+		Type valueType = value.GetType();
+
+		// Strings always pass.
+		if (valueType == typeof(string))
+		{
+			return true;
+		}
+
+		if (type.IsGenericType)
+		{
+			// Check if we have a generic nullable.
+			if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				// Test to consider nullables equal to the underlying type.
+				// typeof(bool) == typeof(bool?) will be true for our purposes.
+				return valueType == Nullable.GetUnderlyingType(type);
+			}
+		}
+
+		return valueType == GetBaseType(mOptionType);
+	}
+
 	private object ConvertValueTypeForSetOperation(object value)
 	{
-		Debug.Assert(value.GetType() == typeof(string) || value.GetType() == GetBaseType(mOptionType));
+		Debug.Assert(IsObjectOfType(value, mOptionType));
 
 		ArgumentNullException.ThrowIfNull(value);
 
@@ -833,13 +835,28 @@ internal class Option : IOption
 				}
 				return Enum.Parse(type, stringValue, true);
 			}
-			else if (type.Equals(typeof(bool)))
+			else if (type.Equals(typeof(bool)) || type.Equals(typeof(bool?)))
 			{
 				return bool.Parse(stringValue);
 			}
-			else // We have a numerical type
+			else if (type.Equals(typeof(char)) || type.Equals(typeof(char?)))
 			{
-				object? returnValue = type.InvokeMember("Parse", BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod, null, null, [value, mNumberFormatInfo], CultureInfo.CurrentUICulture);
+				if (stringValue.Length > 1)
+				{
+					throw new InvalidOptionValueException("Character options must be a single character.");
+				}
+				return char.Parse(stringValue);
+			}
+			else // We have a numerical type.
+			{
+				// For nullable types, we don't want to parse by the nullable type, we want to parse by the underlying type.
+				Type? parseType = type;
+				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					parseType = Nullable.GetUnderlyingType(type);
+					Debug.Assert(parseType != null);
+				}
+				object? returnValue = parseType.InvokeMember("Parse", BindingFlags.Public | BindingFlags.Static | BindingFlags.InvokeMethod, null, null, [value, mNumberFormatInfo], CultureInfo.CurrentUICulture);
 				Debug.Assert(returnValue != null);
 				return returnValue;
 			}
@@ -849,32 +866,6 @@ internal class Option : IOption
 			return value;
 		}
 	}
-
-	#endregion
-
-	#region Private fields
-
-	/// <summary>
-	/// Counts the number of times the value was set for this option
-	/// </summary>
-	private int mSetCount;
-	private readonly Type mOptionType;
-	private readonly MemberInfo mMember;
-	private string mDescription = string.Empty;
-	private readonly string mName = string.Empty;
-	private readonly object mObject;
-	private readonly OptionGroup? mGroup;
-	private readonly int mMaxOccurs;
-	private readonly int mMinOccurs;
-	private readonly BoolFunction mUsage;
-	private readonly ArrayList<Option> mProhibitedBy = [];
-	private readonly NumberFormatInfo mNumberFormatInfo;
-	private readonly object? mDefaultValue;
-	private bool mRequireExplicitAssignment;
-	private readonly object? mMinValue;
-	private readonly object? mMaxValue;
-	private readonly ArrayList<string> mAliases = [];
-	private readonly TreeSet<string> mEnumerationValues = [];
 
 	#endregion
 }

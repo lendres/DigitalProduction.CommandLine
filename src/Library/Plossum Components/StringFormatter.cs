@@ -1,34 +1,3 @@
-/* Copyright (c) Peter Palotas 2007
- *  
- *  All rights reserved.
- *  
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are
- *  met:
- *  
- *      * Redistributions of source code must retain the above copyright 
- *        notice, this list of conditions and the following disclaimer.    
- *      * Redistributions in binary form must reproduce the above copyright 
- *        notice, this list of conditions and the following disclaimer in 
- *        the documentation and/or other materials provided with the distribution.
- *      * Neither the name of the copyright holder nor the names of its 
- *        contributors may be used to endorse or promote products derived 
- *        from this software without specific prior written permission.
- *  
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- *  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *  
- *  $Id: StringFormatter.cs 7 2007-08-04 12:02:15Z palotas $
- */
 using C5;
 using System;
 using System.Diagnostics;
@@ -42,7 +11,7 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 public static class StringFormatter
 {
-	#region Public methods
+	#region Public Methods
 
 	/// <summary>
 	/// Aligns the specified string within a field of the desired width, cropping it if it doesn't fit, and expanding it otherwise.
@@ -147,20 +116,26 @@ public static class StringFormatter
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
 
 		if (cropping != Cropping.Both && width < ellipsis.Length)
+		{
 			throw new ArgumentException("width must not be less than the length of ellipsis");
+		}
 		else if (cropping == Cropping.Both && width < ellipsis.Length * 2)
+		{
 			throw new ArgumentException("width must not be less than twice the length of the ellipsis when cropping is set to Both");
+		}
 
-		IIndexed<string> lines = SplitAtLineBreaks(str);
-		StringBuilder result = new();
+		IIndexed<string> lines	= SplitAtLineBreaks(str);
+		StringBuilder result	= new();
 
 		for (int j = 0; j < lines.Count; j++)
 		{
 			if (j != 0)
+			{
 				result.Append(Environment.NewLine);
+			}
 
-			string s = lines[j];
-			int length = s.Length;
+			string s	= lines[j];
+			int length	= s.Length;
 			if (length <= width)
 			{
 				switch (alignment)
@@ -192,9 +167,9 @@ public static class StringFormatter
 							result.Append(padCharacter, width - length);
 						}
 
-						StringBuilder localResult = new();
-						int remainingSpace = width - length;
-						bool readingWord = true;
+						StringBuilder localResult	= new();
+						int remainingSpace			= width - length;
+						bool readingWord			= true;
 
 						for (int i = 0; i < length; i++)
 						{
@@ -266,11 +241,12 @@ public static class StringFormatter
 	public static string WordWrap(string str, int width, WordWrappingMethod method)
 	{
 		ArgumentNullException.ThrowIfNull(str);
-
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
 
 		if (method == WordWrappingMethod.Optimal)
+		{
 			return new OptimalWordWrappedString(str, width).ToString();
+		}
 
 		// Simple word wrapping method that simply fills lines as 
 		// much as possible and then breaks. Creates a not so nice
@@ -278,8 +254,8 @@ public static class StringFormatter
 		StringBuilder dest = new(str.Length);
 		StringBuilder word = new();
 
-		int spaceLeft = width;
-		StringReader reader = new(str);
+		int spaceLeft		= width;
+		StringReader reader	= new(str);
 		int ch;
 		do
 		{
@@ -287,7 +263,9 @@ public static class StringFormatter
 			{
 				word.Append((char)ch);
 				if (ch == '\n')
+				{
 					spaceLeft = width;
+				}
 			}
 
 			if (word.Length > spaceLeft)
@@ -355,7 +333,6 @@ public static class StringFormatter
 		return StringFormatter.Align(WordWrap(str, width, method), width, alignment, Cropping.Left, "", padCharacter);
 	}
 
-
 	/// <summary>
 	/// Splits the specified strings at line breaks, resulting in an indexed collection where each item represents one line of the 
 	/// original string.
@@ -392,12 +369,16 @@ public static class StringFormatter
 		for (int i = 0; i < str.Length; i++)
 		{
 			if (i < str.Length - 1 && str[i] == '\r' && str[i + 1] == '\n')
+			{
 				i++;
+			}
 
 			if (str[i] == '\n' || str[i] == '\r')
 			{
 				if (!removeEmptyLines || temp.Length > 0)
+				{
 					result.Add(temp.ToString());
+				}
 				temp.Length = 0;
 			}
 			else
@@ -407,7 +388,9 @@ public static class StringFormatter
 		}
 
 		if (temp.Length > 0)
+		{
 			result.Add(temp.ToString());
+		}
 		return result;
 	}
 
@@ -423,12 +406,14 @@ public static class StringFormatter
 	{
 		ArgumentNullException.ThrowIfNull(str);
 
-		int count = 0;
-		bool readingWord = false;
+		int count			= 0;
+		bool readingWord	= false;
 		for (int i = 0; i < str.Length; i++)
 		{
 			if (!char.IsWhiteSpace(str[i]))
+			{
 				readingWord = true;
+			}
 			else if (readingWord)
 			{
 				count++;
@@ -436,7 +421,9 @@ public static class StringFormatter
 			}
 		}
 		if (readingWord)
+		{
 			count++;
+		}
 
 		return count;
 	}
@@ -456,22 +443,28 @@ public static class StringFormatter
 	public static string FormatInColumns(int indent, int columnSpacing, params ColumnInfo[] columns)
 	{
 		if (columnSpacing < 0)
+		{
 			throw new ArgumentException("columnSpacing must not be less than zero", nameof(columnSpacing));
+		}
 
 		if (indent < 0)
+		{
 			throw new ArgumentException("indent must not be less than zero", nameof(indent));
+		}
 
 		if (columns.Length == 0)
+		{
 			return "";
+		}
 
-		IIndexed<string>[] strings = new IIndexed<string>[columns.Length];
-		int totalLineCount = 0;
+		IIndexed<string>[] strings	= new IIndexed<string>[columns.Length];
+		int totalLineCount			= 0;
 
 		// Calculate the total number of lines that needs to be printed
 		for (int i = 0; i < columns.Length; i++)
 		{
-			strings[i] = SplitAtLineBreaks(WordWrap(columns[i].Content, columns[i].Width, columns[i].WordWrappingMethod, columns[i].Alignment, ' '), false);
-			totalLineCount = Math.Max(strings[i].Count, totalLineCount);
+			strings[i]		= SplitAtLineBreaks(WordWrap(columns[i].Content, columns[i].Width, columns[i].WordWrappingMethod, columns[i].Alignment, ' '), false);
+			totalLineCount	= Math.Max(strings[i].Count, totalLineCount);
 		}
 
 		// Calculate the first line on which each column should start to print, based
@@ -503,252 +496,17 @@ public static class StringFormatter
 					result.Append(' ', columns[col].Width);
 				}
 				if (col < columns.Length - 1)
+				{
 					result.Append(' ', columnSpacing);
+				}
 			}
 			if (line != totalLineCount - 1)
+			{
 				result.Append(Environment.NewLine);
+			}
 		}
 		return result.ToString();
 	}
 
 	#endregion
-
-	#region Private classes
-
-	/// <summary>
-	/// Class performing an "optimal solution" word wrapping creating a somewhat more estetically pleasing layout. 
-	/// </summary>
-	/// <remarks><para>This is based on the 
-	/// "optimal solution" as described on the Wikipedia page for "Word Wrap" (http://en.wikipedia.org/wiki/Word_wrap).
-	/// The drawback of this method compared to the simple "greedy" technique is that this is much, much slower. However for 
-	/// short strings to print as console messages this will not be a problem, but using it in a WYSIWYG word processor is probably
-	/// not a very good idea.</para></remarks>
-	private class OptimalWordWrappedString
-	{
-		#region Constructors
-
-		public OptimalWordWrappedString(string s, int lineWidth)
-		{
-			string[] lines = s.Split('\n');
-			for (int c = 0; c < lines.Length; c++)
-			{
-				mStr = lines[c].Trim();
-				mLineWidth = lineWidth;
-
-				BuildWordList(mStr, mLineWidth);
-				Debug.Assert(mWordList != null);
-				mCostCache = new int[mWordList.Length, mWordList.Length];
-				for (int x = 0; x < mWordList.Length; x++)
-					for (int y = 0; y < mWordList.Length; y++)
-						mCostCache[x, y] = -1;
-
-				mfCache = new LineBreakResult[mWordList.Length];
-
-				ArrayList<int> stack = [];
-
-				LineBreakResult last = new(0, mWordList.Length - 1);
-				stack.Push(last.K);
-				while (last.K >= 0)
-				{
-					last = FindLastOptimalBreak(last.K);
-					if (last.K >= 0)
-						stack.Push(last.K);
-				}
-
-				int start = 0;
-				while (!stack.IsEmpty)
-				{
-					int next = stack.Pop();
-					mResult.Append(GetWords(start, next));
-					if (!stack.IsEmpty)
-						mResult.Append(Environment.NewLine);
-					start = next + 1;
-				}
-
-				if (c != lines.Length - 1)
-					mResult.Append(Environment.NewLine);
-			}
-
-			mWordList = null;
-			mfCache = null;
-			mStr = null;
-			mCostCache = null;
-		}
-
-		#endregion
-
-		#region Public methods
-
-		public override string ToString()
-		{
-			return mResult.ToString();
-		}
-
-		#endregion
-
-		#region Private methods
-
-		private string GetWords(int i, int j)
-		{
-			Debug.Assert(mWordList != null);
-			Debug.Assert(mStr != null);
-
-			int start = mWordList[i].pos;
-			int end = (j + 1 >= mWordList.Length) ? mStr.Length : mWordList[j + 1].pos - (mWordList[j + 1].spacesBefore - mWordList[j].spacesBefore);
-			return mStr[start..end];
-		}
-
-		private struct WordInfo
-		{
-			public int spacesBefore;
-			public int pos;
-			public int length;
-			public int totalLength;
-		}
-
-		private void BuildWordList(string s, int lineWidth)
-		{
-			Debug.Assert(!s.Contains('\n'));
-
-			ArrayList<WordInfo> mWordListAL = [];
-
-			bool lookingForWs = false;
-			WordInfo we = new()
-			{
-				pos = 0
-			};
-			int spaces = 0;
-			int totalLength = 0;
-			for (int i = 0; i < s.Length; i++)
-			{
-				char ch = s[i];
-				if (lookingForWs && ch == ' ')
-				{
-					spaces++;
-					if (we.pos != i)
-						mWordListAL.Add(we);
-					we = new WordInfo
-					{
-						spacesBefore = spaces,
-						pos = i + 1
-					};
-					lookingForWs = false;
-					continue;
-				}
-				else if (ch != ' ')
-				{
-					lookingForWs = true;
-				}
-
-				we.length++;
-				totalLength++;
-				we.totalLength = totalLength;
-
-				if (we.length == lineWidth)
-				{
-					mWordListAL.Add(we);
-					we = new WordInfo
-					{
-						spacesBefore = spaces,
-						pos = i + 1
-					};
-				}
-			}
-			mWordListAL.Add(we);
-			mWordList = [.. mWordListAL];
-		}
-
-		private int SumWidths(int i, int j)
-		{
-			Debug.Assert(mWordList != null);
-			return i == 0 ? mWordList[j].totalLength : mWordList[j].totalLength - mWordList[i - 1].totalLength;
-		}
-
-		private int GetCost(int i, int j)
-		{
-			Debug.Assert(mWordList != null);
-			Debug.Assert(mCostCache != null);
-
-			int cost = mCostCache[i, j];
-
-			if (cost == -1)
-			{
-				cost = mLineWidth - (mWordList[j].spacesBefore - mWordList[i].spacesBefore) - SumWidths(i, j);
-				cost = cost < 0 ? mInfinity : cost * cost;
-				mCostCache[i, j] = cost;
-			}
-			return cost;
-		}
-
-		private LineBreakResult FindLastOptimalBreak(int j)
-		{
-			Debug.Assert(mfCache != null);
-
-			if (mfCache[j] != null)
-			{
-				return mfCache[j];
-			}
-
-			int cost = GetCost(0, j);
-			if (cost < mInfinity)
-			{
-				return new LineBreakResult(cost, -1);
-			}
-
-			LineBreakResult min = new();
-			for (int k = 0; k < j; k++)
-			{
-				int result = FindLastOptimalBreak(k).Cost + GetCost(k + 1, j);
-				if (result < min.Cost)
-				{
-					min.Cost = result;
-					min.K = k;
-				}
-			}
-
-			mfCache[j] = min;
-			return min;
-		}
-
-		#endregion
-
-		#region Private types
-
-		private class LineBreakResult
-		{
-			public LineBreakResult()
-			{
-				Cost = mInfinity;
-				K = -1;
-			}
-
-			public LineBreakResult(int cost, int k)
-			{
-				this.Cost = cost;
-				this.K = k;
-			}
-
-			public int Cost;
-			public int K;
-		}
-
-		#endregion
-
-		#region Private fields
-
-		private WordInfo[]? mWordList;
-		private readonly StringBuilder mResult = new();
-		private readonly LineBreakResult[]? mfCache;
-		private readonly string? mStr;
-		private readonly int mLineWidth;
-		private const int mInfinity = int.MaxValue / 2;
-
-		// We need a rectangular array here, so this warning is unwarranted.
-		private readonly int[,]? mCostCache;
-
-		#endregion
-	}
-
-	#endregion
-
 }

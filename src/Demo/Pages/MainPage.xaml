@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:local="clr-namespace:DigitalProduction.Demo"
+	x:DataType="local:MainPageViewModel"
+	x:Class="DigitalProduction.Demo.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="dotnet_bot.png"
+                HeightRequest="150"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a hovercraft number nine" />
+
+			<Label
+				Text="An Error Occurred"
+				Style="{StaticResource ErrorStyle}"
+				IsVisible="{Binding ErrorOccured}"/>
+			<Label
+				Text="{Binding ErrorMessage}"
+				Style="{StaticResource ErrorStyle}"
+				IsVisible="{Binding ErrorOccured}"/>
+
+			<Grid
+				RowDefinitions="Auto,Auto"
+				RowSpacing="8"
+				ColumnDefinitions="240,300"
+				ColumnSpacing="8"
+				WidthRequest="500">
+
+				<Label
+					Grid.Row="0" Grid.Column="0"
+					Text="File Command Line:"
+					Style="{StaticResource SubHeadline}" />
+
+				<Label
+					Grid.Row="0" Grid.Column="1"
+					Text="{Binding FileName}"
+					Style="{StaticResource SubHeadline}" />
+
+				<Label
+					Grid.Row="1" Grid.Column="0"
+					Text="Run Command Line:"
+					Style="{StaticResource SubHeadline}" />
+
+				<Label
+					Grid.Row="1" Grid.Column="1"
+					Text="{Binding Run}"
+					Style="{StaticResource SubHeadline}" />
+			</Grid>
+			<!--<Button
+                Text="Navigate to Second Page" 
+                Clicked="OnNavigateForward"
+                HorizontalOptions="Fill" />-->
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
