@@ -3,7 +3,7 @@ Command line argument parsing library for .Net.
 
 # Legacy
 ## Origin
-This library is derived directly from the Plossum command line parsing library.
+This library is derived directly from the Plossum command line parsing library written by Peter Palotas.
 - [Code project article and original source code.](https://www.codeproject.com/Articles/19869/Powerful-and-simple-command-line-parsing-in-C)
 - [NuGet package](https://www.nuget.org/packages/Plossum.CommandLine)
 
