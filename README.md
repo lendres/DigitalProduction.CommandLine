@@ -13,7 +13,7 @@ The NuGet package was available and functional, so the software was usable.  How
 - The code base was not being maintained.
 - The source code was only available as a download (it was static).  There wasn't a repository to which to contribute changes.
 - The examples were not directly runnable.
-- Some data types contain errors.
+- Some data types contained errors.
 - Nullable types were not supported.
 
 # New Library
