@@ -23,6 +23,7 @@ This effort was initiated to achieve several goals:
 - Provide a GitHub repository.
 - Update the code base to use modern language features.
 - Simplify the code base.
+- Remove bugs and support Nullable types.
 
 ## Changes
 - The library name was changed to avoid confusion with the original.
@@ -30,3 +31,4 @@ This effort was initiated to achieve several goals:
 - Updates to reflect new library features.
 - Simplification of code.
 - Added unit tests.
+- Added a .Net Maui example.
