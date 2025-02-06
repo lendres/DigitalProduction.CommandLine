@@ -29,33 +29,50 @@
 				RowDefinitions="Auto,Auto"
 				RowSpacing="8"
 				ColumnDefinitions="240,300"
-				ColumnSpacing="8"
-				WidthRequest="500">
+				ColumnSpacing="8">
 
 				<Label
 					Grid.Row="0" Grid.Column="0"
 					Text="File Command Line:"
-					Style="{StaticResource SubHeadline}" />
+					Style="{StaticResource SubHeadline}"/>
 
 				<Label
 					Grid.Row="0" Grid.Column="1"
 					Text="{Binding FileName}"
-					Style="{StaticResource SubHeadline}" />
+					Style="{StaticResource SubHeadline}"/>
 
 				<Label
 					Grid.Row="1" Grid.Column="0"
 					Text="Run Command Line:"
-					Style="{StaticResource SubHeadline}" />
+					Style="{StaticResource SubHeadline}"/>
 
 				<Label
 					Grid.Row="1" Grid.Column="1"
 					Text="{Binding Run}"
-					Style="{StaticResource SubHeadline}" />
+					Style="{StaticResource SubHeadline}"/>
 			</Grid>
-			<!--<Button
-                Text="Navigate to Second Page" 
-                Clicked="OnNavigateForward"
-                HorizontalOptions="Fill" />-->
+
+			<VerticalStackLayout Padding="4">
+				<Label Text="Header" Style="{StaticResource SubHeadline}"/>
+				<Border Style="{StaticResource MessageBoxStyle}">
+					<Label Text="{Binding Header}" LineBreakMode="WordWrap"/>
+				</Border>
+			</VerticalStackLayout>
+
+			<VerticalStackLayout Padding="4">
+				<Label Text="Help" Style="{StaticResource SubHeadline}"/>
+				<Border Style="{StaticResource MessageBoxStyle}">
+					<Label Text="{Binding Help}" FontFamily="IBMPlexMono-Regular" LineBreakMode="WordWrap"/>
+				</Border>
+			</VerticalStackLayout>
+
+			<VerticalStackLayout Padding="4">
+				<Label Text="Errors" Style="{StaticResource SubHeadline}"/>
+				<Border Style="{StaticResource MessageBoxStyle}">
+					<Label Text="{Binding Errors}" FontFamily="IBMPlexMono-Regular" LineBreakMode="WordWrap"/>
+				</Border>
+			</VerticalStackLayout>
+
         </VerticalStackLayout>
     </ScrollView>
 
