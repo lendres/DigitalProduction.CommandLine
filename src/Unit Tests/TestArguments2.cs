@@ -2,7 +2,7 @@
 
 namespace UnitTests;
 
-public class TestArguments2
+public class TestArguments2 : TestingBase
 {
 	public TestArguments2()
 	{
@@ -11,23 +11,8 @@ public class TestArguments2
 	[Fact]
 	public void TestShortArguments()
 	{
-		Arguments2 arguments = new();
-		CommandLineParser? parser = null;
-		try
-		{
-			parser = new(arguments);
+		Arguments2 arguments =  GetArgumentsInstance<Arguments2>("-f \"C:\\Temp\\Test File.txt\" -v true -z true -c true");
 
-			string input = "-f \"C:\\Temp\\Test File.txt\" -v true -z true -c true";
-			parser.Parse(input, false);
-			
-		}
-		catch (Exception exception)
-		{
-			System.Diagnostics.Debug.WriteLine("");
-			System.Diagnostics.Debug.WriteLine(exception.ToString());
-		}
-
-		Assert.NotNull(parser);
 		Assert.Equal(@"C:\Temp\Test File.txt", arguments.FileName);
 		Assert.True(arguments.Verbose);
 		Assert.True(arguments.UseCompression);
@@ -42,12 +27,8 @@ public class TestArguments2
 	[Fact]
 	public void TestGroupedArguments()
 	{
-		Arguments2 arguments = new();
-		CommandLineParser? parser = new(arguments);
-		string input = "-f \"C:\\Temp\\Test File.txt\" -vzc";
-		parser.Parse(input, false);
-			
-		Assert.NotNull(parser);
+		Arguments2 arguments =  GetArgumentsInstance<Arguments2>("-f \"C:\\Temp\\Test File.txt\" -vzc");
+		
 		Assert.Equal(@"C:\Temp\Test File.txt", arguments.FileName);
 		Assert.True(arguments.Verbose);
 		Assert.True(arguments.UseCompression);
@@ -63,12 +44,8 @@ public class TestArguments2
 	[Fact]
 	public void TestExactlyOne()
 	{
-		Arguments2 arguments = new();
-		CommandLineParser? parser = new(arguments);
-		string input = "-cx";
-		parser.Parse(input, false);
-			
-		Assert.NotNull(parser);
+		CommandLineParser parser =  GetParser<Arguments2>("-cx");
+
 		foreach (var error in parser.Errors)
 		{
 			switch (error.ErrorCode)

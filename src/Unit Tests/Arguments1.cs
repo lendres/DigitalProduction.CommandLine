@@ -8,6 +8,6 @@ class Arguments1
 	[CommandLineOption(Name = "filename", Description = "Specifies the input file.")]
 	public string FileName { get; set; } = "";
 
-	[CommandLineOption(Name = "run", BoolFunction = BoolFunction.TrueIfPresent, Description = "If true, the application will automatically start running.")]
+	[CommandLineOption(Name = "run", BoolFunction = BoolFunction.TrueIfPresent, Description = "Automatically start running at star tup.")]
 	public bool Run { get; set; } = false;
 }

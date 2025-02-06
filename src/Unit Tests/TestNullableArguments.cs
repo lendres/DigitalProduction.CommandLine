@@ -2,48 +2,10 @@
 
 namespace UnitTests;
 
-public class TestNullableArguments
+public class TestNullableArguments : TestingBase
 {
-	readonly QuotationInfo _quotationInfo = new('\"');
-
 	public TestNullableArguments()
 	{
-		_quotationInfo.AddEscapeCode('\"', '\"');
-	}
-
-	private static T GetArgumentsInstance<T>(string commandLineString) where T : class, new()
-	{
-		T nullableArguments	= new();
-		try
-		{
-			CommandLineParser parser = new(nullableArguments);
-			Assert.NotNull(parser);
-			parser.Parse(commandLineString, false);
-		}
-		catch (Exception exception)
-		{
-			System.Diagnostics.Debug.WriteLine("");
-			System.Diagnostics.Debug.WriteLine(exception.ToString());
-		}
-		return nullableArguments;
-	}
-
-	private static CommandLineParser GetParser<T>(string commandLineString) where T : class, new()
-	{
-		T nullableArguments	= new();
-		try
-		{
-			CommandLineParser parser = new(nullableArguments);
-			Assert.NotNull(parser);
-			parser.Parse(commandLineString, false);
-			return parser;
-		}
-		catch (Exception exception)
-		{
-			System.Diagnostics.Debug.WriteLine("");
-			System.Diagnostics.Debug.WriteLine(exception.ToString());
-			throw;
-		}
 	}
 
 	/// <summary>
@@ -52,18 +14,18 @@ public class TestNullableArguments
 	[Fact]
 	public void StringTest()
 	{
-		StringManager arguments = GetArgumentsInstance<StringManager>("-filename \"Test File.txt\"");
-		Assert.Equal("Test File.txt", arguments.FileName);
+		StringManager arguments = GetArgumentsInstance<StringManager>("-value \"Test File.txt\"");
+		Assert.Equal("Test File.txt", arguments.Value);
 	}
 
 	[Fact]
 	public void NullableStringTest()
 	{
-		NullableStringManager arguments = GetArgumentsInstance<NullableStringManager>("-filename \"Test File.txt\"");
-		Assert.Equal("Test File.txt", arguments.FileName);
+		NullableStringManager arguments = GetArgumentsInstance<NullableStringManager>("-value \"Test File.txt\"");
+		Assert.Equal("Test File.txt", arguments.Value);
 
 		arguments = GetArgumentsInstance<NullableStringManager>("");
-		Assert.Null(arguments.FileName);
+		Assert.Null(arguments.Value);
 	}
 
 	/// <summary>
@@ -72,18 +34,18 @@ public class TestNullableArguments
 	[Fact]
 	public void BoolTest()
 	{
-		BoolManager arguments = GetArgumentsInstance<BoolManager>("-run");
-		Assert.True(arguments.Run);
+		BoolManager arguments = GetArgumentsInstance<BoolManager>("-value");
+		Assert.True(arguments.Value);
 	}
 
 	[Fact]
 	public void NullableBoolTest()
 	{
-		NullableBoolManager arguments = GetArgumentsInstance<NullableBoolManager>("-run");
-		Assert.True(arguments.Run);
+		NullableBoolManager arguments = GetArgumentsInstance<NullableBoolManager>("-value");
+		Assert.True(arguments.Value);
 
 		arguments = GetArgumentsInstance<NullableBoolManager>("");
-		Assert.Null(arguments.Run);
+		Assert.Null(arguments.Value);
 	}
 
 	/// <summary>
