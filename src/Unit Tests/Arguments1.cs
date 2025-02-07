@@ -13,7 +13,7 @@ class Arguments1
 	/// -filename "File Name.txt"
 	/// By specifying an minimum occurance of one, it makes this argument mandatory.
 	/// </summary>
-	[CommandLineOption(Name = "filename", Description = "Specifies the input file.", MinOccurs=1)]
+	[CommandLineOption(Name = "filename", Aliases = "f", Description = "Specifies the input file.", MinOccurs=1)]
 	public string FileName { get; set; } = "";
 
 	/// <summary>
@@ -21,6 +21,6 @@ class Arguments1
 	/// -run
 	/// If present, the property will be set to true (an argument is not requried).
 	/// </summary>
-	[CommandLineOption(Name = "run", BoolFunction = BoolFunction.TrueIfPresent, Description = "Automatically start running at star tup.")]
+	[CommandLineOption(Name = "run", Aliases = "r", BoolFunction = BoolFunction.TrueIfPresent, Description = "Automatically start running at star tup.")]
 	public bool Run { get; set; } = false;
 }

@@ -54,6 +54,9 @@ public class TestArguments1 : TestingBase
 		Assert.True(arguments.Run);
 	}
 
+	/// <summary>
+	/// Test for a single string that includes the executable string as the first argument.
+	/// </summary>
 	[Fact]
 	public void TestStringExecutable()
 	{
@@ -64,6 +67,15 @@ public class TestArguments1 : TestingBase
 		Assert.NotNull(parser);
 		Assert.Equal(@"C:\Temp\Example.exe", parser.ExecutablePath);
 		Assert.Equal("Test File.txt", arguments.FileName);
+		Assert.True(arguments.Run);
+	}
+
+	[Fact]
+	public void TestAliasArguments()
+	{
+		Arguments1 arguments =  GetArgumentsInstance<Arguments1>("-f \"C:\\Temp\\Test File.txt\" -r");
+
+		Assert.Equal(@"C:\Temp\Test File.txt", arguments.FileName);
 		Assert.True(arguments.Run);
 	}
 }
