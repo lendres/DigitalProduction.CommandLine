@@ -23,7 +23,7 @@ public class TestArguments2 : TestingBase
 	[Fact]
 	public void TestAliasArguments()
 	{
-		Arguments2 arguments =  GetArgumentsInstance<Arguments2>("-file \"C:\\Temp\\Test File.txt\" -verbose true -usecompression true -create true");
+		Arguments2 arguments =  GetArgumentsInstance<Arguments2>("--file \"C:\\Temp\\Test File.txt\" --verbose true --usecompression true --create true");
 
 		Assert.Equal(@"C:\Temp\Test File.txt", arguments.FileName);
 		Assert.True(arguments.Verbose);
