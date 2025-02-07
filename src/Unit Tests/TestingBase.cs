@@ -31,7 +31,7 @@ public abstract class TestingBase
 		return parsingPair.Parser;
 	}
 
-	protected static ParserArgumentPair<T> TryParsing<T>(string commandLineString, bool containsExecutable) where T : class, new ()
+	private static ParserArgumentPair<T> TryParsing<T>(string commandLineString, bool containsExecutable) where T : class, new ()
 	{
 		try
 		{
