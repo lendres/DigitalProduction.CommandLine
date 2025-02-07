@@ -16,7 +16,7 @@ class Arguments2
 	[CommandLineOption(Name = "v", Aliases = "verbose", Description = "Produce verbose output.", GroupId = "options")]
 	public bool Verbose { get; set; }
 
-	[CommandLineOption(Name = "z", Aliases = "use-compression", Description = "Compress or decompress the archive.", GroupId = "options")]
+	[CommandLineOption(Name = "z", Aliases = "usecompression", Description = "Compress or decompress the archive.", GroupId = "options")]
 	public bool UseCompression { get; set; }
 
 	[CommandLineOption(Name = "c", Aliases = "create", Description = "Create a new archive.", GroupId = "commands")]

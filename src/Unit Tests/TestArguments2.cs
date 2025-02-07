@@ -20,6 +20,18 @@ public class TestArguments2 : TestingBase
 		Assert.False(arguments.Extract);
 	}
 
+	[Fact]
+	public void TestAliasArguments()
+	{
+		Arguments2 arguments =  GetArgumentsInstance<Arguments2>("-file \"C:\\Temp\\Test File.txt\" -verbose true -usecompression true -create true");
+
+		Assert.Equal(@"C:\Temp\Test File.txt", arguments.FileName);
+		Assert.True(arguments.Verbose);
+		Assert.True(arguments.UseCompression);
+		Assert.True(arguments.Create);
+		Assert.False(arguments.Extract);
+	}
+
 	/// <summary>
 	/// Tests:
 	/// EnabledOptionStyles = OptionStyles.Group.
