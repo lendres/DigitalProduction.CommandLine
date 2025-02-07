@@ -21,6 +21,10 @@ public abstract class TestingBase
 			CommandLineParser parser = new(nullableArguments);
 			Assert.NotNull(parser);
 			parser.Parse(commandLineString, containsExecutable);
+			if (parser.HasErrors)
+			{
+				
+			}
 		}
 		catch (Exception exception)
 		{
