@@ -4,6 +4,8 @@ namespace UnitTests;
 
 /// <summary>
 /// A simple command line manager.
+/// 
+/// Arguments an be accessed with the names or file names as "-filename" or "-f".
 /// </summary>
 [CommandLineManager(ApplicationName = "Test 1", Copyright = "Copyright (c) Lance A. Endres")]
 class Arguments1

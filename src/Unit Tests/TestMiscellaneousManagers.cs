@@ -24,5 +24,4 @@ public class TestMiscellaneousManagers : TestingBase
 		arguments = GetArgumentsInstance<BoolPrefixManager>("-v -lvalue secondvalue");
 		Assert.Equal("secondvalue", arguments.LongValue);
 	}
-
 }
