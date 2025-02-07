@@ -656,7 +656,7 @@ public sealed class CommandLineParser : IDisposable
 		{
 			PushLexer(new Lexer(input, mEscapeCharacters, mQuotations, mAssignmentCharacters), null);
 
-			// Set the option styles for the lexer
+			// Set the option styles for the lexer.
 			Debug.Assert(CurrentLexer != null);
 			CurrentLexer.EnabledOptionStyles = mEnabledOptionStyles;
 
@@ -669,7 +669,7 @@ public sealed class CommandLineParser : IDisposable
 				}
 			}
 
-			// Perform the actual parsing of the input
+			// Perform the actual parsing of the input.
 			while (CurrentLexer != null)
 			{
 				if (LA1 == null && !PopFinishedLexers())
