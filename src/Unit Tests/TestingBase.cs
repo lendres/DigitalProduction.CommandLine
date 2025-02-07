@@ -2,7 +2,7 @@
 
 namespace UnitTests;
 
-public class TestingBase
+public abstract class TestingBase
 {
 	public TestingBase()
 	{

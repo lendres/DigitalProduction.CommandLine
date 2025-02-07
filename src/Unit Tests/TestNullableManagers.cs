@@ -2,9 +2,9 @@
 
 namespace UnitTests;
 
-public class TestNullableArguments : TestingBase
+public class TestNullableManagers : TestingBase
 {
-	public TestNullableArguments()
+	public TestNullableManagers()
 	{
 	}
 

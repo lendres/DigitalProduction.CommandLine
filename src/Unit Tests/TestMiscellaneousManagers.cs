@@ -2,9 +2,9 @@
 
 namespace UnitTests;
 
-public class TestMiscellaneousArguments : TestingBase
+public class TestMiscellaneousManagers : TestingBase
 {
-	public TestMiscellaneousArguments()
+	public TestMiscellaneousManagers()
 	{
 	}
 
