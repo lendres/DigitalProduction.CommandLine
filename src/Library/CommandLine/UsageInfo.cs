@@ -184,7 +184,7 @@ public sealed class UsageInfo
 	/// <param name="width">The total width in characters in which the string should be fitted</param>
 	/// <returns>a string consisting of the program name, version and copyright notice.</returns>
 	/// <remarks>This string is suitable for printing as the first output of a console application.</remarks>
-	public string GetHeaderAsString(int width)
+	public string GetHeaderAsString(int? width = null)
 	{
 		StringBuilder result = new();
 		result.Append(ApplicationName ?? "Unnamed application");
@@ -202,7 +202,15 @@ public sealed class UsageInfo
 			result.Append(ApplicationCopyright);
 			result.Append(Environment.NewLine);
 		}
-		return StringFormatter.WordWrap(result.ToString(), width);
+
+		if (width != null)
+		{
+			return StringFormatter.WordWrap(result.ToString(), (int)width);
+		}
+		else
+		{
+			return result.ToString();
+		}
 	}
 
 	/// <summary>
@@ -211,7 +219,7 @@ public sealed class UsageInfo
 	/// <param name="width">The maximum width of each line in the returned string.</param>
 	/// <returns>A formatted string describing the options available in this parser</returns>
 	/// <exception cref="ArgumentException">The specified width was too small to generate the requested list.</exception>
-	public string GetOptionsAsString(int width)
+	public string GetOptionsAsString(int width = 10000)
 	{
 		// Remove spacing between columns.
 		width -= ColumnSpacing;
@@ -292,7 +300,7 @@ public sealed class UsageInfo
 	/// </summary>
 	/// <param name="width">The width of the field in which to format the error list.</param>
 	/// <returns>The list of errors formatted inside a field of the specified <paramref name="width"/></returns>
-	public string GetErrorsAsString(int width)
+	public string GetErrorsAsString(int width = int.MaxValue)
 	{
 		if (width < IndentWidth + 7)
 		{

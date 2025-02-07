@@ -32,8 +32,8 @@ public struct ColumnInfo(int width, string content, Alignment alignment, Vertica
 	/// <param name="content">The content of this column.</param>
 	/// <param name="alignment">The alignment to use for this column.</param>
 	/// <param name="verticalAlignment">The vertical alignment to use for this column</param>
-	public ColumnInfo(int width, string content, Alignment alignment, VerticalAlignment verticalAlignment)
-			: this(width, content, alignment, verticalAlignment, WordWrappingMethod.Optimal)
+	public ColumnInfo(int width, string content, Alignment alignment, VerticalAlignment verticalAlignment) :
+		this(width, content, alignment, verticalAlignment, WordWrappingMethod.Optimal)
 	{
 	}
 
@@ -44,8 +44,8 @@ public struct ColumnInfo(int width, string content, Alignment alignment, Vertica
 	/// <param name="content">The content of this column.</param>
 	/// <param name="alignment">The alignment to use for this column.</param>
 	/// <remarks>The word wrapping method used will be the one described by <see cref="Plossum.WordWrappingMethod.Optimal"/>.</remarks>
-	public ColumnInfo(int width, string content, Alignment alignment)
-		: this(width, content, alignment, VerticalAlignment.Top)
+	public ColumnInfo(int width, string content, Alignment alignment) :
+		this(width, content, alignment, VerticalAlignment.Top)
 	{
 	}
 
@@ -56,8 +56,8 @@ public struct ColumnInfo(int width, string content, Alignment alignment, Vertica
 	/// <param name="content">The content of this column.</param>
 	/// <remarks>The word wrapping method used will be the one described by <see cref="Plossum.WordWrappingMethod.Optimal"/>, and 
 	/// each line in this column will be left aligned.</remarks>
-	public ColumnInfo(int width, string content)
-		: this(width, content, Alignment.Left)
+	public ColumnInfo(int width, string content) :
+		this(width, content, Alignment.Left)
 	{
 	}
 

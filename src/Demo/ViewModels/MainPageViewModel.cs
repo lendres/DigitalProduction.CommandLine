@@ -33,6 +33,9 @@ public partial class MainPageViewModel : ObservableObject
 
 		FileName		= _commandLineArguments.FileName		?? string.Empty;
 		Run				= _commandLineArguments.Run				?? false;
+		Header			= _commandLineArguments.Header			?? string.Empty;
+		Help			= _commandLineArguments.Help			?? string.Empty;
+		Errors			= _commandLineArguments.Errors			?? string.Empty;
 	}
 
 	#endregion
@@ -50,6 +53,15 @@ public partial class MainPageViewModel : ObservableObject
 
 	[ObservableProperty]
 	public partial string			ErrorMessage { get; set; }				= string.Empty;
+
+	[ObservableProperty]
+	public partial string			Header { get; set; }					= string.Empty;
+
+	[ObservableProperty]
+	public partial string			Help { get; set; }						= string.Empty;
+
+	[ObservableProperty]
+	public partial string			Errors{ get; set; }						= string.Empty;
 
 	#endregion
 
