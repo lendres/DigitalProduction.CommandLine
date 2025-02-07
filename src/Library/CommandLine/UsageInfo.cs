@@ -300,7 +300,7 @@ public sealed class UsageInfo
 	/// </summary>
 	/// <param name="width">The width of the field in which to format the error list.</param>
 	/// <returns>The list of errors formatted inside a field of the specified <paramref name="width"/></returns>
-	public string GetErrorsAsString(int width = int.MaxValue)
+	public string GetErrorsAsString(int width = 10000)
 	{
 		if (width < IndentWidth + 7)
 		{
