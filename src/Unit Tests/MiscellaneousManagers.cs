@@ -3,7 +3,7 @@ using DigitalProduction.CommandLine;
 namespace UnitTests;
 
 /// <summary>
-/// String.
+/// Test using +/- for boolean prefixes.
 /// </summary>
 [CommandLineManager(EnabledOptionStyles = OptionStyles.Unix | OptionStyles.Plus)]
 class BoolPrefixManager
