@@ -18,10 +18,11 @@ public class TestMiscellaneousManagers : TestingBase
 		BoolPrefixManager arguments = GetArgumentsInstance<BoolPrefixManager>("+v");
 		Assert.True(arguments.Value);
 
+		arguments = GetArgumentsInstance<BoolPrefixManager>("-v");
+		Assert.False(arguments.Value);
 
-//		arguments = GetArgumentsInstance<BoolPrefixManager>("-v");
-		//Assert.False(arguments.Value);
+		arguments = GetArgumentsInstance<BoolPrefixManager>("-v -lvalue secondvalue");
+		Assert.Equal("secondvalue", arguments.LongValue);
 	}
-
 
 }
