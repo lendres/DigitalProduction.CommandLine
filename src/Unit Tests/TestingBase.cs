@@ -4,6 +4,12 @@ namespace UnitTests;
 
 public abstract class TestingBase
 {
+	private struct ParserArgumentPair<T>
+	{
+		public T Arguments;
+		public CommandLineParser Parser;
+	}
+
 	public TestingBase()
 	{
 		QuotationInfo = new('\"');
@@ -15,39 +21,43 @@ public abstract class TestingBase
 
 	protected static T GetArgumentsInstance<T>(string commandLineString, bool containsExecutable = false) where T : class, new()
 	{
-		T nullableArguments	= new();
-		try
-		{
-			CommandLineParser parser = new(nullableArguments);
-			Assert.NotNull(parser);
-			parser.Parse(commandLineString, containsExecutable);
-			if (parser.HasErrors)
-			{
-				
-			}
-		}
-		catch (Exception exception)
-		{
-			System.Diagnostics.Debug.WriteLine("");
-			System.Diagnostics.Debug.WriteLine(exception.ToString());
-		}
-		return nullableArguments;
+		ParserArgumentPair<T> parsingPair = TryParsing<T>(commandLineString, containsExecutable);
+		return parsingPair.Arguments;
 	}
 
 	protected static CommandLineParser GetParser<T>(string commandLineString, bool containsExecutable = false) where T : class, new()
 	{
-		T nullableArguments	= new();
+		ParserArgumentPair<T> parsingPair = TryParsing<T>(commandLineString, containsExecutable);
+		return parsingPair.Parser;
+	}
+
+	protected static ParserArgumentPair<T> TryParsing<T>(string commandLineString, bool containsExecutable) where T : class, new ()
+	{
 		try
 		{
-			CommandLineParser parser = new(nullableArguments);
-			Assert.NotNull(parser);
-			parser.Parse(commandLineString, containsExecutable);
-			return parser;
+			T arguments = new();
+			ParserArgumentPair<T> parsingPair = new()
+			{
+				Arguments = arguments,
+				Parser = new(arguments)
+			};
+
+			Assert.NotNull(parsingPair.Parser);
+			parsingPair.Parser.Parse(commandLineString, containsExecutable);
+
+			// If parsing errors occured, write them to the output and continue.
+			if (parsingPair.Parser.HasErrors)
+			{
+				System.Diagnostics.Trace.WriteLine("");
+				System.Diagnostics.Trace.Write(parsingPair.Parser.UsageInfo.GetErrorsAsString());
+			}
+
+			return parsingPair;
 		}
 		catch (Exception exception)
 		{
-			System.Diagnostics.Debug.WriteLine("");
-			System.Diagnostics.Debug.WriteLine(exception.ToString());
+			System.Diagnostics.Trace.WriteLine("");
+			System.Diagnostics.Trace.WriteLine(exception.ToString());
 			throw;
 		}
 	}
