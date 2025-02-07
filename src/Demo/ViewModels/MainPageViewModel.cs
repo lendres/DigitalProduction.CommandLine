@@ -31,11 +31,11 @@ public partial class MainPageViewModel : ObservableObject
 			ErrorMessage = exception.Message;
 		}
 
-		FileName		= _commandLineArguments.FileName		?? string.Empty;
-		Run				= _commandLineArguments.Run				?? false;
-		Header			= _commandLineArguments.Header			?? string.Empty;
-		Help			= _commandLineArguments.Help			?? string.Empty;
-		Errors			= _commandLineArguments.Errors			?? string.Empty;
+		FileName	= _commandLineArguments.FileName	?? string.Empty;
+		Run			= _commandLineArguments.Run			?? false;
+		Header		= _commandLineArguments.Header		?? string.Empty;
+		Help		= _commandLineArguments.Help		?? string.Empty;
+		Errors		= _commandLineArguments.Errors		?? string.Empty;
 	}
 
 	#endregion
