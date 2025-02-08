@@ -18,15 +18,8 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 {
 	#region Private Fields
 
-	private readonly string			mId								= id;
-	private string					mName							= string.Empty;
-	private string					mDescription					= string.Empty;
-	private OptionGroupRequirement	mRequired;
 	private bool?					mRequireExplicitAssignment;
 
-	#endregion
-
-	#region Constructor
 	#endregion
 
 	#region Properties
@@ -37,25 +30,25 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 	/// <value>The name.</value>
 	/// <remarks>This is the name that will be displayed as a headline for the options contained in the
 	/// group in any generated documentation. If not explicitly set it will be the same as <see cref="Id"/>.</remarks>
-	public string Name { get => mName; set => mName = value; }
+	public string Name { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description { get => mDescription; set => mDescription = value; }
+	public string? Description { get; set; } = null;
 
 	/// <summary>
 	/// Gets the id.
 	/// </summary>
 	/// <value>The id.</value>
-	public string Id { get => mId; }
+	public string Id { get; } = id;
 
 	/// <summary>
 	/// Gets or sets the requirements placed on the options in this group.
 	/// </summary>
 	/// <value>requirements placed on the options in this group.</value>
-	public OptionGroupRequirement Require { get => mRequired; set => mRequired = value; }
+	public OptionGroupRequirement Require { get; set; }
 
 	/// <summary>
 	/// Gets or sets a value indicating whether explicit assignment is required for the options
