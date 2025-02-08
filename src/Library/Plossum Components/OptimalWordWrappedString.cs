@@ -24,7 +24,7 @@ internal class OptimalWordWrappedString
 
 		public LineBreakResult()
 		{
-			Cost	= mInfinity;
+			Cost	= _infinity;
 			K		= -1;
 		}
 
@@ -47,15 +47,15 @@ internal class OptimalWordWrappedString
 
 	#region Private Fields
 
-	private WordInfo[]?						mWordList;
-	private readonly StringBuilder			mResult			= new();
-	private readonly LineBreakResult[]?		mfCache;
-	private readonly string?				mStr;
-	private readonly int					mLineWidth;
-	private const int						mInfinity		= int.MaxValue / 2;
+	private WordInfo[]?						_wordList;
+	private readonly StringBuilder			_result			= new();
+	private readonly LineBreakResult[]?		_cache;
+	private readonly string?				_string;
+	private readonly int					_lineWidth;
+	private const int						_infinity		= int.MaxValue / 2;
 
 	// We need a rectangular array here, so this warning is unwarranted.
-	private readonly int[,]?				mCostCache;
+	private readonly int[,]?				_costCache;
 
 	#endregion
 
@@ -66,25 +66,25 @@ internal class OptimalWordWrappedString
 		string[] lines = s.Split('\n');
 		for (int c = 0; c < lines.Length; c++)
 		{
-			mStr = lines[c].Trim();
-			mLineWidth = lineWidth;
+			_string = lines[c].Trim();
+			_lineWidth = lineWidth;
 
-			BuildWordList(mStr, mLineWidth);
-			Debug.Assert(mWordList != null);
-			mCostCache = new int[mWordList.Length, mWordList.Length];
-			for (int x = 0; x < mWordList.Length; x++)
+			BuildWordList(_string, _lineWidth);
+			Debug.Assert(_wordList != null);
+			_costCache = new int[_wordList.Length, _wordList.Length];
+			for (int x = 0; x < _wordList.Length; x++)
 			{
-				for (int y = 0; y < mWordList.Length; y++)
+				for (int y = 0; y < _wordList.Length; y++)
 				{
-					mCostCache[x, y] = -1;
+					_costCache[x, y] = -1;
 				}
 			}
 
-			mfCache = new LineBreakResult[mWordList.Length];
+			_cache = new LineBreakResult[_wordList.Length];
 
 			ArrayList<int> stack = [];
 
-			LineBreakResult last = new(0, mWordList.Length - 1);
+			LineBreakResult last = new(0, _wordList.Length - 1);
 			stack.Push(last.K);
 			while (last.K >= 0)
 			{
@@ -99,24 +99,24 @@ internal class OptimalWordWrappedString
 			while (!stack.IsEmpty)
 			{
 				int next = stack.Pop();
-				mResult.Append(GetWords(start, next));
+				_result.Append(GetWords(start, next));
 				if (!stack.IsEmpty)
 				{
-					mResult.Append(Environment.NewLine);
+					_result.Append(Environment.NewLine);
 				}
 				start = next + 1;
 			}
 
 			if (c != lines.Length - 1)
 			{
-				mResult.Append(Environment.NewLine);
+				_result.Append(Environment.NewLine);
 			}
 		}
 
-		mWordList	= null;
-		mfCache		= null;
-		mStr		= null;
-		mCostCache	= null;
+		_wordList	= null;
+		_cache		= null;
+		_string		= null;
+		_costCache	= null;
 	}
 
 	#endregion
@@ -125,7 +125,7 @@ internal class OptimalWordWrappedString
 
 	public override string ToString()
 	{
-		return mResult.ToString();
+		return _result.ToString();
 	}
 
 	#endregion
@@ -134,12 +134,12 @@ internal class OptimalWordWrappedString
 
 	private string GetWords(int i, int j)
 	{
-		Debug.Assert(mWordList != null);
-		Debug.Assert(mStr != null);
+		Debug.Assert(_wordList != null);
+		Debug.Assert(_string != null);
 
-		int start = mWordList[i].Position;
-		int end = (j + 1 >= mWordList.Length) ? mStr.Length : mWordList[j + 1].Position - (mWordList[j + 1].SpacesBefore - mWordList[j].SpacesBefore);
-		return mStr[start..end];
+		int start = _wordList[i].Position;
+		int end = (j + 1 >= _wordList.Length) ? _string.Length : _wordList[j + 1].Position - (_wordList[j + 1].SpacesBefore - _wordList[j].SpacesBefore);
+		return _string[start..end];
 	}
 
 	private void BuildWordList(string s, int lineWidth)
@@ -193,42 +193,42 @@ internal class OptimalWordWrappedString
 			}
 		}
 		mWordListAL.Add(we);
-		mWordList = [.. mWordListAL];
+		_wordList = [.. mWordListAL];
 	}
 
 	private int SumWidths(int i, int j)
 	{
-		Debug.Assert(mWordList != null);
-		return i == 0 ? mWordList[j].TotalLength : mWordList[j].TotalLength - mWordList[i - 1].TotalLength;
+		Debug.Assert(_wordList != null);
+		return i == 0 ? _wordList[j].TotalLength : _wordList[j].TotalLength - _wordList[i - 1].TotalLength;
 	}
 
 	private int GetCost(int i, int j)
 	{
-		Debug.Assert(mWordList != null);
-		Debug.Assert(mCostCache != null);
+		Debug.Assert(_wordList != null);
+		Debug.Assert(_costCache != null);
 
-		int cost = mCostCache[i, j];
+		int cost = _costCache[i, j];
 
 		if (cost == -1)
 		{
-			cost = mLineWidth - (mWordList[j].SpacesBefore - mWordList[i].SpacesBefore) - SumWidths(i, j);
-			cost = cost < 0 ? mInfinity : cost * cost;
-			mCostCache[i, j] = cost;
+			cost = _lineWidth - (_wordList[j].SpacesBefore - _wordList[i].SpacesBefore) - SumWidths(i, j);
+			cost = cost < 0 ? _infinity : cost * cost;
+			_costCache[i, j] = cost;
 		}
 		return cost;
 	}
 
 	private LineBreakResult FindLastOptimalBreak(int j)
 	{
-		Debug.Assert(mfCache != null);
+		Debug.Assert(_cache != null);
 
-		if (mfCache[j] != null)
+		if (_cache[j] != null)
 		{
-			return mfCache[j];
+			return _cache[j];
 		}
 
 		int cost = GetCost(0, j);
-		if (cost < mInfinity)
+		if (cost < _infinity)
 		{
 			return new LineBreakResult(cost, -1);
 		}
@@ -244,7 +244,7 @@ internal class OptimalWordWrappedString
 			}
 		}
 
-		mfCache[j] = min;
+		_cache[j] = min;
 		return min;
 	}
 

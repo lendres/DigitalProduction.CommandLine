@@ -674,21 +674,21 @@ public sealed class CommandLineParser : IDisposable
 				Token token = LA1!;
 				switch (token.TokenType)
 				{
-					case Token.TokenTypes.ValueToken:
+					case TokenTypes.ValueToken:
 						_remainingArguments.Add(((ValueToken)GetNextToken()!).Value);
 						break;
-					case Token.TokenTypes.AssignmentToken:
+					case TokenTypes.AssignmentToken:
 						ReportError(ParseErrorCodes.UnexpectedAssignment, CommandLineStrings.Unexpected0CharacterOnCommandLine, ((AssignmentToken)token).AssignmentCharacter);
 						SkipTokens(1);
 						break;
-					case Token.TokenTypes.OptionNameToken:
+					case TokenTypes.OptionNameToken:
 						MatchOptionName();
 						break;
-					case Token.TokenTypes.EndToken:
+					case TokenTypes.EndToken:
 						CurrentLexer.EnabledOptionStyles = OptionStyles.None;
 						SkipTokens(1);
 						break;
-					case Token.TokenTypes.OptionFileToken:
+					case TokenTypes.OptionFileToken:
 						MatchOptionFile();
 						break;
 					default:
@@ -952,7 +952,7 @@ public sealed class CommandLineParser : IDisposable
 	private void MatchOptionFile()
 	{
 		Debug.Assert(LA1 != null);
-		Debug.Assert(LA1.TokenType == Token.TokenTypes.OptionFileToken);
+		Debug.Assert(LA1.TokenType == TokenTypes.OptionFileToken);
 
 		OptionFileToken fileToken = (OptionFileToken)GetNextToken()!;
 
@@ -994,7 +994,7 @@ public sealed class CommandLineParser : IDisposable
 	private void MatchOptionName()
 	{
 		Debug.Assert(LA1 != null);
-		Debug.Assert(LA1.TokenType == Token.TokenTypes.OptionNameToken);
+		Debug.Assert(LA1.TokenType == TokenTypes.OptionNameToken);
 
 		OptionNameToken optionNameToken = (OptionNameToken)GetNextToken()!;
 		string currentName = optionNameToken.Name;
@@ -1003,7 +1003,7 @@ public sealed class CommandLineParser : IDisposable
 			ReportOptionError(ParseErrorCodes.UnknownOption, optionNameToken.Text, CommandLineStrings.UnknownOption0, optionNameToken.Name);
 
 			// Skip an assignment token and value if it follows
-			if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+			if (LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 			{
 				SkipTokens(2);
 			}
@@ -1019,11 +1019,11 @@ public sealed class CommandLineParser : IDisposable
 				ReportOptionError(ParseErrorCodes.OptionProhibited, optionNameToken.Text, CommandLineStrings.Option0MayNotBeSpecifiedTogetherWithOption1, option.Name, prohibiter.Name);
 
 				// Skip any assignment following this option
-				if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+				if (LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 				{
 					SkipTokens(2);
 				}
-				else if (option.AcceptsValue && LA1 != null && LA1.TokenType == Token.TokenTypes.ValueToken)
+				else if (option.AcceptsValue && LA1 != null && LA1.TokenType == TokenTypes.ValueToken)
 				{
 					SkipTokens(1);
 				}
@@ -1032,7 +1032,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Determine whether we need an assignment token 
-		if (option.RequireExplicitAssignment && !option.HasDefaultValue && (LA1 == null || LA1.TokenType != Token.TokenTypes.AssignmentToken))
+		if (option.RequireExplicitAssignment && !option.HasDefaultValue && (LA1 == null || LA1.TokenType != TokenTypes.AssignmentToken))
 		{
 			ReportOptionError(ParseErrorCodes.MissingValue, optionNameToken.Text, CommandLineStrings.MissingRequiredValueForOption0, option.Name);
 			// Increase SetCount to avoid additional error about this option not being specified
@@ -1041,7 +1041,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Determine whether an explicit assignment is prohibited (bool type not using value)
-		if (!option.AcceptsValue && LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+		if (!option.AcceptsValue && LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 		{
 			ReportOptionError(ParseErrorCodes.AssignmentToNonValueOption, optionNameToken.Text, CommandLineStrings.Option0DoesNotAcceptAValue, option.Name);
 			SkipTokens(1);
@@ -1049,7 +1049,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Should we set this option to the default value and be done with it?
-		if (option.RequireExplicitAssignment && (LA1 == null || LA1.TokenType != Token.TokenTypes.AssignmentToken))
+		if (option.RequireExplicitAssignment && (LA1 == null || LA1.TokenType != TokenTypes.AssignmentToken))
 		{
 			option.SetDefaultValue();
 			return;
@@ -1057,13 +1057,13 @@ public sealed class CommandLineParser : IDisposable
 
 		// Now we know that any value that follows should be assigned to this token, so we skip any 
 		// following assignment token
-		if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+		if (LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 		{
 			SkipTokens(1);
 		}
 
 		// Determine whether we require a value
-		if (option.RequiresValue && (LA1 == null || LA1.TokenType != Token.TokenTypes.ValueToken))
+		if (option.RequiresValue && (LA1 == null || LA1.TokenType != TokenTypes.ValueToken))
 		{
 			ReportOptionError(ParseErrorCodes.MissingValue, optionNameToken.Text, CommandLineStrings.MissingRequiredValueForOption0, option.Name);
 			option.SetCount++;
@@ -1100,7 +1100,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Check if this option has already been specified the maximum allowed number of times
-		if (LA1 != null && LA1.TokenType == Token.TokenTypes.ValueToken)
+		if (LA1 != null && LA1.TokenType == TokenTypes.ValueToken)
 		{
 			ValueToken valueToken = (ValueToken)GetNextToken()!;
 			if (!CheckMaxOccurs(optionNameToken, option))

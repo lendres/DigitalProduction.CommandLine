@@ -9,11 +9,9 @@ namespace DigitalProduction.CommandLine;
 /// <param name="assignmentChar">The assignment char.</param>
 internal class AssignmentToken(char assignmentChar) : Token(TokenTypes.AssignmentToken, assignmentChar.ToString())
 {
-	private readonly char mAssignmentChar = assignmentChar;
-
 	/// <summary>
 	/// Gets the assignment character.
 	/// </summary>
 	/// <value>The assignment character.</value>
-	public char AssignmentCharacter { get => mAssignmentChar; }
+	public char AssignmentCharacter { get; } = assignmentChar;
 }
