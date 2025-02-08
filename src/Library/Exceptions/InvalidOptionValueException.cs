@@ -12,8 +12,6 @@ namespace DigitalProduction.CommandLine;
 [Serializable]
 public class InvalidOptionValueException : ParseException
 {
-	private readonly bool mIncludeDefaultMessage = true;
-
 	/// <summary>
 	/// Initializes a new instance of the <see cref="InvalidOptionValueException"/> class.
 	/// </summary>
@@ -40,7 +38,7 @@ public class InvalidOptionValueException : ParseException
 	public InvalidOptionValueException(string message, bool includeDefaultMessage) :
 		base(message)
 	{
-		mIncludeDefaultMessage = includeDefaultMessage;
+		IncludeDefaultMessage = includeDefaultMessage;
 	}
 
 	/// <summary>
@@ -59,5 +57,5 @@ public class InvalidOptionValueException : ParseException
 	/// <value>
 	/// 	<c>true</c> if the default message is included in the error list supplied by <see cref="CommandLineParser.Errors"/>; otherwise, <c>false</c>.
 	/// </value>
-	public bool InlcudeDefaultMessage { get => mIncludeDefaultMessage; }
+	public bool IncludeDefaultMessage { get; private set; } = true;
 }

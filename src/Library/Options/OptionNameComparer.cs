@@ -11,15 +11,9 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 internal class OptionNameComparer(bool isCaseSensitive) : SCG.IComparer<OptionGroup>, SCG.IEqualityComparer<OptionGroup>, SCG.IComparer<string>, SCG.IEqualityComparer<string>
 {
-	#region Fields
-
-	private readonly bool mIsCaseSensitive = isCaseSensitive;
-
-	#endregion
-
 	#region Properties
 
-	public bool IsCaseSensitive { get => mIsCaseSensitive; }
+	public bool IsCaseSensitive { get; } = isCaseSensitive;
 
 	#endregion
 
@@ -31,7 +25,7 @@ internal class OptionNameComparer(bool isCaseSensitive) : SCG.IComparer<OptionGr
 
 		ArgumentNullException.ThrowIfNull(y);
 
-		return String.Compare(x.Id, y.Id, !mIsCaseSensitive, CultureInfo.CurrentUICulture);
+		return String.Compare(x.Id, y.Id, !IsCaseSensitive, CultureInfo.CurrentUICulture);
 	}
 
 	#endregion
@@ -47,7 +41,7 @@ internal class OptionNameComparer(bool isCaseSensitive) : SCG.IComparer<OptionGr
 	{
 		ArgumentNullException.ThrowIfNull(obj);
 
-		return mIsCaseSensitive ? obj.Id.GetHashCode() : obj.Id.ToUpper(CultureInfo.CurrentUICulture).GetHashCode();
+		return IsCaseSensitive ? obj.Id.GetHashCode() : obj.Id.ToUpper(CultureInfo.CurrentUICulture).GetHashCode();
 	}
 
 	#endregion
@@ -56,7 +50,7 @@ internal class OptionNameComparer(bool isCaseSensitive) : SCG.IComparer<OptionGr
 
 	public int Compare(string? x, string? y)
 	{
-		return String.Compare(x, y, !mIsCaseSensitive, CultureInfo.CurrentUICulture);
+		return String.Compare(x, y, !IsCaseSensitive, CultureInfo.CurrentUICulture);
 	}
 
 	#endregion
@@ -72,7 +66,7 @@ internal class OptionNameComparer(bool isCaseSensitive) : SCG.IComparer<OptionGr
 	{
 		ArgumentNullException.ThrowIfNull(obj);
 
-		return mIsCaseSensitive ? obj.GetHashCode() : obj.ToUpper(CultureInfo.CurrentUICulture).GetHashCode();
+		return IsCaseSensitive ? obj.GetHashCode() : obj.ToUpper(CultureInfo.CurrentUICulture).GetHashCode();
 	}
 
 	#endregion

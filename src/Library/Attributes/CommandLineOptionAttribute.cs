@@ -18,18 +18,8 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 {
 	#region Private Fields
 
-	private BoolFunction	mBoolFunction					= BoolFunction.TrueIfPresent;
-	private int?			mMaxOccurs;
-	private int				mMinOccurs						= 0;
-	private string?			mGroupId						= null;
-	private string?			mProhibits						= null;
-	private string?			mName							= null;
-	private string			mDescription					= string.Empty;
-	private object?			mDefaultValue;
-	private bool?			mRequireExplicitAssignment;
-	private string?			mAliases						= null;
-	private object?			mMinValue;
-	private object?			mMaxValue;
+	private int?			_maxOccurs						= null;
+	private bool?			_requireExplicitAssignment;
 
 	#endregion
 
@@ -50,7 +40,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// Gets or sets the group to which this option belongs.
 	/// </summary>
 	/// <value>The id of the group to which this option belongs, or null if this option does not belong to any group.</value>
-	public string? GroupId { get => mGroupId; set => mGroupId = value; }
+	public string? GroupId { get; set; } = null;
 
 	/// <summary>
 	/// Gets or sets the names of other options that must not be specified on the command line if this option is specified.
@@ -60,7 +50,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// automatically means that the other option also prohibits the first option, and it need not be 
 	/// explicitly specified.</remarks>
 	/// <seealso cref="CommandLineOptionGroupAttribute.Require"/>
-	public string? Prohibits { get => mProhibits; set => mProhibits = value; }
+	public string? Prohibits { get; set; } = null;
 
 	/// <summary>
 	/// Gets or sets the name of this option.
@@ -68,7 +58,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// <value>The name of this option.</value>
 	/// <remarks>This is the text that the user will specify on the command line. If not explicitly set, this 
 	/// will take on the name of the member to which the attribute was applied.</remarks>
-	public string? Name { get => mName; set => mName = value; }
+	public string? Name { get; set; } = null;
 
 	/// <summary>
 	/// Gets or sets how option values will be assigned if this option is applied to a field of type bool.
@@ -76,7 +66,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// <value>The bool function of this option.</value>
 	/// <remarks>This value is ignored for any other member types than Boolean. See <see cref="BoolFunction"/> for 
 	/// more information.</remarks>
-	public BoolFunction BoolFunction { get => mBoolFunction; set => mBoolFunction = value; }
+	public BoolFunction BoolFunction { get; set;  } = BoolFunction.TrueIfPresent;
 
 	/// <summary>
 	/// Gets or sets the maximum number of times this option may be specified on the command line.
@@ -87,7 +77,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// this option may be specified.</para>
 	/// <note>Note that this value must be either 0 or 1 if the member is not a method, or if the field or 
 	/// property does not represent an array or collection type.</note></remarks>
-	public int MaxOccurs { get => mMaxOccurs ?? -1; set => mMaxOccurs = value; }
+	public int MaxOccurs { get => _maxOccurs ?? -1; set => _maxOccurs = value; }
 
 	/// <summary>
 	/// Gets or sets the minimum number of times this option may be specified on the command line.
@@ -98,13 +88,13 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	///     <note>This value must be less than or equal to <see cref="MaxOccurs"/>, unless <see cref="MaxOccurs"/> is 
 	///         equal to 0.</note>
 	/// </remarks>
-	public int MinOccurs { get => mMinOccurs; set => mMinOccurs = value; }
+	public int MinOccurs { get; set; } = 0;
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description { get => mDescription; set => mDescription = value; }
+	public string Description { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the default assignment value for this option.
@@ -114,7 +104,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// set, this means that if the option is specified without an explicit assignment, this is the value the option
 	/// will be take. However if the option is never specified on the command line, this value will <i>not</i> be 
 	/// assigned to the associated member.</remarks>
-	public object? DefaultAssignmentValue { get => mDefaultValue; set => mDefaultValue = value; }
+	public object? DefaultAssignmentValue { get; set; } = null;
 
 	/// <summary>
 	/// Gets or sets a value indicating whether this option requires an explicit assignment character or not.
@@ -129,10 +119,10 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	{
 		get
 		{
-			System.Diagnostics.Debug.Assert(mRequireExplicitAssignment != null);
-			return mRequireExplicitAssignment.Value;
+			System.Diagnostics.Debug.Assert(_requireExplicitAssignment != null);
+			return _requireExplicitAssignment.Value;
 		}
-		set => mRequireExplicitAssignment = value;
+		set => _requireExplicitAssignment = value;
 	}
 
 	/// <summary>
@@ -142,7 +132,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// <remarks>An option may have one or more aliases, which are other names with which to refer to the 
 	/// same option. This is common in the UN*X world, where many programs provide both a long and a short name
 	/// for most options.</remarks>
-	public string? Aliases { get => mAliases; set => mAliases = value; }
+	public string? Aliases { get; set; } = null;
 
 	/// <summary>
 	/// Gets or sets the maximum value for a numeric option.
@@ -150,7 +140,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// <value>The maximum value for a numeric option.</value>
 	/// <remarks>This option should be null for any non-numeric option. This option also defaults to null for non-numeric
 	/// options, or the maximum value for the type of this option for numerical options.</remarks>
-	public object? MaxValue { get => mMaxValue; set => mMaxValue = value; }
+	public object? MaxValue { get; set; } = null;
 
 	/// <summary>
 	/// Gets or sets the minimum value for a numeric option.
@@ -158,7 +148,7 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// <value>The minimum value for a numeric option.</value>
 	/// <remarks>This option should be null for any non-numeric option. This option also defaults to null for non-numeric
 	/// options, or the minimum value for the type of this option for numerical options.</remarks>
-	public object? MinValue { get => mMinValue; set => mMinValue = value; }
+	public object? MinValue { get; set; } = null;
 
 	/// <summary>
 	/// Gets a value indicating whether this instance has its <see cref="MaxOccurs"/> property explicitly set.
@@ -166,14 +156,14 @@ public sealed class CommandLineOptionAttribute : System.Attribute
 	/// <value>
 	/// 	<c>true</c> if this instance has its <see cref="MaxOccurs"/> property explicitly set.; otherwise, <c>false</c>.
 	/// </value>
-	internal bool IsMaxOccursSet { get => mMaxOccurs != null; }
+	internal bool IsMaxOccursSet { get => _maxOccurs != null; }
 
 	/// <summary>
 	/// Gets a value indicating whether this option requires explicit assignment.
 	/// </summary>
 	/// <value>A value indicating whether this option requires explicit assignment. If this value is 
 	/// null that means that it should inherit this value from its group or ultimately the manager.</value>
-	internal bool? DoesRequireExplicitAssignment { get => mRequireExplicitAssignment; }
+	internal bool? DoesRequireExplicitAssignment { get => _requireExplicitAssignment; }
 
 	#endregion
 }

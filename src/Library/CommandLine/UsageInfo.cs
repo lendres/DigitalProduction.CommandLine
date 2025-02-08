@@ -19,11 +19,11 @@ public sealed class UsageInfo
 {
 	#region Fields
 
-	private readonly CommandLineParser							mParser;
-	private readonly TreeDictionary<string, OptionGroupInfo>	mGroups				= [];
-	private readonly TreeDictionary<string, OptionInfo>			mOptions			= [];
-	private int													mColumnSpacing		= 3;
-	private int													mIndentWidth		= 3;
+	private readonly CommandLineParser							_parser;
+	private readonly TreeDictionary<string, OptionGroupInfo>	_groups				= [];
+	private readonly TreeDictionary<string, OptionInfo>			_options			= [];
+	private int													_columnSpacing		= 3;
+	private int													_indentWidth		= 3;
 
 	#endregion
 
@@ -37,22 +37,22 @@ public sealed class UsageInfo
 	/// <param name="parser">The parser.</param>
 	internal UsageInfo(SCG.IEnumerable<KeyValuePair<string, IOption>> options, OptionStyles optionStyles, CommandLineParser parser)
 	{
-		mParser = parser;
+		_parser = parser;
 		foreach (KeyValuePair<string, IOption> entry in options)
 		{
 			if (entry.Value is Option option)
 			{
 				if (option.Group != null)
 				{
-					if (!mGroups.Contains(option.Group.Id))
+					if (!_groups.Contains(option.Group.Id))
 					{
-						mGroups.Add(option.Group.Id, new OptionGroupInfo(this, option.Group, optionStyles));
+						_groups.Add(option.Group.Id, new OptionGroupInfo(this, option.Group, optionStyles));
 					}
 				}
 				else
 				{
-					Debug.Assert(!mOptions.Contains(option.Name));
-					mOptions.Add(option.Name, new OptionInfo(this, option, optionStyles));
+					Debug.Assert(!_options.Contains(option.Name));
+					_options.Add(option.Name, new OptionInfo(this, option, optionStyles));
 				}
 			}
 		}
@@ -66,25 +66,25 @@ public sealed class UsageInfo
 	/// Gets or sets the name of the application.
 	/// </summary>
 	/// <value>The name of the application.</value>
-	public string ApplicationName { get => mParser.ApplicationName; set =>  mParser.ApplicationName = value; }
+	public string ApplicationName { get => _parser.ApplicationName; set =>  _parser.ApplicationName = value; }
 
 	/// <summary>
 	/// Gets or sets the application version.
 	/// </summary>
 	/// <value>The application version.</value>
-	public string ApplicationVersion { get => mParser.ApplicationVersion; set =>  mParser.ApplicationVersion = value; }
+	public string ApplicationVersion { get => _parser.ApplicationVersion; set =>  _parser.ApplicationVersion = value; }
 
 	/// <summary>
 	/// Gets or sets the application copyright.
 	/// </summary>
 	/// <value>The application copyright.</value>
-	public string ApplicationCopyright { get => mParser.ApplicationCopyright; set =>  mParser.ApplicationCopyright = value; }
+	public string ApplicationCopyright { get => _parser.ApplicationCopyright; set =>  _parser.ApplicationCopyright = value; }
 
 	/// <summary>
 	/// Gets or sets the application description.
 	/// </summary>
 	/// <value>The application description.</value>
-	public string ApplicationDescription { get => mParser.ApplicationDescription; set => mParser.ApplicationDescription = value; }
+	public string ApplicationDescription { get => _parser.ApplicationDescription; set => _parser.ApplicationDescription = value; }
 
 	/// <summary>
 	/// Gets an enumeration of <see cref="OptionInfo"/> objects describing the options of this 
@@ -92,7 +92,7 @@ public sealed class UsageInfo
 	/// </summary>
 	/// <value>an enumeration of <see cref="OptionInfo"/> objects describing the options of this 
 	/// command line manager that are <i>not</i> part of any option group.</value>
-	public SCG.IEnumerable<OptionInfo> Options { get => mOptions.Values; }
+	public SCG.IEnumerable<OptionInfo> Options { get => _options.Values; }
 
 	/// <summary>
 	/// Gets an enumeration of the <see cref="OptionGroupInfo"/> objects describin the option groups
@@ -100,7 +100,7 @@ public sealed class UsageInfo
 	/// </summary>
 	/// <value>an enumeration of the <see cref="OptionGroupInfo"/> objects describin the option groups
 	/// of this command line manager.</value>
-	public SCG.IEnumerable<OptionGroupInfo> Groups { get => mGroups.Values; }
+	public SCG.IEnumerable<OptionGroupInfo> Groups { get => _groups.Values; }
 
 	/// <summary>
 	/// Gets or sets the column spacing to use for any string formatting involving multiple columns.
@@ -108,14 +108,14 @@ public sealed class UsageInfo
 	/// <value>The column spacing used for any string formatting involving multiple columns.</value>
 	public int ColumnSpacing
 	{
-		get => mColumnSpacing;
+		get => _columnSpacing;
 		set
 		{
 			if (value < 0)
 			{
 				throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "value"), nameof(value));
 			}
-			mColumnSpacing = value;
+			_columnSpacing = value;
 		}
 	}
 
@@ -125,14 +125,14 @@ public sealed class UsageInfo
 	/// <value>the width of the indent to use for any string formatting by this <see cref="UsageInfo"/>.</value>
 	public int IndentWidth
 	{
-		get => mIndentWidth;
+		get => _indentWidth;
 		set
 		{
 			if (value < 0)
 			{
 				throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "value"), nameof(value));
 			}
-			mIndentWidth = value;
+			_indentWidth = value;
 		}
 	}
 
@@ -148,10 +148,10 @@ public sealed class UsageInfo
 	/// a null reference if no such option exists.</returns>        
 	public OptionInfo? GetOption(string name)
 	{
-		if (!mOptions.Find(ref name, out OptionInfo? description))
+		if (!_options.Find(ref name, out OptionInfo? description))
 		{
 			// Search through all groups for this option
-			foreach (OptionGroupInfo gdesc in mGroups.Values)
+			foreach (OptionGroupInfo gdesc in _groups.Values)
 			{
 				if ((description = gdesc.GetOption(name)) != null)
 				{
@@ -171,7 +171,7 @@ public sealed class UsageInfo
 	/// by this object, or a null reference if no such option group exists.</returns>
 	public OptionGroupInfo? GetGroup(string id)
 	{
-		if (!mGroups.Find(ref id, out OptionGroupInfo desc))
+		if (!_groups.Find(ref id, out OptionGroupInfo desc))
 		{
 			return null;
 		}
@@ -233,7 +233,7 @@ public sealed class UsageInfo
 		int maxNameWidth = 5;
 
 		// Get the maximum option name length from options not in groups.
-		foreach (OptionInfo option in mOptions.Values)
+		foreach (OptionInfo option in _options.Values)
 		{
 			maxNameWidth = Math.Max(option.Name.Length, maxNameWidth);
 			foreach (string alias in option.Aliases)
@@ -243,7 +243,7 @@ public sealed class UsageInfo
 		}
 
 		// Get the maximum option name length from option inside groups.
-		foreach (OptionGroupInfo group in mGroups.Values)
+		foreach (OptionGroupInfo group in _groups.Values)
 		{
 			foreach (OptionInfo option in group.Options)
 			{
@@ -275,11 +275,11 @@ public sealed class UsageInfo
 	{
 		StringBuilder result = new();
 
-		if (!mOptions.IsEmpty)
+		if (!_options.IsEmpty)
 		{
 			result.Append(StringFormatter.WordWrap(CommandLineStrings.Options, nameColumnWidth + descriptionColumnWidth + ColumnSpacing, WordWrappingMethod.Optimal, Alignment.Left, ' '));
 			result.Append(Environment.NewLine);
-			foreach (OptionInfo option in mOptions.Values)
+			foreach (OptionInfo option in _options.Values)
 			{
 				result.Append(option.ToString(IndentWidth, nameColumnWidth, descriptionColumnWidth - IndentWidth));
 				result.Append(Environment.NewLine);
@@ -287,7 +287,7 @@ public sealed class UsageInfo
 			result.Append(Environment.NewLine);
 		}
 
-		foreach (OptionGroupInfo group in mGroups.Values)
+		foreach (OptionGroupInfo group in _groups.Values)
 		{
 			result.Append(group.ToString(0, nameColumnWidth, descriptionColumnWidth));
 			result.Append(Environment.NewLine);
@@ -312,7 +312,7 @@ public sealed class UsageInfo
 		result.Append(Environment.NewLine);
 
 		StringBuilder errors = new();
-		foreach (ErrorInfo error in mParser.Errors)
+		foreach (ErrorInfo error in _parser.Errors)
 		{
 			errors.Append(error.Message);
 			if (error.FileName != null)
@@ -364,7 +364,7 @@ public sealed class UsageInfo
 		result.Append(GetHeaderAsString(width));
 		result.Append(Environment.NewLine);
 
-		if (mParser.HasErrors && includeErrors)
+		if (_parser.HasErrors && includeErrors)
 		{
 			result.Append(GetErrorsAsString(width));
 			result.Append(Environment.NewLine);

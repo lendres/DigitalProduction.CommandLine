@@ -12,18 +12,6 @@ namespace DigitalProduction.CommandLine;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public sealed class CommandLineManagerAttribute : System.Attribute
 {
-	#region Private fields
-
-	private string			mCopyright						= string.Empty;
-	private string			mApplicationName				= string.Empty;
-	private string			mDescription					= string.Empty;
-	private bool			mIsCaseSensitive;
-	private string			mVersion						= string.Empty;
-	private OptionStyles	mOptionStyle					= OptionStyles.Windows | OptionStyles.File | OptionStyles.ShortUnix;
-	private bool			mRequireExplicitAssignment;
-
-	#endregion
-
 	#region Constructors
 
 	/// <summary>
@@ -68,28 +56,28 @@ public sealed class CommandLineManagerAttribute : System.Attribute
 	/// </summary>
 	/// <value>The name of the application.</value>
 	/// <remarks>If not explicitly specified, this value will be retrieved from the assembly information.</remarks>
-	public string ApplicationName { get => mApplicationName; set => mApplicationName = value; }
+	public string ApplicationName { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the copyright message.
 	/// </summary>
 	/// <value>The copyright message.</value>
 	/// <remarks>If not explicitly specified, this value will be retrieved from the assembly information.</remarks>
-	public string Copyright { get => mCopyright; set => mCopyright = value; }
+	public string Copyright { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
 	/// <remarks>If not explicitly specified, the application will be retrieved from the assembly information.</remarks>
-	public string Description { get => mDescription; set => mDescription = value; }
+	public string Description { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the version of this application.
 	/// </summary>
 	/// <value>The version of this application.</value>
 	/// <remarks>If not explicitly specified, the application will be retrieved from the assembly information.</remarks>
-	public string Version { get => mVersion; set => mVersion = value; }
+	public string Version { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets a value indicating whether options are case sensitive or not.
@@ -97,14 +85,14 @@ public sealed class CommandLineManagerAttribute : System.Attribute
 	/// <value>
 	/// 	<c>true</c> if options are case sensitive; otherwise, <c>false</c>.
 	/// </value>
-	public bool IsCaseSensitive { get => mIsCaseSensitive; set => mIsCaseSensitive = value; }
+	public bool IsCaseSensitive { get; set; } = false;
 
 	/// <summary>
 	/// Gets or sets the enabled option styles.
 	/// </summary>
 	/// <value>The enabled option styles.</value>
 	/// <remarks>The default value for this property is to enable the Windows, ShortUnix and File style.</remarks>
-	public OptionStyles EnabledOptionStyles { get => mOptionStyle; set => mOptionStyle = value; }
+	public OptionStyles EnabledOptionStyles { get; set; } = OptionStyles.Windows | OptionStyles.File | OptionStyles.ShortUnix;
 
 	/// <summary>
 	/// Gets or sets a value indicating whether options in this manager requires explicit assignment or not.
@@ -117,7 +105,7 @@ public sealed class CommandLineManagerAttribute : System.Attribute
 	/// as an assignment.
 	/// <note>This value sets the default value for all options contained in this manager, but may be overridden for
 	/// individual groups.</note></remarks>
-	public bool RequireExplicitAssignment { get => mRequireExplicitAssignment; set => mRequireExplicitAssignment = value; }
+	public bool RequireExplicitAssignment { get; set; } = false;
 
 	#endregion
 }

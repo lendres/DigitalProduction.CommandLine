@@ -13,10 +13,10 @@ public sealed class OptionInfo : IDisposable
 {
 	#region Fields
 
-	private readonly ArrayList<string>	mAliases = [];
-	private readonly OptionStyles		mOptionStyles;
-	private readonly Option				mOption;
-	private readonly UsageInfo			mUsageInfo;
+	private readonly ArrayList<string>	_aliases = [];
+	private readonly OptionStyles		_optionStyles;
+	private readonly Option				_option;
+	private readonly UsageInfo			_usageInfo;
 
 	#endregion
 
@@ -30,13 +30,13 @@ public sealed class OptionInfo : IDisposable
 	/// <param name="optionStyle">The option style.</param>
 	internal OptionInfo(UsageInfo usageInfo, Option option, OptionStyles optionStyle)
 	{
-		mOption = option;
-		mOptionStyles = optionStyle;
-		mUsageInfo = usageInfo;
+		_option = option;
+		_optionStyles = optionStyle;
+		_usageInfo = usageInfo;
 
-		foreach (string alias in mOption.Aliases)
+		foreach (string alias in _option.Aliases)
 		{
-			mAliases.Add(OptionStyleManager.PrefixOptionForDescription(mOptionStyles, alias));
+			_aliases.Add(OptionStyleManager.PrefixOptionForDescription(_optionStyles, alias));
 		}
 	}
 
@@ -45,7 +45,7 @@ public sealed class OptionInfo : IDisposable
 	/// </summary>
 	public void Dispose()
 	{
-		mAliases.Dispose();
+		_aliases.Dispose();
 	}
 
 	#endregion
@@ -56,26 +56,26 @@ public sealed class OptionInfo : IDisposable
 	/// Gets an enumeration containing strings representing the prefixed names of the aliases of this option.
 	/// </summary>
 	/// <value>an enumeration containing strings representing the prefixed names of the aliases of this option.</value>
-	public SCG.IEnumerable<string> Aliases { get => mAliases; }
+	public SCG.IEnumerable<string> Aliases { get => _aliases; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description { get => mOption.Description; set => mOption.Description = value; }
+	public string Description { get => _option.Description; set => _option.Description = value; }
 
 	/// <summary>
 	/// Gets the name.
 	/// </summary>
 	/// <value>The name.</value>
-	public string Name { get => OptionStyleManager.PrefixOptionForDescription(mOptionStyles, mOption.Name); }
+	public string Name { get => OptionStyleManager.PrefixOptionForDescription(_optionStyles, _option.Name); }
 
 	/// <summary>
 	/// Gets the id. 
 	/// </summary>
 	/// <value>The id.</value>
 	/// <remarks>The id of an option is the same as its <see cref="Name"/>.</remarks>
-	public string Id { get => mOption.Name; }
+	public string Id { get => _option.Name; }
 
 	#endregion
 
@@ -120,15 +120,15 @@ public sealed class OptionInfo : IDisposable
 		StringBuilder names = new();
 
 		names.Append(Name);
-		foreach (string alias in mOption.Aliases)
+		foreach (string alias in _option.Aliases)
 		{
 			names.Append(", ");
-			names.Append(OptionStyleManager.PrefixOptionForDescription(mOptionStyles, alias));
+			names.Append(OptionStyleManager.PrefixOptionForDescription(_optionStyles, alias));
 		}
 
 		ColumnInfo nameColumn = new(nameColumnWidth, names.ToString(), Alignment.Left);
 		ColumnInfo descColumn = new(descriptionColumnWidth, Description ?? "e", Alignment.Left, VerticalAlignment.Bottom);
-		return StringFormatter.FormatInColumns(indent, mUsageInfo.ColumnSpacing, nameColumn, descColumn);
+		return StringFormatter.FormatInColumns(indent, _usageInfo.ColumnSpacing, nameColumn, descColumn);
 	}
 
 	#endregion

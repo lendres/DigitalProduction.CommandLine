@@ -17,60 +17,59 @@ internal class Lexer
 	/// <summary>
 	/// Stores text read by the lexer when more than one character needs to be stored
 	/// </summary>
-	readonly StringBuilder mText = new();
-
+	readonly StringBuilder _text = new();
 
 	/// <summary>
 	/// Indicates the option styles that are currently active.
 	/// </summary>
-	private OptionStyles mEnabledOptionStyles;
+	private OptionStyles _enabledOptionStyles;
 
 	/// <summary>
 	/// The input stream used by the lexer. This must be readable, but need not be seekable.
 	/// </summary>
-	private readonly TextReader mInput;
+	private readonly TextReader _input;
 
 	/// <summary>
 	/// Intermediate storage of the current option style being parsed, used by various MatchXXXX functions.
 	/// </summary>
-	private OptionStyles mCurrentOptionStyle = OptionStyles.None;
+	private OptionStyles _currentOptionStyle = OptionStyles.None;
 
 	/// <summary>
 	/// A queue of tokens to be returned by <see cref="GetNextToken"/>. Filled up if a single call
 	/// to GetNextToken generates more than one token, such as when reading an option of style
 	/// <see cref="OptionStyles.ShortUnix"/>
 	/// </summary>
-	private readonly CircularQueue<Token> mTokenQueue = new();
+	private readonly CircularQueue<Token> _tokenQueue = new();
 
 	/// <summary>
 	/// Internal buffer of characters read from the input stream.
 	/// </summary>
-	private readonly CircularQueue<char> mCharacterBuffer = new(mCharacterBufferCapacity);
+	private readonly CircularQueue<char> _characterBuffer = new(_characterBufferCapacity);
 
 	/// <summary>
 	/// Constant indicating the size of the internal character buffer.
 	/// </summary>
-	private const int mCharacterBufferCapacity = 128;
+	private const int _characterBufferCapacity = 128;
 
 	/// <summary>
 	/// Table of the valid quotes and what characters to escape for a value within those quotes. The special
 	/// key of <c>-1</c> stores the escaped character table to use for unquoted values.
 	/// </summary>
 
-	private readonly IDictionary<char, QuotationInfo> mQuotations;
+	private readonly IDictionary<char, QuotationInfo> _quotations;
 
 	/// <summary>
 	/// Set storing the valid escape characters. (Normally only a backslash '\' character, but could be 
 	/// set to something else.
 	/// </summary>
-	private readonly ICollection<char> mEscapeCharacters;
+	private readonly ICollection<char> _escapeCharacters;
 
 	/// <summary>
 	/// Table mapping valid assignment characters to their respective option values.
 	/// </summary>
-	private readonly IDictionary<char, OptionStyles> mAssignmentCharacters;
+	private readonly IDictionary<char, OptionStyles> _assignmentCharacters;
 
-	private int mLine = 1;
+	private int _line = 1;
 
 	#endregion
 
@@ -85,24 +84,24 @@ internal class Lexer
 	/// <param name="assignmentCharacters">The assignment characters that should be recognized.</param>
 	public Lexer(TextReader input, ICollection<char> escapeCharacters, IDictionary<char, QuotationInfo> quotations, IDictionary<char, OptionStyles> assignmentCharacters)
 	{
-		mInput = input;
+		_input = input;
 		FillCharacterBuffer();
-		mEscapeCharacters = new GuardedCollection<char>(escapeCharacters);
-		mQuotations = new GuardedDictionary<char, QuotationInfo>(quotations);
-		mAssignmentCharacters = new GuardedDictionary<char, OptionStyles>(assignmentCharacters);
+		_escapeCharacters = new GuardedCollection<char>(escapeCharacters);
+		_quotations = new GuardedDictionary<char, QuotationInfo>(quotations);
+		_assignmentCharacters = new GuardedDictionary<char, OptionStyles>(assignmentCharacters);
 
-		mEnabledOptionStyles = OptionStyles.ShortUnix | OptionStyles.Windows | OptionStyles.File;
+		_enabledOptionStyles = OptionStyles.ShortUnix | OptionStyles.Windows | OptionStyles.File;
 	}
 
 	public Lexer(TextReader input, Lexer parent) :
-		this(input, parent.mEscapeCharacters, parent.mQuotations, parent.mAssignmentCharacters)
+		this(input, parent._escapeCharacters, parent._quotations, parent._assignmentCharacters)
 	{
-		mEscapeCharacters = parent.mEscapeCharacters;
-		mAssignmentCharacters = parent.mAssignmentCharacters;
-		mQuotations = parent.mQuotations;
+		_escapeCharacters = parent._escapeCharacters;
+		_assignmentCharacters = parent._assignmentCharacters;
+		_quotations = parent._quotations;
 
 		// OptionStyles are immutable, so this is safe. Changes to one lexer wont propagate to another.
-		mEnabledOptionStyles = parent.mEnabledOptionStyles;
+		_enabledOptionStyles = parent._enabledOptionStyles;
 
 	}
 	#endregion
@@ -116,9 +115,9 @@ internal class Lexer
 	/// <remarks>The enabled option styles detemines what types of switch-characters the lexer will recognize
 	/// as starting an option on the command line.</remarks>
 	/// <seealso cref="OptionStyles"/>
-	public OptionStyles EnabledOptionStyles { get => mEnabledOptionStyles; set => mEnabledOptionStyles = value; }
+	public OptionStyles EnabledOptionStyles { get => _enabledOptionStyles; set => _enabledOptionStyles = value; }
 
-	public int CurrentLine { get => mLine; }
+	public int CurrentLine { get => _line; }
 
 	#endregion
 
@@ -126,10 +125,10 @@ internal class Lexer
 
 	public ValueToken GetNextValueToken()
 	{
-		OptionStyles oldStyles = mEnabledOptionStyles;
-		mEnabledOptionStyles = OptionStyles.None;
+		OptionStyles oldStyles = _enabledOptionStyles;
+		_enabledOptionStyles = OptionStyles.None;
 		Token? returnToken = GetNextToken();
-		mEnabledOptionStyles = oldStyles;
+		_enabledOptionStyles = oldStyles;
 		Debug.Assert(returnToken is ValueToken);
 		return (ValueToken)returnToken;
 	}
@@ -140,9 +139,9 @@ internal class Lexer
 	/// <returns>the next token from the input or a null reference if no more tokens are available.</returns>
 	public Token? GetNextToken()
 	{
-		if (!mTokenQueue.IsEmpty)
+		if (!_tokenQueue.IsEmpty)
 		{
-			return mTokenQueue.Dequeue();
+			return _tokenQueue.Dequeue();
 		}
 
 		// Cache LA(1), it will be used a lot.
@@ -243,7 +242,7 @@ internal class Lexer
 	/// <exception cref="MissingClosingQuoteException">no closing quote was found before the command line ended.</exception>
 	private ValueToken MatchValue()
 	{
-		if (mQuotations.Contains((char)LA(1)))
+		if (_quotations.Contains((char)LA(1)))
 		{
 			return MatchQuotedValue();
 		}
@@ -261,13 +260,13 @@ internal class Lexer
 	private ValueToken MatchUnquotedValue()
 	{
 		Debug.Assert(!IsWhiteSpace(LA(1)));
-		mText.Length = 0;
+		_text.Length = 0;
 
 		while (!IsWhiteSpace(LA(1)) && LA(1) != -1)
 		{
-			mText.Append((char)ReadPossiblyEscapedCharacter('\0'));
+			_text.Append((char)ReadPossiblyEscapedCharacter('\0'));
 		}
-		return new ValueToken(mText.ToString());
+		return new ValueToken(_text.ToString());
 	}
 
 	/// <summary>
@@ -278,27 +277,27 @@ internal class Lexer
 	/// <exception cref="MissingClosingQuoteException">no closing quote was found before the command line ended.</exception>
 	private ValueToken MatchQuotedValue()
 	{
-		Debug.Assert(mQuotations.Contains((char)LA(1)) && LA(1) != '\0');
+		Debug.Assert(_quotations.Contains((char)LA(1)) && LA(1) != '\0');
 
 		int quote = LA(1);
 
 		SkipCharacters(1);
-		mText.Length = 0;
+		_text.Length = 0;
 
 		int ch;
 		while ((ch = LA(1)) != quote && ch != -1)
 		{
-			mText.Append((char)ReadPossiblyEscapedCharacter((char)quote));
+			_text.Append((char)ReadPossiblyEscapedCharacter((char)quote));
 		}
 
 		if (ReadCharacter() != quote)
 		{
 			throw new MissingClosingQuoteException(String.Format(CultureInfo.CurrentUICulture,
 				CommandLineStrings.MissingClosingQuoteForValue0, quote.ToString(CultureInfo.CurrentUICulture) +
-				mText.ToString()));
+				_text.ToString()));
 		}
 
-		return new ValueToken(mText.ToString());
+		return new ValueToken(_text.ToString());
 	}
 
 	/// <summary>
@@ -307,7 +306,7 @@ internal class Lexer
 	/// <returns>An <see cref="OptionNameToken"/> representing the name (and style) of the first option 
 	/// in the sequence read.</returns>
 	/// <remarks>This method is called by the other methods that start with "MatchShort".
-	/// Even though this method only returns the first option read, the <see cref="mTokenQueue"/> is 
+	/// Even though this method only returns the first option read, the <see cref="_tokenQueue"/> is 
 	/// filled up with the rest of them.</remarks>
 	private Token MatchGroupedOptionNames()
 	{
@@ -318,10 +317,10 @@ internal class Lexer
 
 		while (LA(1) != -1 && !IsWhiteSpace(LA(1)) && !IsAssignmentCharacter(LA(1)))
 		{
-			mTokenQueue.Enqueue(new OptionNameToken(((char)ReadCharacter()).ToString(), mCurrentOptionStyle));
+			_tokenQueue.Enqueue(new OptionNameToken(((char)ReadCharacter()).ToString(), _currentOptionStyle));
 		}
 
-		return mTokenQueue.Dequeue();
+		return _tokenQueue.Dequeue();
 	}
 
 	/// <summary>
@@ -336,9 +335,9 @@ internal class Lexer
 		Debug.Assert(LA(1) == '-');
 		SkipCharacters(1);
 
-		mCurrentOptionStyle = OptionStyles.ShortUnix;
+		_currentOptionStyle = OptionStyles.ShortUnix;
 
-		if (OptionStyleManager.IsAllEnabled(mEnabledOptionStyles, OptionStyles.Group))
+		if (OptionStyleManager.IsAllEnabled(_enabledOptionStyles, OptionStyles.Group))
 		{
 			return MatchGroupedOptionNames();
 		}
@@ -360,7 +359,7 @@ internal class Lexer
 		Debug.Assert(LA(1) == '+');
 		SkipCharacters(1);
 
-		mCurrentOptionStyle = OptionStyles.Plus;
+		_currentOptionStyle = OptionStyles.Plus;
 
 		if (OptionStyleManager.IsAllEnabled(EnabledOptionStyles, OptionStyles.Group))
 		{
@@ -393,7 +392,7 @@ internal class Lexer
 	/// <exception cref="MissingOptionNameException">there was no name following the option switch character</exception>
 	private OptionNameToken MatchLongOptionName()
 	{
-		mText.Length = 0;
+		_text.Length = 0;
 
 		if (LA(1) == -1 || IsWhiteSpace(LA(1)))
 		{
@@ -403,10 +402,10 @@ internal class Lexer
 		int ch;
 		while (!IsWhiteSpace(ch = LA(1)) && !IsAssignmentCharacter(ch) && ch != -1)
 		{
-			mText.Append((char)ReadCharacter());
+			_text.Append((char)ReadCharacter());
 		}
 
-		return new OptionNameToken(mText.ToString(), mCurrentOptionStyle);
+		return new OptionNameToken(_text.ToString(), _currentOptionStyle);
 	}
 
 	/// <summary>
@@ -418,7 +417,7 @@ internal class Lexer
 	private OptionNameToken MatchWindowsOption()
 	{
 		Debug.Assert(LA(1) == '/');
-		mCurrentOptionStyle = OptionStyles.Windows;
+		_currentOptionStyle = OptionStyles.Windows;
 		SkipCharacters(1);
 		return MatchLongOptionName();
 	}
@@ -443,8 +442,8 @@ internal class Lexer
 		{
 			SkipCharacters(1);
 		}
-		mText.Length = 0;
-		mCurrentOptionStyle = OptionStyles.LongUnix;
+		_text.Length = 0;
+		_currentOptionStyle = OptionStyles.LongUnix;
 		return MatchLongOptionName();
 	}
 
@@ -493,17 +492,17 @@ internal class Lexer
 	/// <returns>The next available character from the input, or -1 if no more characters are available.</returns>
 	private int ReadCharacter()
 	{
-		if (mCharacterBuffer.IsEmpty)
+		if (_characterBuffer.IsEmpty)
 		{
 			FillCharacterBuffer();
 		}
 
 		if (LA(1) == '\n')
 		{
-			mLine++;
+			_line++;
 		}
 
-		return mCharacterBuffer.IsEmpty ? -1 : mCharacterBuffer.Dequeue();
+		return _characterBuffer.IsEmpty ? -1 : _characterBuffer.Dequeue();
 	}
 
 	/// <summary>
@@ -532,7 +531,7 @@ internal class Lexer
 			return -1;
 		}
 
-		return mCharacterBuffer[offset];
+		return _characterBuffer[offset];
 
 	}
 
@@ -542,27 +541,27 @@ internal class Lexer
 	/// <returns>The number of characters added to the buffer.</returns>
 	private int FillCharacterBuffer()
 	{
-		int readCount = mCharacterBufferCapacity - CharacterBufferSize;
+		int readCount = _characterBufferCapacity - CharacterBufferSize;
 		if (readCount > 0)
 		{
 			char[] buf = new char[readCount + 1];
-			readCount = mInput.Read(buf, 0, readCount + 1);
+			readCount = _input.Read(buf, 0, readCount + 1);
 			for (int i = 0; i < readCount; ++i)
 			{
 				// Perform newline translation. All newlines will
 				// be represented by a single '\n'.
 				if (buf[i] == '\r' && buf[i + 1] == '\n')
 				{
-					mCharacterBuffer.Enqueue('\n');
+					_characterBuffer.Enqueue('\n');
 					++i;
 				}
 				else if (buf[i] == '\r')
 				{
-					mCharacterBuffer.Enqueue('\n');
+					_characterBuffer.Enqueue('\n');
 				}
 				else
 				{
-					mCharacterBuffer.Enqueue(buf[i]);
+					_characterBuffer.Enqueue(buf[i]);
 				}
 			}
 		}
@@ -573,7 +572,7 @@ internal class Lexer
 	/// Gets the number of available characters in the internal character buffer.
 	/// </summary>
 	/// <value>the number of available characters in the internal character buffer.</value>        
-	private int CharacterBufferSize { get => mCharacterBuffer.Count; }
+	private int CharacterBufferSize { get => _characterBuffer.Count; }
 
 	/// <summary>
 	/// Determines whether the specified character is a character used to escape other characters, such
@@ -586,7 +585,7 @@ internal class Lexer
 	/// <remarks>The escape character in use is <i>not</i> context sensitive.</remarks>
 	private bool IsEscapeCharacter(int ch) 
 	{
-		return mEscapeCharacters.Contains((char)ch);
+		return _escapeCharacters.Contains((char)ch);
 	}
 
 	/// <summary>
@@ -601,8 +600,8 @@ internal class Lexer
 	private bool IsAssignmentCharacter(int ch)
 	{
 		char ch2 = (char)ch;
-		return mAssignmentCharacters.Find(ref ch2, out OptionStyles optionStyle) && OptionStyleManager.IsAnyEnabled(optionStyle, EnabledOptionStyles)
-				&& OptionStyleManager.IsAnyEnabled(optionStyle, mCurrentOptionStyle);
+		return _assignmentCharacters.Find(ref ch2, out OptionStyles optionStyle) && OptionStyleManager.IsAnyEnabled(optionStyle, EnabledOptionStyles)
+				&& OptionStyleManager.IsAnyEnabled(optionStyle, _currentOptionStyle);
 	}
 
 	/// <summary>
@@ -618,7 +617,7 @@ internal class Lexer
 	private int ReadPossiblyEscapedCharacter(char currentQuote)
 	{
 
-		if (IsEscapeCharacter(LA(1)) && mQuotations.Find(ref currentQuote, out QuotationInfo quotationInfo) &&
+		if (IsEscapeCharacter(LA(1)) && _quotations.Find(ref currentQuote, out QuotationInfo quotationInfo) &&
 			LA(2) != -1 && quotationInfo.IsEscapeCode((char)LA(2)))
 		{
 			char replacement = quotationInfo.EscapeCharacter((char)LA(2));

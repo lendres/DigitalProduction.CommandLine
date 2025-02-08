@@ -13,16 +13,6 @@ namespace DigitalProduction.CommandLine;
 /// <param name="method">The word wrapping method to use for this column</param>
 public struct ColumnInfo(int width, string content, Alignment alignment, VerticalAlignment verticalAlignment, WordWrappingMethod method)
 {
-	#region Private Fields
-
-	private readonly WordWrappingMethod mWordWrappingMethod     = method;
-	private readonly Alignment          mAlignment              = alignment;
-	private readonly int                mWidth                  = width;
-	private readonly string             mContent                = content;
-	private VerticalAlignment           mVerticalAlignment      = verticalAlignment;
-
-	#endregion
-
 	#region Constructors
 
 	/// <summary>
@@ -60,6 +50,40 @@ public struct ColumnInfo(int width, string content, Alignment alignment, Vertica
 		this(width, content, Alignment.Left)
 	{
 	}
+
+	#endregion
+
+	#region Public Properties 
+
+	/// <summary>
+	/// Gets the width of this column in fixed width characters.
+	/// </summary>
+	/// <value>the width of this column in fixed width characters.</value>
+	public readonly int Width { get; } = width;
+
+	/// <summary>
+	/// Gets the content of this column.
+	/// </summary>
+	/// <value>The content of this column.</value>
+	public readonly string Content { get; } = content;
+
+	/// <summary>
+	/// Gets the alignment of this column.
+	/// </summary>
+	/// <value>The alignment of this column.</value>
+	public readonly Alignment Alignment { get; } = alignment;
+
+	/// <summary>
+	/// Gets the word wrapping method to use for this column.
+	/// </summary>
+	/// <value>The the word wrapping method to use for this column.</value>
+	public readonly WordWrappingMethod WordWrappingMethod { get; } = method;
+
+	/// <summary>
+	/// Gets or sets the vertical alignment of the contents of this column.
+	/// </summary>
+	/// <value>The vertical alignment of this column.</value>
+	public VerticalAlignment VerticalAlignment { readonly get; set; } = verticalAlignment;
 
 	#endregion
 
@@ -116,40 +140,6 @@ public struct ColumnInfo(int width, string content, Alignment alignment, Vertica
 	{
 		return Width.GetHashCode() ^ Content.GetHashCode() ^ Alignment.GetHashCode() ^ WordWrappingMethod.GetHashCode();
 	}
-
-	#endregion
-
-	#region Public Properties 
-
-	/// <summary>
-	/// Gets the width of this column in fixed width characters.
-	/// </summary>
-	/// <value>the width of this column in fixed width characters.</value>
-	public readonly int Width { get => mWidth; }
-
-	/// <summary>
-	/// Gets the content of this column.
-	/// </summary>
-	/// <value>The content of this column.</value>
-	public readonly string Content { get => mContent; }
-
-	/// <summary>
-	/// Gets the alignment of this column.
-	/// </summary>
-	/// <value>The alignment of this column.</value>
-	public readonly Alignment Alignment { get => mAlignment; }
-
-	/// <summary>
-	/// Gets the word wrapping method to use for this column.
-	/// </summary>
-	/// <value>The the word wrapping method to use for this column.</value>
-	public readonly WordWrappingMethod WordWrappingMethod { get => mWordWrappingMethod; }
-
-	/// <summary>
-	/// Gets or sets the vertical alignment of the contents of this column.
-	/// </summary>
-	/// <value>The vertical alignment of this column.</value>
-	public VerticalAlignment VerticalAlignment { readonly get => mVerticalAlignment; set => mVerticalAlignment = value; }
 
 	#endregion
 }

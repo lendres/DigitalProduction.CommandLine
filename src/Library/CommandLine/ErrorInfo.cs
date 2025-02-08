@@ -9,11 +9,11 @@ public class ErrorInfo
 {
 	#region Private Fields
 
-	private string?				mFileName;
-	private ParseErrorCodes		mErrorCode;
-	private int?				mLine;
-	private string				mMessage;
-	private string?				mOptionName;
+	private string?				_fileName;
+	private ParseErrorCodes		_errorCode;
+	private int?				_line;
+	private string				_message;
+	private string?				_optionName;
 
 	#endregion
 
@@ -29,11 +29,11 @@ public class ErrorInfo
 	/// <param name="line">The line number on which the error occured, or null if no line information was available.</param>
 	internal ErrorInfo(ParseErrorCodes errorCode, string errorMessage, string? optionName, string? fileName, int? line)
 	{
-		mErrorCode = errorCode;
-		mMessage = errorMessage;
-		mOptionName = optionName;
-		mLine = line;
-		mFileName = fileName;
+		_errorCode = errorCode;
+		_message = errorMessage;
+		_optionName = optionName;
+		_line = line;
+		_fileName = fileName;
 	}
 
 	#endregion
@@ -44,25 +44,25 @@ public class ErrorInfo
 	/// Gets or sets the message.
 	/// </summary>
 	/// <value>The message.</value>
-	public string Message { get => mMessage; set => mMessage = value; }
+	public string Message { get => _message; set => _message = value; }
 
 	/// <summary>
 	/// Gets or sets the error code.
 	/// </summary>
 	/// <value>The error code.</value>
-	public ParseErrorCodes ErrorCode { get => mErrorCode; set => mErrorCode = value; }
+	public ParseErrorCodes ErrorCode { get => _errorCode; set => _errorCode = value; }
 
 	/// <summary>
 	/// Gets a value indicating whether this error originates from a file, meaning that a file name will be available.
 	/// </summary>
 	/// <value><c>true</c> if this error originates from a file; otherwise, <c>false</c>.</value>
-	public bool OriginatesFromFile {get => mFileName != null; }
+	public bool OriginatesFromFile {get => _fileName != null; }
 
 	/// <summary>
 	/// Gets or sets the name of the option causing this error.
 	/// </summary>
 	/// <value>The name of the option causing this error, or null if no option name is available.</value>
-	public string? OptionName { get => mOptionName; set => mOptionName = value; }
+	public string? OptionName { get => _optionName; set => _optionName = value; }
 
 	/// <summary>
 	/// Gets a value indicating whether this instance has option name set.
@@ -70,19 +70,19 @@ public class ErrorInfo
 	/// <value>
 	/// 	<c>true</c> if this instance has option name set; otherwise, <c>false</c>.
 	/// </value>
-	public bool HasOptionName { get => mOptionName != null; }
+	public bool HasOptionName { get => _optionName != null; }
 
 	/// <summary>
 	/// Gets or sets the line on which the error occured.
 	/// </summary>
 	/// <value>The line on which the error occured, or null if no such information is available.</value>
-	public int? Line { get => mLine; set => mLine = value; }
+	public int? Line { get => _line; set => _line = value; }
 
 	/// <summary>
 	/// Gets or sets the name of the file.
 	/// </summary>
 	/// <value>The name of the file in which the error occured, or null if no file name is available.</value>
-	public string? FileName { get => mFileName; set => mFileName = value; }
+	public string? FileName { get => _fileName; set => _fileName = value; }
 
 	#endregion
 
@@ -102,7 +102,7 @@ public class ErrorInfo
 			return false;
 		}
 
-		return mErrorCode.Equals(error.mErrorCode) && mMessage.Equals(error.mMessage) && (mOptionName == null ? error.mOptionName == null : mOptionName.Equals(error.mOptionName));
+		return _errorCode.Equals(error._errorCode) && _message.Equals(error._message) && (_optionName == null ? error._optionName == null : _optionName.Equals(error._optionName));
 	}
 
 	/// <summary>
@@ -113,7 +113,7 @@ public class ErrorInfo
 	/// </returns>
 	public override int GetHashCode()
 	{
-		return mMessage.GetHashCode() ^ mErrorCode.GetHashCode() ^ (mOptionName == null ? 0 : mOptionName.GetHashCode());
+		return _message.GetHashCode() ^ _errorCode.GetHashCode() ^ (_optionName == null ? 0 : _optionName.GetHashCode());
 	}
 
 	/// <summary>
@@ -127,20 +127,20 @@ public class ErrorInfo
 		StringBuilder str = new();
 		str.Append("Error");
 
-		if (mFileName != null)
+		if (_fileName != null)
 		{
 			str.Append(" in file \"");
-			str.Append(mFileName);
+			str.Append(_fileName);
 			str.Append('"');
 		}
 
-		if (mLine.HasValue)
+		if (_line.HasValue)
 		{
 			str.Append(" on line ");
-			str.Append(mLine.Value);
+			str.Append(_line.Value);
 		}
 		str.Append(": ");
-		str.Append(mMessage);
+		str.Append(_message);
 		return str.ToString();
 	}
 

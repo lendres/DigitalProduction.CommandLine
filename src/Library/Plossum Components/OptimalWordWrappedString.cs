@@ -30,17 +30,17 @@ internal class OptimalWordWrappedString
 
 		public LineBreakResult(int cost, int k)
 		{
-			this.Cost	= cost;
-			this.K		= k;
+			Cost	= cost;
+			K		= k;
 		}
 	}
 
 	private struct WordInfo
 	{
-		public int spacesBefore;
-		public int pos;
-		public int length;
-		public int totalLength;
+		public int SpacesBefore;
+		public int Position;
+		public int Length;
+		public int TotalLength;
 	}
 
 	#endregion
@@ -137,8 +137,8 @@ internal class OptimalWordWrappedString
 		Debug.Assert(mWordList != null);
 		Debug.Assert(mStr != null);
 
-		int start = mWordList[i].pos;
-		int end = (j + 1 >= mWordList.Length) ? mStr.Length : mWordList[j + 1].pos - (mWordList[j + 1].spacesBefore - mWordList[j].spacesBefore);
+		int start = mWordList[i].Position;
+		int end = (j + 1 >= mWordList.Length) ? mStr.Length : mWordList[j + 1].Position - (mWordList[j + 1].SpacesBefore - mWordList[j].SpacesBefore);
 		return mStr[start..end];
 	}
 
@@ -151,7 +151,7 @@ internal class OptimalWordWrappedString
 		bool lookingForWs = false;
 		WordInfo we = new()
 		{
-			pos = 0
+			Position = 0
 		};
 		int spaces		= 0;
 		int totalLength	= 0;
@@ -161,14 +161,14 @@ internal class OptimalWordWrappedString
 			if (lookingForWs && ch == ' ')
 			{
 				spaces++;
-				if (we.pos != i)
+				if (we.Position != i)
 				{
 					mWordListAL.Add(we);
 				}
 				we = new WordInfo
 				{
-					spacesBefore = spaces,
-					pos = i + 1
+					SpacesBefore = spaces,
+					Position = i + 1
 				};
 				lookingForWs = false;
 				continue;
@@ -178,17 +178,17 @@ internal class OptimalWordWrappedString
 				lookingForWs = true;
 			}
 
-			we.length++;
+			we.Length++;
 			totalLength++;
-			we.totalLength = totalLength;
+			we.TotalLength = totalLength;
 
-			if (we.length == lineWidth)
+			if (we.Length == lineWidth)
 			{
 				mWordListAL.Add(we);
 				we = new WordInfo
 				{
-					spacesBefore = spaces,
-					pos = i + 1
+					SpacesBefore = spaces,
+					Position = i + 1
 				};
 			}
 		}
@@ -199,7 +199,7 @@ internal class OptimalWordWrappedString
 	private int SumWidths(int i, int j)
 	{
 		Debug.Assert(mWordList != null);
-		return i == 0 ? mWordList[j].totalLength : mWordList[j].totalLength - mWordList[i - 1].totalLength;
+		return i == 0 ? mWordList[j].TotalLength : mWordList[j].TotalLength - mWordList[i - 1].TotalLength;
 	}
 
 	private int GetCost(int i, int j)
@@ -211,7 +211,7 @@ internal class OptimalWordWrappedString
 
 		if (cost == -1)
 		{
-			cost = mLineWidth - (mWordList[j].spacesBefore - mWordList[i].spacesBefore) - SumWidths(i, j);
+			cost = mLineWidth - (mWordList[j].SpacesBefore - mWordList[i].SpacesBefore) - SumWidths(i, j);
 			cost = cost < 0 ? mInfinity : cost * cost;
 			mCostCache[i, j] = cost;
 		}
