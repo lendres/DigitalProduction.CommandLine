@@ -13,8 +13,8 @@ public class QuotationInfo(char quotationMark)
 {
 	#region Fields
 
-	private readonly HashDictionary<char, char>		mEscapeCodes		= [];
-	private readonly char							mQuotationMark		= quotationMark;
+	private readonly HashDictionary<char, char>		_escapeCodes		= [];
+	private readonly char							_quotationMark		= quotationMark;
 
 	#endregion
 
@@ -28,7 +28,7 @@ public class QuotationInfo(char quotationMark)
 	/// Gets the quotation mark.
 	/// </summary>
 	/// <value>The quotation mark.</value>
-	public char QuotationMark { get => mQuotationMark; }
+	public char QuotationMark { get => _quotationMark; }
 
 	#endregion
 
@@ -42,7 +42,7 @@ public class QuotationInfo(char quotationMark)
 	/// <param name="replacement">The character with which the escape sequence will be replaced.</param>
 	public void AddEscapeCode(char code, char replacement)
 	{
-		mEscapeCodes.Add(code, replacement);
+		_escapeCodes.Add(code, replacement);
 	}
 
 	/// <summary>
@@ -51,7 +51,7 @@ public class QuotationInfo(char quotationMark)
 	/// <param name="code">The code to remove.</param>
 	public void RemoveEscapeCode(char code)
 	{
-		mEscapeCodes.Remove(code);
+		_escapeCodes.Remove(code);
 	}
 
 	/// <summary>
@@ -63,7 +63,7 @@ public class QuotationInfo(char quotationMark)
 	/// </returns>
 	public bool IsEscapeCode(char code)
 	{
-		return mEscapeCodes.Contains(code);
+		return _escapeCodes.Contains(code);
 	}
 
 	/// <summary>
@@ -74,7 +74,7 @@ public class QuotationInfo(char quotationMark)
 	/// quotation, otherwise returns the character unchanged.</returns>
 	public char EscapeCharacter(char code)
 	{
-		if (!mEscapeCodes.Find(ref code, out char replacement))
+		if (!_escapeCodes.Find(ref code, out char replacement))
 		{
 			return code;
 		}
@@ -98,7 +98,7 @@ public class QuotationInfo(char quotationMark)
 			return false;
 		}
 
-		return mQuotationMark.Equals(qi.mQuotationMark) && mEscapeCodes.Equals(qi.mEscapeCodes);
+		return _quotationMark.Equals(qi._quotationMark) && _escapeCodes.Equals(qi._escapeCodes);
 	}
 
 	/// <summary>
@@ -109,7 +109,7 @@ public class QuotationInfo(char quotationMark)
 	/// </returns>
 	public override int GetHashCode()
 	{
-		return mQuotationMark.GetHashCode() ^ mEscapeCodes.GetHashCode();
+		return _quotationMark.GetHashCode() ^ _escapeCodes.GetHashCode();
 	}
 
 	#endregion

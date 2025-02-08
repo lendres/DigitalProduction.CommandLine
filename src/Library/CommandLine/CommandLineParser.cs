@@ -22,98 +22,93 @@ public sealed class CommandLineParser : IDisposable
 	/// lexer is created and pushed onto the stack so parsing will continue from that lexer instead. The current
 	/// lexer is the one on the top of the stack.
 	/// </summary>
-	private readonly ArrayList<LexerStackRecord> mLexerStack = [];
+	private readonly ArrayList<LexerStackRecord> _lexerStack = [];
 
 	/// <summary>
 	/// The option manager, i.e. the object used for storing the values of the options read. Supplied by the 
 	/// user.
 	/// </summary>
-	private readonly object mOptionManager;
+	private readonly object _optionManager;
 
 	/// <summary>
 	/// Dictionary mapping option names to the corresponding <see cref="Option"/> or <see cref="OptionAlias"/> object.
 	/// </summary>
-	private readonly TreeDictionary<string, IOption> mOptions;
+	private readonly TreeDictionary<string, IOption> _options;
 
 	/// <summary>
 	/// Set containing all defined option groups.
 	/// </summary>
-	private readonly TreeSet<OptionGroup> mOptionGroups;
+	private readonly TreeSet<OptionGroup> _optionGroups;
 
 	/// <summary>
 	/// The comparer to be used for comparing option names. This is either case sensitive, or case insensitive 
 	/// depending on what was specified in the <see cref="CommandLineManagerAttribute"/> of the 
 	/// command line manager.
 	/// </summary>
-	private readonly OptionNameComparer mOptionNameComparer;
-
-	private string				mApplicationName;
-	private string				mApplicationVersion;
-	private readonly string		mApplicationCopyright;
-	private string				mApplicationDescription;
+	private readonly OptionNameComparer _optionNameComparer;
 
 	/// <summary>
 	/// The option styles enabled for this parser.
 	/// </summary>
-	private readonly OptionStyles mEnabledOptionStyles;
+	private readonly OptionStyles _enabledOptionStyles;
 
 	/// <summary>
 	/// <see cref="NumberFormatInfo"/> dictating how numeric values should be parsed.
 	/// </summary>
-	readonly NumberFormatInfo mNumberFormatInfo;
+	readonly NumberFormatInfo _numberFormatInfo;
 
 	/// <summary>
 	/// The name of the executable file from the command line, or null if none was available.
 	/// </summary>
-	private string mExecutable = string.Empty;
+	private string _executable = string.Empty;
 
 	/// <summary>
 	/// The list of the remaining arguments, i.e. those that were not options or values assigned to options.
 	/// </summary>
-	private readonly ArrayList<string> mRemainingArguments = [];
+	private readonly ArrayList<string> _remainingArguments = [];
 
 	/// <summary>
 	/// The list of errors.
 	/// </summary>
-	private readonly HashSet<ErrorInfo> mErrors = [];
+	private readonly HashSet<ErrorInfo> _errors = [];
 
 	/// <summary>
 	/// The escape characters available to this parser.
 	/// </summary>
-	private readonly ArrayList<char> mEscapeCharacters = [];
+	private readonly ArrayList<char> _escapeCharacters = [];
 
 	/// <summary>
 	/// Dictionary mapping quotation marks to <see cref="QuotationInfo"/> objects describing what
 	/// characters may be escaped within those quotes.
 	/// </summary>
-	private readonly HashDictionary<char, QuotationInfo> mQuotations = [];
+	private readonly HashDictionary<char, QuotationInfo> _quotations = [];
 
 	/// <summary>
 	/// Dictionary mapping assignemnt characters to the option styles for which they are enabled.
 	/// </summary>
-	private readonly HashDictionary<char, OptionStyles> mAssignmentCharacters = [];
+	private readonly HashDictionary<char, OptionStyles> _assignmentCharacters = [];
 
 	/// <summary>
 	/// Separators that may be used for separating values in strings that may contain several values, such as 
 	/// the Aliases or Prohibits attributes of <see cref="CommandLineOptionAttribute"/>.
 	/// </summary>
-	private static readonly char [] mSeparators = [' ', ',', ';'];
+	private static readonly char [] _separators = [' ', ',', ';'];
 
 	/// <summary>
 	/// The default escape characters.
 	/// </summary>
-	private static readonly char[] mDefaultEscapeCharacters = ['\\'];
+	private static readonly char[] _defaultEscapeCharacters = ['\\'];
 
 	/// <summary>
 	/// Value indicating whether we are currently parsing.
 	/// </summary>
-	private bool mIsParsing;
+	private bool _isParsing;
 
 	/// <summary>
 	/// Contains the object describing the command line options and groups for the option manager associated
 	/// with this parser. It will be null before such an object is generated (upon request)
 	/// </summary>
-	private UsageInfo? mUsageDescription;
+	private UsageInfo? _usageDescription;
 
 	#endregion
 
@@ -157,7 +152,7 @@ public sealed class CommandLineParser : IDisposable
 	public CommandLineParser(object optionManager, NumberFormatInfo numberFormatInfo)
 	{
 		// Set default escape characters
-		SetEscapeCharacters(mDefaultEscapeCharacters);
+		SetEscapeCharacters(_defaultEscapeCharacters);
 
 		// Set the default assignment characters
 		AddAssignmentCharacter('=', OptionStyles.All);
@@ -178,69 +173,69 @@ public sealed class CommandLineParser : IDisposable
 
 		ArgumentNullException.ThrowIfNull(numberFormatInfo);
 
-		mNumberFormatInfo	= numberFormatInfo;
-		mOptionManager		= optionManager;
+		_numberFormatInfo	= numberFormatInfo;
+		_optionManager		= optionManager;
 
-		CommandLineManagerAttribute managerAttr = Attribute.GetCustomAttribute(mOptionManager.GetType(), typeof(CommandLineManagerAttribute)) as CommandLineManagerAttribute ??
-			throw new AttributeException(typeof(CommandLineManagerAttribute), mOptionManager.GetType(), CommandLineStrings.MissingRequiredAttributeForACommandLineManagerObjectCommandLineManagerAttribute);
+		CommandLineManagerAttribute managerAttr = Attribute.GetCustomAttribute(_optionManager.GetType(), typeof(CommandLineManagerAttribute)) as CommandLineManagerAttribute ??
+			throw new AttributeException(typeof(CommandLineManagerAttribute), _optionManager.GetType(), CommandLineStrings.MissingRequiredAttributeForACommandLineManagerObjectCommandLineManagerAttribute);
 
-		mApplicationName		= managerAttr.ApplicationName;
-		mApplicationVersion		= managerAttr.Version;
-		mApplicationDescription	= managerAttr.Description;
-		mApplicationCopyright	= managerAttr.Copyright;
-		mEnabledOptionStyles	= managerAttr.EnabledOptionStyles;
+		ApplicationName		= managerAttr.ApplicationName;
+		ApplicationVersion		= managerAttr.Version;
+		ApplicationDescription	= managerAttr.Description;
+		ApplicationCopyright	= managerAttr.Copyright;
+		_enabledOptionStyles	= managerAttr.EnabledOptionStyles;
 
-		mOptionNameComparer		= new OptionNameComparer(managerAttr.IsCaseSensitive);
-		mOptions				= new TreeDictionary<string, IOption>(mOptionNameComparer);
-		mOptionGroups			= new TreeSet<OptionGroup>(mOptionNameComparer, mOptionNameComparer);
+		_optionNameComparer		= new OptionNameComparer(managerAttr.IsCaseSensitive);
+		_options				= new TreeDictionary<string, IOption>(_optionNameComparer);
+		_optionGroups			= new TreeSet<OptionGroup>(_optionNameComparer, _optionNameComparer);
 
 		// Parse the CommandLineOptionGroupAttributes of the manager object and create all OptionGroup instances representing
 		// these attributes.
-		foreach (object attr in Attribute.GetCustomAttributes(mOptionManager.GetType(), typeof(CommandLineOptionGroupAttribute)))
+		foreach (object attr in Attribute.GetCustomAttributes(_optionManager.GetType(), typeof(CommandLineOptionGroupAttribute)))
 		{
 			CommandLineOptionGroupAttribute? groupAttr = attr as CommandLineOptionGroupAttribute;
 			Debug.Assert(groupAttr != null);
 
 			if (String.IsNullOrEmpty(groupAttr.Id))
 			{
-				throw new AttributeException(typeof(CommandLineOptionGroupAttribute), mOptionManager.GetType(),
+				throw new AttributeException(typeof(CommandLineOptionGroupAttribute), _optionManager.GetType(),
 					CommandLineStrings.InvalidIdOfGroupIdMustNotBeNullOrEmpty);
 			}
 
 
-			if (!mOptionGroups.Add(new OptionGroup(groupAttr.Id, groupAttr.Name, groupAttr.Description, groupAttr.Require, groupAttr.HasRequireExplicitAssignment ? groupAttr.RequireExplicitAssignment : managerAttr.RequireExplicitAssignment, mOptionNameComparer)))
+			if (!_optionGroups.Add(new OptionGroup(groupAttr.Id, groupAttr.Name, groupAttr.Description, groupAttr.Require, groupAttr.HasRequireExplicitAssignment ? groupAttr.RequireExplicitAssignment : managerAttr.RequireExplicitAssignment, _optionNameComparer)))
 			{
-				throw new AttributeException(typeof(CommandLineOptionGroupAttribute), mOptionManager.GetType(),
+				throw new AttributeException(typeof(CommandLineOptionGroupAttribute), _optionManager.GetType(),
 					String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.RedefinitionOfGroupWithId01,
-					groupAttr.Id, mOptionNameComparer.IsCaseSensitive ? CommandLineStrings.UsingCaseSensitiveNames :
+					groupAttr.Id, _optionNameComparer.IsCaseSensitive ? CommandLineStrings.UsingCaseSensitiveNames :
 					CommandLineStrings.UsingCaseInsensitiveNames));
 			}
 		}
 
 		// Temporary list to contain the prohibitions of each option.
-		TreeDictionary<string, TreeSet<string>> prohibitions = new(mOptionNameComparer);
+		TreeDictionary<string, TreeSet<string>> prohibitions = new(_optionNameComparer);
 
 		// Traverse the CommandLineOptionAttribute attributes of the manager object and create Option instances
 		// to represent the command line options as well as OptionAlias instances for the aliases.
-		foreach (MemberInfo member in mOptionManager.GetType().GetMembers())
+		foreach (MemberInfo member in _optionManager.GetType().GetMembers())
 		{
 			foreach (object attr in member.GetCustomAttributes(typeof(CommandLineOptionAttribute), false))
 			{
 				CommandLineOptionAttribute? optionAttr = attr as CommandLineOptionAttribute;
 				Debug.Assert(optionAttr != null);
 
-				Option option = new(optionAttr, member, mOptionManager, mOptionGroups, mNumberFormatInfo);
+				Option option = new(optionAttr, member, _optionManager, _optionGroups, _numberFormatInfo);
 
 				Debug.Assert(!String.IsNullOrEmpty(option.Name));
-				if (mOptions.Contains(option.Name))
+				if (_options.Contains(option.Name))
 				{
 					throw new AttributeException(typeof(CommandLineOptionAttribute), member,
 						String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.RedefinitionOfCommandLineOptionWithParameterName01,
-						option.Name, mOptionNameComparer.IsCaseSensitive ? CommandLineStrings.UsingCaseSensitiveNames :
+						option.Name, _optionNameComparer.IsCaseSensitive ? CommandLineStrings.UsingCaseSensitiveNames :
 					CommandLineStrings.UsingCaseInsensitiveNames));
 				}
 
-				mOptions.Add(option.Name, option);
+				_options.Add(option.Name, option);
 
 				// Check special rules concering option styles and option names
 				if (optionAttr.BoolFunction == BoolFunction.UsePrefix)
@@ -277,10 +272,10 @@ public sealed class CommandLineParser : IDisposable
 				// Find all aliases and create OptionAlias instances for these.
 				if (optionAttr.Aliases != null)
 				{
-					string[] aliasNames = optionAttr.Aliases.Split(mSeparators, StringSplitOptions.RemoveEmptyEntries);
+					string[] aliasNames = optionAttr.Aliases.Split(_separators, StringSplitOptions.RemoveEmptyEntries);
 					foreach (string alias in aliasNames)
 					{
-						if (mOptions.Contains(alias))
+						if (_options.Contains(alias))
 						{
 							throw new AttributeException(typeof(CommandLineOptionAttribute), member,
 								String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.AliasName0IsAlreadyInUseByAnotherOption,
@@ -293,18 +288,18 @@ public sealed class CommandLineParser : IDisposable
 								String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.Alias0IsInvalidForOption1BoolFunctionIsSetTo2AndThe3OptionStyleIsEnabledWhichProhibitsAnyNameLongerThanOneCharacter,
 								alias, option.Name, option.BoolFunction, OptionStyles.Group));
 						}
-						mOptions.Add(alias, new OptionAlias(alias, option));
+						_options.Add(alias, new OptionAlias(alias, option));
 						option.AddAlias(alias);
 					}
 				}
 
 				if (optionAttr.Prohibits != null)
 				{
-					string [] targetArray = optionAttr.Prohibits.Split(mSeparators, StringSplitOptions.RemoveEmptyEntries);
+					string [] targetArray = optionAttr.Prohibits.Split(_separators, StringSplitOptions.RemoveEmptyEntries);
 
 					if (!prohibitions.Contains(option.Name))
 					{
-						prohibitions.Add(option.Name, new TreeSet<string>(mOptionNameComparer, mOptionNameComparer));
+						prohibitions.Add(option.Name, new TreeSet<string>(_optionNameComparer, _optionNameComparer));
 					}
 
 					TreeSet<string> targets = prohibitions[option.Name];
@@ -328,7 +323,7 @@ public sealed class CommandLineParser : IDisposable
 			if (entry.Value != null && entry.Value.Count > 0)
 			{
 				string key = entry.Key;
-				if (!mOptions.Find(ref key, out IOption ioption))
+				if (!_options.Find(ref key, out IOption ioption))
 				{
 					throw new InvalidOperationException(CommandLineStrings.InternalErrorOptionSpecifiedInProhibitionDoesNotExist);
 				}
@@ -346,7 +341,7 @@ public sealed class CommandLineParser : IDisposable
 				foreach (string name in entry.Value)
 				{
 					string currentName = name;
-					if (!mOptions.Find(ref currentName, out IOption target))
+					if (!_options.Find(ref currentName, out IOption target))
 					{
 						throw new AttributeException(
 							String.Format(
@@ -380,32 +375,32 @@ public sealed class CommandLineParser : IDisposable
 	/// Gets or sets the name of the application.
 	/// </summary>
 	/// <value>The name of the application.</value>
-	public string ApplicationName { get => mApplicationName; set => mApplicationName = value; }
+	public string ApplicationName { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the application version.
 	/// </summary>
 	/// <value>The application version.</value>
-	public string ApplicationVersion { get => mApplicationVersion; set => mApplicationVersion = value; }
+	public string ApplicationVersion { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the application copyright.
 	/// </summary>
 	/// <value>The application copyright.</value>
-	public string ApplicationCopyright { get => mApplicationCopyright; set  => mApplicationVersion = value; }
+	public string ApplicationCopyright { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets or sets the application description.
 	/// </summary>
 	/// <value>The application description.</value>
-	public string ApplicationDescription { get => mApplicationDescription; set => mApplicationDescription = value; }
+	public string ApplicationDescription { get; set; } = string.Empty;
 
 	/// <summary>
 	/// Gets the path to the executable of this application if it was included on the command line (it normally is), or null otherwise.
 	/// </summary>
 	/// <value>the path to the executable of this application if it was included on the command line.</value>
 	/// <remarks>This should only be evaluated after <see cref="Parse()"/> has been called.</remarks>
-	public string ExecutablePath { get => mExecutable; }
+	public string ExecutablePath { get => _executable; }
 
 	/// <summary>
 	/// Gets a value indicating whether any errors were encountered during parsing.
@@ -414,21 +409,21 @@ public sealed class CommandLineParser : IDisposable
 	/// 	<c>true</c> if this instance has errors; otherwise, <c>false</c>.
 	/// </value>
 	/// <remarks>This should only be evaluated after <see cref="Parse()"/> has been called.</remarks>
-	public bool HasErrors { get  => !mErrors.IsEmpty; }
+	public bool HasErrors { get  => !_errors.IsEmpty; }
 
 	/// <summary>
 	/// Gets a collection containing any parse errors that occured.
 	/// </summary>
 	/// <value>The parse errors that occured.</value>
 	/// <remarks>This should only be evaluated after <see cref="Parse()"/> has been called.</remarks>
-	public ICollection<ErrorInfo> Errors { get  => mErrors; }
+	public ICollection<ErrorInfo> Errors { get  => _errors; }
 
 	/// <summary>
 	/// Gets the remaining arguments specified on the command line, i.e. those that were not interpreted as options
 	/// or values assigned to options.
 	/// </summary>
 	/// <value>The remaining arguments.</value>
-	public ArrayList<string> RemainingArguments { get  => mRemainingArguments; }
+	public ArrayList<string> RemainingArguments { get  => _remainingArguments; }
 
 	/// <summary>
 	/// Gets an object containing the descriptive properties of the option manager from which this instance was
@@ -442,8 +437,8 @@ public sealed class CommandLineParser : IDisposable
 	{
 		get
 		{
-			mUsageDescription ??= new UsageInfo(mOptions, mEnabledOptionStyles, this);
-			return mUsageDescription;
+			_usageDescription ??= new UsageInfo(_options, _enabledOptionStyles, this);
+			return _usageDescription;
 		}
 	}
 
@@ -496,11 +491,11 @@ public sealed class CommandLineParser : IDisposable
 	{
 		get
 		{
-			if (mLexerStack.IsEmpty)
+			if (_lexerStack.IsEmpty)
 			{
 				return null;
 			}
-			return mLexerStack[^1].Lexer;
+			return _lexerStack[^1].Lexer;
 		}
 	}
 
@@ -516,7 +511,7 @@ public sealed class CommandLineParser : IDisposable
 			{
 				return null;
 			}
-			return mLexerStack[^1].FileName;
+			return _lexerStack[^1].FileName;
 		}
 	}
 
@@ -529,17 +524,17 @@ public sealed class CommandLineParser : IDisposable
 	{
 		get
 		{
-			if (mLexerStack.IsEmpty)
+			if (_lexerStack.IsEmpty)
 			{
 				return null;
 			}
-			return mLexerStack[^1].LA1Token;
+			return _lexerStack[^1].LA1Token;
 		}
 
 		set
 		{
-			Debug.Assert(!mLexerStack.IsEmpty);
-			mLexerStack[^1].LA1Token = value;
+			Debug.Assert(!_lexerStack.IsEmpty);
+			_lexerStack[^1].LA1Token = value;
 		}
 	}
 
@@ -648,23 +643,23 @@ public sealed class CommandLineParser : IDisposable
 	/// of the option manager object (i.e. which properties has been set or not) is undefined.</remarks>
 	public void Parse(TextReader input, bool containsExecutable)
 	{
-		Debug.Assert(mLexerStack.IsEmpty);
-		mIsParsing = true;
+		Debug.Assert(_lexerStack.IsEmpty);
+		_isParsing = true;
 		
 		try
 		{
-			PushLexer(new Lexer(input, mEscapeCharacters, mQuotations, mAssignmentCharacters), null);
+			PushLexer(new Lexer(input, _escapeCharacters, _quotations, _assignmentCharacters), null);
 
 			// Set the option styles for the lexer.
 			Debug.Assert(CurrentLexer != null);
-			CurrentLexer.EnabledOptionStyles = mEnabledOptionStyles;
+			CurrentLexer.EnabledOptionStyles = _enabledOptionStyles;
 
 			if (containsExecutable)
 			{
 				ValueToken valueToken = CurrentLexer.GetNextValueToken();
 				if (valueToken != null)
 				{
-					mExecutable = valueToken.Value;
+					_executable = valueToken.Value;
 				}
 			}
 
@@ -679,21 +674,21 @@ public sealed class CommandLineParser : IDisposable
 				Token token = LA1!;
 				switch (token.TokenType)
 				{
-					case Token.TokenTypes.ValueToken:
-						mRemainingArguments.Add(((ValueToken)GetNextToken()!).Value);
+					case TokenTypes.ValueToken:
+						_remainingArguments.Add(((ValueToken)GetNextToken()!).Value);
 						break;
-					case Token.TokenTypes.AssignmentToken:
+					case TokenTypes.AssignmentToken:
 						ReportError(ParseErrorCodes.UnexpectedAssignment, CommandLineStrings.Unexpected0CharacterOnCommandLine, ((AssignmentToken)token).AssignmentCharacter);
 						SkipTokens(1);
 						break;
-					case Token.TokenTypes.OptionNameToken:
+					case TokenTypes.OptionNameToken:
 						MatchOptionName();
 						break;
-					case Token.TokenTypes.EndToken:
+					case TokenTypes.EndToken:
 						CurrentLexer.EnabledOptionStyles = OptionStyles.None;
 						SkipTokens(1);
 						break;
-					case Token.TokenTypes.OptionFileToken:
+					case TokenTypes.OptionFileToken:
 						MatchOptionFile();
 						break;
 					default:
@@ -702,7 +697,7 @@ public sealed class CommandLineParser : IDisposable
 			}
 
 			// Verify that the MinOccurs restriction of each option has been satisfied
-			foreach (SCG.KeyValuePair<string, IOption> entry in mOptions)
+			foreach (SCG.KeyValuePair<string, IOption> entry in _options)
 			{
 				if (!entry.Value.IsAlias)
 				{
@@ -731,7 +726,7 @@ public sealed class CommandLineParser : IDisposable
 			}
 
 			// Verify that the group requirements have been satisified
-			foreach (OptionGroup group in mOptionGroups)
+			foreach (OptionGroup group in _optionGroups)
 			{
 				int optionCount = 0;
 				if (group.Require != OptionGroupRequirement.None)
@@ -788,9 +783,9 @@ public sealed class CommandLineParser : IDisposable
 		}
 		finally
 		{
-			mIsParsing = false;
+			_isParsing = false;
 		}
-		Debug.Assert(mLexerStack.IsEmpty);
+		Debug.Assert(_lexerStack.IsEmpty);
 	}
 
 	/// <summary>
@@ -803,7 +798,7 @@ public sealed class CommandLineParser : IDisposable
 	/// which characters you chose.</remarks>
 	public void SetEscapeCharacters(SCG.IEnumerable<char> characters)
 	{
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException("Escape characters may not be set while parsing");
 		}
@@ -817,8 +812,8 @@ public sealed class CommandLineParser : IDisposable
 			}
 		}
 
-		mEscapeCharacters.Clear();
-		mEscapeCharacters.AddAll(characters);
+		_escapeCharacters.Clear();
+		_escapeCharacters.AddAll(characters);
 	}
 
 	/// <summary>
@@ -836,12 +831,12 @@ public sealed class CommandLineParser : IDisposable
 	{
 		ArgumentNullException.ThrowIfNull(quotationInfo);
 
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException("Quotation information must not be changed while parse in progress");
 		}
 
-		mQuotations.UpdateOrAdd(quotationInfo.QuotationMark, quotationInfo);
+		_quotations.UpdateOrAdd(quotationInfo.QuotationMark, quotationInfo);
 	}
 
 	/// <summary>
@@ -851,12 +846,12 @@ public sealed class CommandLineParser : IDisposable
 	/// <exception cref="InvalidOperationException">This method was called during parsing.</exception>
 	public void RemoveQuotation(char quotationMark)
 	{
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException("Quotation information must not be changed while parse in progress");
 		}
 
-		mQuotations.Remove(quotationMark);
+		_quotations.Remove(quotationMark);
 	}
 
 	/// <summary>
@@ -865,12 +860,12 @@ public sealed class CommandLineParser : IDisposable
 	/// <exception cref="InvalidOperationException">This method was called during parsing.</exception>
 	public void ClearQuotations()
 	{
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException("Quotation information must not be changed while parse in progress");
 		}
 
-		mQuotations.Clear();
+		_quotations.Clear();
 	}
 
 	/// <summary>
@@ -887,12 +882,12 @@ public sealed class CommandLineParser : IDisposable
 	/// <exception cref="InvalidOperationException">This method was called during parsing.</exception>
 	public void AddAssignmentCharacter(char assignmentCharacter, OptionStyles targetStyles)
 	{
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException(CommandLineStrings.AssignmentCharactersMustNotBeChangedWhileParseInProgress);
 		}
 
-		mAssignmentCharacters.UpdateOrAdd(assignmentCharacter, targetStyles);
+		_assignmentCharacters.UpdateOrAdd(assignmentCharacter, targetStyles);
 	}
 
 	/// <summary>
@@ -902,12 +897,12 @@ public sealed class CommandLineParser : IDisposable
 	/// <exception cref="InvalidOperationException">This method was called during parsing.</exception>
 	public void RemoveAssignmentCharacter(char assignmentCharacter)
 	{
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException(CommandLineStrings.AssignmentCharactersMustNotBeChangedWhileParseInProgress);
 		}
 
-		mAssignmentCharacters.Remove(assignmentCharacter);
+		_assignmentCharacters.Remove(assignmentCharacter);
 	}
 
 	/// <summary>
@@ -915,12 +910,12 @@ public sealed class CommandLineParser : IDisposable
 	/// </summary>
 	public void ClearAssignmentCharacters()
 	{
-		if (mIsParsing)
+		if (_isParsing)
 		{
 			throw new InvalidOperationException(CommandLineStrings.AssignmentCharactersMustNotBeChangedWhileParseInProgress);
 		}
 
-		mAssignmentCharacters.Clear();
+		_assignmentCharacters.Clear();
 	}
 
 	/// <summary>
@@ -931,7 +926,7 @@ public sealed class CommandLineParser : IDisposable
 	/// quotation mark.</returns>
 	public QuotationInfo? GetQuotationInfo(char quotationMark)
 	{
-		if (!mQuotations.Find(ref quotationMark, out QuotationInfo quotationInfo))
+		if (!_quotations.Find(ref quotationMark, out QuotationInfo quotationInfo))
 		{
 			return null;
 		}
@@ -957,7 +952,7 @@ public sealed class CommandLineParser : IDisposable
 	private void MatchOptionFile()
 	{
 		Debug.Assert(LA1 != null);
-		Debug.Assert(LA1.TokenType == Token.TokenTypes.OptionFileToken);
+		Debug.Assert(LA1.TokenType == TokenTypes.OptionFileToken);
 
 		OptionFileToken fileToken = (OptionFileToken)GetNextToken()!;
 
@@ -999,16 +994,16 @@ public sealed class CommandLineParser : IDisposable
 	private void MatchOptionName()
 	{
 		Debug.Assert(LA1 != null);
-		Debug.Assert(LA1.TokenType == Token.TokenTypes.OptionNameToken);
+		Debug.Assert(LA1.TokenType == TokenTypes.OptionNameToken);
 
 		OptionNameToken optionNameToken = (OptionNameToken)GetNextToken()!;
 		string currentName = optionNameToken.Name;
-		if (!mOptions.Find(ref currentName, out IOption option))
+		if (!_options.Find(ref currentName, out IOption option))
 		{
 			ReportOptionError(ParseErrorCodes.UnknownOption, optionNameToken.Text, CommandLineStrings.UnknownOption0, optionNameToken.Name);
 
 			// Skip an assignment token and value if it follows
-			if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+			if (LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 			{
 				SkipTokens(2);
 			}
@@ -1024,11 +1019,11 @@ public sealed class CommandLineParser : IDisposable
 				ReportOptionError(ParseErrorCodes.OptionProhibited, optionNameToken.Text, CommandLineStrings.Option0MayNotBeSpecifiedTogetherWithOption1, option.Name, prohibiter.Name);
 
 				// Skip any assignment following this option
-				if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+				if (LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 				{
 					SkipTokens(2);
 				}
-				else if (option.AcceptsValue && LA1 != null && LA1.TokenType == Token.TokenTypes.ValueToken)
+				else if (option.AcceptsValue && LA1 != null && LA1.TokenType == TokenTypes.ValueToken)
 				{
 					SkipTokens(1);
 				}
@@ -1037,7 +1032,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Determine whether we need an assignment token 
-		if (option.RequireExplicitAssignment && !option.HasDefaultValue && (LA1 == null || LA1.TokenType != Token.TokenTypes.AssignmentToken))
+		if (option.RequireExplicitAssignment && !option.HasDefaultValue && (LA1 == null || LA1.TokenType != TokenTypes.AssignmentToken))
 		{
 			ReportOptionError(ParseErrorCodes.MissingValue, optionNameToken.Text, CommandLineStrings.MissingRequiredValueForOption0, option.Name);
 			// Increase SetCount to avoid additional error about this option not being specified
@@ -1046,7 +1041,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Determine whether an explicit assignment is prohibited (bool type not using value)
-		if (!option.AcceptsValue && LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+		if (!option.AcceptsValue && LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 		{
 			ReportOptionError(ParseErrorCodes.AssignmentToNonValueOption, optionNameToken.Text, CommandLineStrings.Option0DoesNotAcceptAValue, option.Name);
 			SkipTokens(1);
@@ -1054,7 +1049,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Should we set this option to the default value and be done with it?
-		if (option.RequireExplicitAssignment && (LA1 == null || LA1.TokenType != Token.TokenTypes.AssignmentToken))
+		if (option.RequireExplicitAssignment && (LA1 == null || LA1.TokenType != TokenTypes.AssignmentToken))
 		{
 			option.SetDefaultValue();
 			return;
@@ -1062,13 +1057,13 @@ public sealed class CommandLineParser : IDisposable
 
 		// Now we know that any value that follows should be assigned to this token, so we skip any 
 		// following assignment token
-		if (LA1 != null && LA1.TokenType == Token.TokenTypes.AssignmentToken)
+		if (LA1 != null && LA1.TokenType == TokenTypes.AssignmentToken)
 		{
 			SkipTokens(1);
 		}
 
 		// Determine whether we require a value
-		if (option.RequiresValue && (LA1 == null || LA1.TokenType != Token.TokenTypes.ValueToken))
+		if (option.RequiresValue && (LA1 == null || LA1.TokenType != TokenTypes.ValueToken))
 		{
 			ReportOptionError(ParseErrorCodes.MissingValue, optionNameToken.Text, CommandLineStrings.MissingRequiredValueForOption0, option.Name);
 			option.SetCount++;
@@ -1105,7 +1100,7 @@ public sealed class CommandLineParser : IDisposable
 		}
 
 		// Check if this option has already been specified the maximum allowed number of times
-		if (LA1 != null && LA1.TokenType == Token.TokenTypes.ValueToken)
+		if (LA1 != null && LA1.TokenType == TokenTypes.ValueToken)
 		{
 			ValueToken valueToken = (ValueToken)GetNextToken()!;
 			if (!CheckMaxOccurs(optionNameToken, option))
@@ -1173,14 +1168,14 @@ public sealed class CommandLineParser : IDisposable
 			catch (InvalidOptionValueException iove)
 			{
 				StringBuilder errorMessage = new();
-				if (iove.InlcudeDefaultMessage)
+				if (iove.IncludeDefaultMessage)
 				{
 					errorMessage.Append(String.Format(CultureInfo.CurrentUICulture, "The value \"{0}\" is not valid for option \"{1}\"", valueToken.Value, option.Name));
 				}
 
 				if (!String.IsNullOrEmpty(iove.Message))
 				{
-					if (iove.InlcudeDefaultMessage)
+					if (iove.IncludeDefaultMessage)
 					{
 						errorMessage.Append("; ");
 					}
@@ -1232,7 +1227,7 @@ public sealed class CommandLineParser : IDisposable
 			CurrentFile,
 			CurrentLexer == null ? null : (CurrentFile == null ? null : (int?)CurrentLexer.CurrentLine)
 		);
-		mErrors.Add(error);
+		_errors.Add(error);
 	}
 
 	/// <summary>
@@ -1275,11 +1270,11 @@ public sealed class CommandLineParser : IDisposable
 	private bool PopFinishedLexers()
 	{
 		Debug.Assert(LA1 == null);
-		while (!mLexerStack.IsEmpty && LA1 == null)
+		while (!_lexerStack.IsEmpty && LA1 == null)
 		{
-			mLexerStack.Pop();
+			_lexerStack.Pop();
 		}
-		return !mLexerStack.IsEmpty;
+		return !_lexerStack.IsEmpty;
 	}
 
 	/// <summary>
@@ -1289,7 +1284,7 @@ public sealed class CommandLineParser : IDisposable
 	/// <param name="fileName">Name of the file used for input to the lexer, or null if no file name is available.</param>
 	private void PushLexer(Lexer lexer, string? fileName)
 	{
-		mLexerStack.Push(new LexerStackRecord(lexer, fileName));
+		_lexerStack.Push(new LexerStackRecord(lexer, fileName));
 	}
 
 	/// <summary>
@@ -1300,13 +1295,13 @@ public sealed class CommandLineParser : IDisposable
 	{
 		if (disposing)
 		{
-			mEscapeCharacters.Dispose();
-			mRemainingArguments.Dispose();
-			if (mLexerStack is ArrayList<LexerStackRecord> list)
+			_escapeCharacters.Dispose();
+			_remainingArguments.Dispose();
+			if (_lexerStack is ArrayList<LexerStackRecord> list)
 			{
 				list.Dispose();
 			}
-			mOptionGroups.Dispose();
+			_optionGroups.Dispose();
 		}
 	}
 

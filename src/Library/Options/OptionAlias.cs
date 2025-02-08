@@ -4,63 +4,63 @@ internal class OptionAlias(string aliasName, Option definingOption) : IOption
 {
 	#region Fields
 
-	private readonly Option		mDefiningOption		= definingOption;
+	private readonly Option		_definingOption		= definingOption;
 
 	#endregion
 
 	#region Properties
 
-	public object Value { set => mDefiningOption.Value = value; }
+	public object Value { set => _definingOption.Value = value; }
 
-	public bool RequiresValue { get => mDefiningOption.RequiresValue; }
+	public bool RequiresValue { get => _definingOption.RequiresValue; }
 
 	public bool RequireExplicitAssignment
 	{
-		get => mDefiningOption.RequireExplicitAssignment;
-		set => mDefiningOption.RequireExplicitAssignment = value;
+		get => _definingOption.RequireExplicitAssignment;
+		set => _definingOption.RequireExplicitAssignment = value;
 	}
 
-	public C5.ICollection<Option> ProhibitedBy { get => mDefiningOption.ProhibitedBy; }
+	public C5.ICollection<Option> ProhibitedBy { get => _definingOption.ProhibitedBy; }
 
-	public OptionGroup? Group { get => mDefiningOption.Group; }
+	public OptionGroup? Group { get => _definingOption.Group; }
 
 	public string Name { get; } = aliasName;
 
-	public BoolFunction BoolFunction { get => mDefiningOption.BoolFunction; }
+	public BoolFunction BoolFunction { get => _definingOption.BoolFunction; }
 
-	public int MaxOccurs { get => mDefiningOption.MaxOccurs; }
+	public int MaxOccurs { get => _definingOption.MaxOccurs; }
 
-	public int MinOccurs { get => mDefiningOption.MinOccurs; }
+	public int MinOccurs { get => _definingOption.MinOccurs; }
 
-	public string Description { get => mDefiningOption.Description; }
+	public string Description { get => _definingOption.Description; }
 
-	public int SetCount { get => mDefiningOption.SetCount; set => mDefiningOption.SetCount = value; }
+	public int SetCount { get => _definingOption.SetCount; set => _definingOption.SetCount = value; }
 
-	public bool AcceptsValue { get => mDefiningOption.AcceptsValue; }
+	public bool AcceptsValue { get => _definingOption.AcceptsValue; }
 
-	public bool HasDefaultValue { get => mDefiningOption.HasDefaultValue; }
+	public bool HasDefaultValue { get => _definingOption.HasDefaultValue; }
 
-	public bool IsBooleanType { get => mDefiningOption.IsBooleanType; }
+	public bool IsBooleanType { get => _definingOption.IsBooleanType; }
 
 	public bool IsAlias { get => true; }
 
-	public Option DefiningOption { get => mDefiningOption; }
+	public Option DefiningOption { get => _definingOption; }
 
-	public object? MinValue { get => mDefiningOption.MinValue; }
+	public object? MinValue { get => _definingOption.MinValue; }
 
-	public object? MaxValue { get => mDefiningOption.MaxValue; }
+	public object? MaxValue { get => _definingOption.MaxValue; }
 
 	#endregion
 
 	#region IOption Properties
 
-	public bool IsIntegralType { get => mDefiningOption.IsIntegralType; }
+	public bool IsIntegralType { get => _definingOption.IsIntegralType; }
 
-	public bool IsFloatingPointType { get => mDefiningOption.IsFloatingPointType; }
+	public bool IsFloatingPointType { get => _definingOption.IsFloatingPointType; }
 
-	public bool IsDecimalType { get => mDefiningOption.IsDecimalType; }
+	public bool IsDecimalType { get => _definingOption.IsDecimalType; }
 
-	public bool IsNumericalType { get => mDefiningOption.IsNumericalType; }
+	public bool IsNumericalType { get => _definingOption.IsNumericalType; }
 
 	#endregion
 
@@ -68,7 +68,7 @@ internal class OptionAlias(string aliasName, Option definingOption) : IOption
 
 	public void SetDefaultValue()
 	{
-		mDefiningOption.SetDefaultValue();
+		_definingOption.SetDefaultValue();
 	}
 
 	#endregion

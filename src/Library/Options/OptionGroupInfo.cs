@@ -13,9 +13,9 @@ public sealed class OptionGroupInfo
 {
 	#region Fields
 
-	private readonly TreeDictionary<string, OptionInfo>		mOptions = [];
-	private readonly OptionGroup							mOptionGroup;
-	private readonly UsageInfo								mUsageInfo;
+	private readonly TreeDictionary<string, OptionInfo>		_options = [];
+	private readonly OptionGroup							_optionGroup;
+	private readonly UsageInfo								_usageInfo;
 
 	#endregion
 
@@ -29,12 +29,12 @@ public sealed class OptionGroupInfo
 	/// <param name="optionStyles">The option styles.</param>
 	internal OptionGroupInfo(UsageInfo usageInfo, OptionGroup optionGroup, OptionStyles optionStyles)
 	{
-		mOptionGroup	= optionGroup;
-		mUsageInfo		= usageInfo;
+		_optionGroup	= optionGroup;
+		_usageInfo		= usageInfo;
 
 		foreach (SCG.KeyValuePair<string, Option> entry in optionGroup.Options)
 		{
-			mOptions.Add(entry.Key, new OptionInfo(mUsageInfo, entry.Value, optionStyles));
+			_options.Add(entry.Key, new OptionInfo(_usageInfo, entry.Value, optionStyles));
 		}
 	}
 
@@ -46,25 +46,25 @@ public sealed class OptionGroupInfo
 	/// Gets an enumeration of the options included in this group.
 	/// </summary>
 	/// <value>an enumeration of the options included in this group.</value>
-	public SCG.IEnumerable<OptionInfo> Options { get => mOptions.Values; }
+	public SCG.IEnumerable<OptionInfo> Options { get => _options.Values; }
 
 	/// <summary>
 	/// Gets or sets the description.
 	/// </summary>
 	/// <value>The description.</value>
-	public string Description { get => mOptionGroup.Description; set => mOptionGroup.Description = value; }
+	public string? Description { get => _optionGroup.Description; set => _optionGroup.Description = value; }
 
 	/// <summary>
 	/// Gets or sets the name.
 	/// </summary>
 	/// <value>The name.</value>
-	public string Name { get => mOptionGroup.Name ?? mOptionGroup.Id; set => mOptionGroup.Name = value; }
+	public string Name { get => _optionGroup.Name ?? _optionGroup.Id; set => _optionGroup.Name = value; }
 
 	/// <summary>
 	/// Gets the id.
 	/// </summary>
 	/// <value>The id.</value>
-	public string Id { get => mOptionGroup.Id; }
+	public string Id { get => _optionGroup.Id; }
 
 	#endregion
 
@@ -97,18 +97,18 @@ public sealed class OptionGroupInfo
 		}
 
 		StringBuilder result = new();
-		result.Append(StringFormatter.FormatInColumns(indent, 0, new ColumnInfo(nameColumnWidth + descriptionColumnWidth + mUsageInfo.ColumnSpacing, Name + ":")));
+		result.Append(StringFormatter.FormatInColumns(indent, 0, new ColumnInfo(nameColumnWidth + descriptionColumnWidth + _usageInfo.ColumnSpacing, Name + ":")));
 		//result.Append(Environment.NewLine);
-		int newIndent = mUsageInfo.IndentWidth;
+		int newIndent = _usageInfo.IndentWidth;
 
 		if (Description != null)
 		{
 			result.Append(StringFormatter.FormatInColumns(newIndent + indent, 0, new ColumnInfo(nameColumnWidth + descriptionColumnWidth, Description, Alignment.Left, VerticalAlignment.Top, WordWrappingMethod.Optimal)));
 			result.Append(Environment.NewLine);
-			newIndent += mUsageInfo.IndentWidth;
+			newIndent += _usageInfo.IndentWidth;
 		}
 
-		foreach (SCG.KeyValuePair<string, OptionInfo> entry in mOptions)
+		foreach (SCG.KeyValuePair<string, OptionInfo> entry in _options)
 		{
 			result.Append(entry.Value.ToString(indent + newIndent, nameColumnWidth, descriptionColumnWidth - newIndent));
 			result.Append(Environment.NewLine);
@@ -123,7 +123,7 @@ public sealed class OptionGroupInfo
 	/// <returns>the option with the specified name from this group if one exists; otherwise a null reference is returned.</returns>
 	public OptionInfo? GetOption(string optionName)
 	{
-		if (!mOptions.Find(ref optionName, out OptionInfo description))
+		if (!_options.Find(ref optionName, out OptionInfo description))
 		{
 			return null;
 		}

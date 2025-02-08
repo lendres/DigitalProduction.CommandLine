@@ -6,10 +6,17 @@ namespace DigitalProduction.Demo;
 [CommandLineManager(ApplicationName = "Test 1", Copyright = "Copyright (c) Lance A. Endres")]
 public partial class CommandLineService : ICommandLine
 {
-	[CommandLineOption(Name = "filename", Description = "Specifies the input file.")]
+	[CommandLineOption(
+		Name			= "filename",
+		Description		= "Specifies the input file."
+	)]
 	public string? FileName { get; set; } = string.Empty;
 
-	[CommandLineOption(Name = "run", BoolFunction = BoolFunction.TrueIfPresent, Description = "If true, the application will automatically start running.")]
+	[CommandLineOption(
+		Name			= "run",
+		BoolFunction	= BoolFunction.TrueIfPresent,
+		Description		= "If true, the application will automatically start running."
+	)]
 	public bool? Run { get; set; } = false;
 
 	public string Header { get; private set; } = string.Empty;

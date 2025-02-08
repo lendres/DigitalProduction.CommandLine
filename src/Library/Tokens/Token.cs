@@ -7,41 +7,6 @@ namespace DigitalProduction.CommandLine;
 /// </summary>
 internal class Token
 {
-	#region Public Types
-
-	/// <summary>
-	/// Represents the various token types
-	/// </summary>
-	public enum TokenTypes
-	{
-		/// <summary>
-		/// A token of type <see cref="ValueToken"/>
-		/// </summary>
-		ValueToken,
-
-		/// <summary>
-		/// A token of type <see cref="AssignmentToken"/>
-		/// </summary>
-		AssignmentToken,
-
-		/// <summary>
-		/// A token of type <see cref="OptionNameToken"/>
-		/// </summary>
-		OptionNameToken,
-
-		/// <summary>
-		/// A token of type <see cref="EndToken"/>
-		/// </summary>
-		EndToken,
-
-		/// <summary>
-		/// A token of type <see cref="OptionFileToken"/>
-		/// </summary>
-		OptionFileToken
-	}
-
-	#endregion
-
 	#region Constructor
 
 	/// <summary>

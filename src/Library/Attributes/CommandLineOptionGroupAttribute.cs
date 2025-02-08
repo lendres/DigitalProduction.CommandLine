@@ -18,7 +18,7 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 {
 	#region Private Fields
 
-	private bool?					mRequireExplicitAssignment;
+	private bool?					_requireExplicitAssignment;
 
 	#endregion
 
@@ -63,10 +63,10 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 	{
 		get
 		{
-			System.Diagnostics.Debug.Assert(mRequireExplicitAssignment != null);
-			return mRequireExplicitAssignment.Value;
+			System.Diagnostics.Debug.Assert(_requireExplicitAssignment != null);
+			return _requireExplicitAssignment.Value;
 		}
-		set => mRequireExplicitAssignment = value;
+		set => _requireExplicitAssignment = value;
 	}
 
 	#endregion
@@ -79,7 +79,7 @@ public sealed class CommandLineOptionGroupAttribute(string id) : System.Attribut
 	/// <value>
 	/// 	<c>true</c> if this instance has specified a require explicit assignment value; otherwise, <c>false</c>.
 	/// </value>
-	internal bool HasRequireExplicitAssignment { get => mRequireExplicitAssignment.HasValue; }
+	internal bool HasRequireExplicitAssignment { get => _requireExplicitAssignment.HasValue; }
 
 	#endregion
 }
