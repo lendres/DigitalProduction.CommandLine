@@ -4,7 +4,11 @@ public interface ICommandLine
 {
 	public string? FileName { get; set; }
 
+	public string? OutputFile { get; set; }
+
 	public bool? Run { get; set; }
+
+	public bool? Exit { get; set; }
 
 	public string Header { get; }
 
