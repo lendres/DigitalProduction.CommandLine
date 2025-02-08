@@ -8,15 +8,15 @@ namespace UnitTests;
 [CommandLineManager(ApplicationName = "Nullable Test", Copyright = "Copyright (c) Lance A. Endres")]
 class StringManager
 {
-	[CommandLineOption(Name = "filename", Description = "Specifies the input file.")]
-	public string FileName { get; set; } = string.Empty;
+	[CommandLineOption(Name = "value", Description = "Specifies the test value.")]
+	public string Value { get; set; } = string.Empty;
 }
 
 [CommandLineManager(ApplicationName = "Nullable Test", Copyright = "Copyright (c) Lance A. Endres")]
 class NullableStringManager
 {
-	[CommandLineOption(Name = "filename", Description = "Specifies the input file.")]
-	public string? FileName { get; set; } = null;
+	[CommandLineOption(Name = "value", Description = "Specifies the test value.")]
+	public string? Value { get; set; } = null;
 }
 
 /// <summary>
@@ -25,15 +25,15 @@ class NullableStringManager
 [CommandLineManager(ApplicationName = "Nullable Test", Copyright = "Copyright (c) Lance A. Endres")]
 class BoolManager
 {
-	[CommandLineOption(Name = "run", BoolFunction = BoolFunction.TrueIfPresent, Description = "If true, the application will automatically start running.")]
-	public bool Run { get; set; }
+	[CommandLineOption(Name = "value", BoolFunction = BoolFunction.TrueIfPresent, Description = "Specifies the test value.")]
+	public bool Value { get; set; }
 }
 
 [CommandLineManager(ApplicationName = "Nullable Test", Copyright = "Copyright (c) Lance A. Endres")]
 class NullableBoolManager
 {
-	[CommandLineOption(Name = "run", BoolFunction = BoolFunction.TrueIfPresent, Description = "If true, the application will automatically start running.")]
-	public bool? Run { get; set; } = null;
+	[CommandLineOption(Name = "value", BoolFunction = BoolFunction.TrueIfPresent, Description = "Specifies the test value.")]
+	public bool? Value { get; set; } = null;
 }
 
 /// <summary>

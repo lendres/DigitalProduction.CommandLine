@@ -2,13 +2,10 @@
 
 namespace UnitTests;
 
-public class TestArguments1
+public class TestArguments1 : TestingBase
 {
-	readonly QuotationInfo _quotationInfo = new('\"');
-			
 	public TestArguments1()
 	{
-		_quotationInfo.AddEscapeCode('\"', '\"');
 	}
 
 	[Fact]
@@ -42,7 +39,6 @@ public class TestArguments1
 			parser = new(arguments);
 
 			string[] input = ["\"C:\\Temp\\Example.exe\"", "-filename", "\"Test File.txt\"", "-run"];
-			//parser.AddQuotation(_quotationInfo);
 			parser.Parse(input, true);
 			
 		}
@@ -58,28 +54,28 @@ public class TestArguments1
 		Assert.True(arguments.Run);
 	}
 
+	/// <summary>
+	/// Test for a single string that includes the executable string as the first argument.
+	/// </summary>
 	[Fact]
 	public void TestStringExecutable()
 	{
-		Arguments1 arguments = new();
-		CommandLineParser? parser = null;
-		try
-		{
-			parser = new(arguments);
-
-			string input = "\"C:\\Temp\\Example.exe\" -filename \"Test File.txt\" -run";
-			parser.Parse(input, true);
-			
-		}
-		catch (Exception exception)
-		{
-			System.Diagnostics.Debug.WriteLine("");
-			System.Diagnostics.Debug.WriteLine(exception.ToString());
-		}
+		string              input       = "\"C:\\Temp\\Example.exe\" -filename \"Test File.txt\" -run";
+		Arguments1			arguments	= GetArgumentsInstance<Arguments1>(input, true);
+		CommandLineParser	parser		= GetParser<Arguments1>(input, true);
 
 		Assert.NotNull(parser);
 		Assert.Equal(@"C:\Temp\Example.exe", parser.ExecutablePath);
 		Assert.Equal("Test File.txt", arguments.FileName);
+		Assert.True(arguments.Run);
+	}
+
+	[Fact]
+	public void TestAliasArguments()
+	{
+		Arguments1 arguments =  GetArgumentsInstance<Arguments1>("-f \"C:\\Temp\\Test File.txt\" -r");
+
+		Assert.Equal(@"C:\Temp\Test File.txt", arguments.FileName);
 		Assert.True(arguments.Run);
 	}
 }
