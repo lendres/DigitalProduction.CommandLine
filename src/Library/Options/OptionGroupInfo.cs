@@ -96,9 +96,14 @@ public sealed class OptionGroupInfo
 			throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, CommandLineStrings.ArgMustBeNonNegative, "indent"), nameof(indent));
 		}
 
+		// Start building the output string.
 		StringBuilder result = new();
+
+		// Print the group name followed by a colon.
 		result.Append(StringFormatter.FormatInColumns(indent, 0, new ColumnInfo(nameColumnWidth + descriptionColumnWidth + _usageInfo.ColumnSpacing, Name + ":")));
-		//result.Append(Environment.NewLine);
+		result.Append(Environment.NewLine);
+
+		// Indent the following lines after the header.
 		int newIndent = _usageInfo.IndentWidth;
 
 		if (Description != null)

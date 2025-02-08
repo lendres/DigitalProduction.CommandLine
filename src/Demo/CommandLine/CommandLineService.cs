@@ -63,7 +63,7 @@ public partial class CommandLineService : ICommandLine
 		parser.Parse();
 
 		Header	= parser.UsageInfo.GetHeaderAsString();
-		Help	= parser.UsageInfo.GetOptionsAsString();
+		Help	= parser.UsageInfo.GetOptionsAsString(15, 1000);
 		Errors	= parser.HasErrors ? parser.UsageInfo.GetErrorsAsString() : "No parsing errors.";
 	}
 }
