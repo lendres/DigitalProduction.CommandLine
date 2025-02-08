@@ -12,7 +12,7 @@ namespace UnitTests;
 /// </summary>
 [CommandLineManager(ApplicationName = "Test 2", Copyright = "Copyright (C) Peter Palotas 2007", EnabledOptionStyles = OptionStyles.Group | OptionStyles.LongUnix)]
 [CommandLineOptionGroup("commands", Name = "Commands", Require = OptionGroupRequirement.ExactlyOne)]
-[CommandLineOptionGroup("options", Name = "Options")]
+[CommandLineOptionGroup("options", Name = "Run Options")]
 class Arguments2
 {
 	/// <summary>

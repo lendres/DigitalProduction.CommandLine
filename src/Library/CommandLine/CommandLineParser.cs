@@ -178,21 +178,21 @@ public sealed class CommandLineParser : IDisposable
 
 		ArgumentNullException.ThrowIfNull(numberFormatInfo);
 
-		mNumberFormatInfo = numberFormatInfo;
-		mOptionManager = optionManager;
+		mNumberFormatInfo	= numberFormatInfo;
+		mOptionManager		= optionManager;
 
 		CommandLineManagerAttribute managerAttr = Attribute.GetCustomAttribute(mOptionManager.GetType(), typeof(CommandLineManagerAttribute)) as CommandLineManagerAttribute ??
 			throw new AttributeException(typeof(CommandLineManagerAttribute), mOptionManager.GetType(), CommandLineStrings.MissingRequiredAttributeForACommandLineManagerObjectCommandLineManagerAttribute);
 
-		mApplicationName = managerAttr.ApplicationName;
-		mApplicationVersion = managerAttr.Version;
-		mApplicationDescription = managerAttr.Description;
-		mApplicationCopyright = managerAttr.Copyright;
-		mEnabledOptionStyles = managerAttr.EnabledOptionStyles;
+		mApplicationName		= managerAttr.ApplicationName;
+		mApplicationVersion		= managerAttr.Version;
+		mApplicationDescription	= managerAttr.Description;
+		mApplicationCopyright	= managerAttr.Copyright;
+		mEnabledOptionStyles	= managerAttr.EnabledOptionStyles;
 
-		mOptionNameComparer = new OptionNameComparer(managerAttr.IsCaseSensitive);
-		mOptions = new TreeDictionary<string, IOption>(mOptionNameComparer);
-		mOptionGroups = new TreeSet<OptionGroup>(mOptionNameComparer, mOptionNameComparer);
+		mOptionNameComparer		= new OptionNameComparer(managerAttr.IsCaseSensitive);
+		mOptions				= new TreeDictionary<string, IOption>(mOptionNameComparer);
+		mOptionGroups			= new TreeSet<OptionGroup>(mOptionNameComparer, mOptionNameComparer);
 
 		// Parse the CommandLineOptionGroupAttributes of the manager object and create all OptionGroup instances representing
 		// these attributes.
@@ -362,7 +362,6 @@ public sealed class CommandLineParser : IDisposable
 					{
 						target = target.DefiningOption;
 					}
-
 
 					if (!target.ProhibitedBy.Contains(option))
 					{
