@@ -74,4 +74,16 @@ public class TestArguments2 : TestingBase
 			}
 		}	
 	}
+
+	/// <summary>
+	/// Test help string.
+	/// </summary>
+	[Fact]
+	public void TestHelpString()
+	{
+		CommandLineParser parser =  GetParser<Arguments2>("-cx");
+
+		System.Diagnostics.Trace.WriteLine("");
+		System.Diagnostics.Trace.Write(parser.UsageInfo.GetOptionsAsString());
+	}
 }

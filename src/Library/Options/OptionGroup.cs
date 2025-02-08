@@ -10,34 +10,34 @@ internal class OptionGroup
 {
 	#region Construction
 
-	public OptionGroup(string id, string name, string description, OptionGroupRequirement require, bool requireExplicitAssignment, SCG.IComparer<string> keyComparer)
+	public OptionGroup(string id, string name, string? description, OptionGroupRequirement require, bool requireExplicitAssignment, SCG.IComparer<string> keyComparer)
 	{
 		Debug.Assert(!String.IsNullOrEmpty(id));
 		Debug.Assert(keyComparer != null);
 
-		Id = id;
-		Name = name;
-		Description = description;
-		Require = require;
-		Options = new TreeDictionary<string, Option>(keyComparer);
-		RequireExplicitAssignment = requireExplicitAssignment;
+		Id							= id;
+		Name						= name;
+		Description					= description;
+		Require						= require;
+		Options						= new TreeDictionary<string, Option>(keyComparer);
+		RequireExplicitAssignment	= requireExplicitAssignment;
 	}
 
 	#endregion
 
 	#region Properties
 
-	public string Id { get; private set; }
+	public string						Id { get; private set; }
 
-	public OptionGroupRequirement Require { get; private set; }
+	public OptionGroupRequirement		Require { get; private set; }
 
-	public string Description { get; set; }
+	public string?						Description { get; set; } = null;
 
-	public string Name { get; set; }
+	public string						Name { get; set; }
 
-	public IDictionary<string, Option> Options { get; private set; }
+	public IDictionary<string, Option>	Options { get; private set; }
 
-	public bool RequireExplicitAssignment { get; private set; }
+	public bool							RequireExplicitAssignment { get; private set; }
 
 	#endregion
 

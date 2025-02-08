@@ -98,7 +98,7 @@ public sealed class OptionGroupInfo
 
 		StringBuilder result = new();
 		result.Append(StringFormatter.FormatInColumns(indent, 0, new ColumnInfo(nameColumnWidth + descriptionColumnWidth + mUsageInfo.ColumnSpacing, Name + ":")));
-		result.Append(Environment.NewLine);
+		//result.Append(Environment.NewLine);
 		int newIndent = mUsageInfo.IndentWidth;
 
 		if (Description != null)
