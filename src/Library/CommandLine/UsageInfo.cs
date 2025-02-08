@@ -277,8 +277,11 @@ public sealed class UsageInfo
 
 		if (!_options.IsEmpty)
 		{
+			// First "Options:" line.
 			result.Append(StringFormatter.WordWrap(CommandLineStrings.Options, nameColumnWidth + descriptionColumnWidth + ColumnSpacing, WordWrappingMethod.Optimal, Alignment.Left, ' '));
 			result.Append(Environment.NewLine);
+
+			// Print all the common options (options not in a group).
 			foreach (OptionInfo option in _options.Values)
 			{
 				result.Append(option.ToString(IndentWidth, nameColumnWidth, descriptionColumnWidth - IndentWidth));
@@ -287,6 +290,7 @@ public sealed class UsageInfo
 			result.Append(Environment.NewLine);
 		}
 
+		// Print out all options that have been grouped.
 		foreach (OptionGroupInfo group in _groups.Values)
 		{
 			result.Append(group.ToString(0, nameColumnWidth, descriptionColumnWidth));
