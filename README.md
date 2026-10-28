@@ -1,6 +1,11 @@
 # DigitalProduction.CommandLine
 Command line argument parsing library for .Net.
 
+## Requirements
+Version 0.7.0 and later require .NET 10. Building the solution uses the default C# 14 language version. The MAUI demo also requires the corresponding .NET 10 platform workloads.
+
+Version 0.6.2 is the final .NET 9 release and is no longer maintained.
+
 # Legacy
 ## Origin
 This library is derived directly from the Plossum command line parsing library written by Peter Palotas.
